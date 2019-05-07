@@ -6,11 +6,24 @@
 #define CPPGB_MMU_H
 
 #include "common.h"
-#include "Memory.h"
+#include "Mem.h"
+#include "AddressSpace.h"
+
+#include <vector>
+#include <memory>
+
+using std::vector;
+using std::shared_ptr;
+using std::make_shared;
 class MMU {
+private:
+    vector<AddressSpace *> spaces;
+
 public:
-    Memory rom;
-    MMU(char * s): rom(0x00, 0x3FFF, s){};
+	void addAddressSpace(AddressSpace * s){
+		spaces.push_back(s);
+	};
+
     Byte readByte(Word address);
     Word readWord(Word address);
 	SByte readSByte(Word address);

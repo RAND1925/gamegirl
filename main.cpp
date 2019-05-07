@@ -1,24 +1,28 @@
 #include <iostream>
 #include <bitset>
 #include <fstream>
+#include <memory>
 
-
-#include "Memory.h"
+#include "Mem.h"
 #include "MMU.h"
 #include "CPU.h"
-const int ROM_VOL = 1 << 16;
+const Word ROM_VOL = 1 << 14;
+#define FILE_PATH "D:\\Tetris.gb"
 
 int main() {
 
     std::ifstream gameFile;
-    gameFile.open("D:\\Tetris.gb", std::ios::binary);
+    gameFile.open(FILE_PATH, std::ios::binary);
     char gameRom[ROM_VOL];
     gameFile.read(gameRom, ROM_VOL);
     gameFile.close();
 
-    MMU mmu(gameRom);
-    CPU cpu(mmu);
+    MMU mmu;
+    Mem rom(0x00, ROM_VOL, gameRom);
 
+    mmu.addAddressSpace(&rom);
+    CPU cpu(mmu);
+    int p = mmu.readByte(0);
     while (1){
         cpu.step();
     }
