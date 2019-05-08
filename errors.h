@@ -7,6 +7,13 @@
 
 #include <exception>
 
+#include <iostream>
+void warning(char *s){
+    cout << "WARNING!" << s;
+}
 
+void error(char *s){
+    cout << "ERROR!" << s;
+}
 
 #endif //CPPGB_ERRORS_H

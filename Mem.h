@@ -26,10 +26,10 @@ public:
         return address >= offset && address < offset + length;
     }
     Byte getByte(Word address) override {
-        return  bytes[address - offset];
+        return  bytes[address & 0x1FFF];
     }
     void setByte(Word address, Byte value) override {
-        bytes[address - offset] = value;
+        bytes[address & 0x1FFF] = value;
     }
 };
 
