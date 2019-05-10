@@ -294,3 +294,5 @@ __pycache__/
 *.app
 
 /.idea
+/.vscode
+/build
