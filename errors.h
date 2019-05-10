@@ -11,10 +11,11 @@
 
 void warning(std::string s){
     std::cout << "WARNING!" << s << std::endl;
-}
+};
 
 void error(std::string s){
     std::cout << "ERROR!" << s << std::endl;
-}
+};
+
 
 #endif //CPPGB_ERRORS_H
