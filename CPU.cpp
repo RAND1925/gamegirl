@@ -1,4 +1,4 @@
-//
++//
 // Created by dell on 2019/4/16.
 //
 
@@ -219,7 +219,7 @@ void CPU::initMap() {
 	opMap[0x9C] = [this, &ld8]() {ld8(registers.a, sbc(registers.a, registers.h)); return 4; };
 	opMap[0x9D] = [this, &ld8]() {ld8(registers.a, sbc(registers.a, registers.l)); return 4; };
 	opMap[0x9E] = [this, &ld8, &getHL]() {ld8(registers.a, sbc(registers.a, mmu.readByte(getHL()))); return 8; };
-	//ÕâÀïµÄ#ÔÚÊéÀïµÄopcodeÊÇÎÊºÅËùÒÔÉ¾µôÁË
+	//ï¿½ï¿½ï¿½ï¿½ï¿½#ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½opcodeï¿½ï¿½ï¿½Êºï¿½ï¿½ï¿½ï¿½ï¿½É¾ï¿½ï¿½ï¿½ï¿½
 
 	//and
 	opMap[0xA7] = [this, &ld8]() {ld8(registers.a, andAL(registers.a, registers.a)); return 4; };
@@ -309,7 +309,7 @@ void CPU::initMap() {
 	opMap[0x3B] = [this, &ld16]() {ld16(registers.sp, dec(registers.sp)); return 8; };
 
 	opMap[0xCB] = [this, &getImmediateValue8]() {return opCBMap[getImmediateValue8()](); };
-	//ÔÓÏî
+	//ï¿½ï¿½ï¿½ï¿½
 	//swap
 	opCBMap[0x37] = [this, &ld8]() {ld8(registers.a, swap(registers.a)); return 8; };
 	opCBMap[0x30] = [this, &ld8]() {ld8(registers.b, swap(registers.b)); return 8; };

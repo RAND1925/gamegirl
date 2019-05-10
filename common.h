@@ -11,4 +11,9 @@
     using SByte = int8_t;
     using Register8 = uint8_t;
     using Register16 = uint16_t;
+
+    inline constexpr Word operator "" _kb(const unsigned long long w){
+        return w << 10;
+    }
+
 #endif //CPPGBUI_COMMON_H
