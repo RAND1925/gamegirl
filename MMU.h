@@ -1,4 +1,4 @@
-//
+// memory management unit
 // Created by dell on 2019/4/17.
 //
 
@@ -6,15 +6,12 @@
 #define CPPGB_MMU_H
 
 #include "common.h"
-#include "Mem.h"
 #include "AddressSpace.h"
 
 #include <vector>
 #include <memory>
 
 using std::vector;
-using std::shared_ptr;
-using std::make_shared;
 class MMU {
 private:
     vector<AddressSpace *> spaces;
