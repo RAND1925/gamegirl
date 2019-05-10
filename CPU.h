@@ -7,8 +7,10 @@
 
 #include <functional>
 #include <iostream>
+#include <iomanip>
 #include "common.h"
-#include "Op.h"
+#include "MMU.h"
+
 class CPU {
 private:
         using FlagSetter = std::function<void(void)>;
@@ -27,8 +29,8 @@ private:
         FlagGetter getC = [this]() -> Byte { return (registers.f & (1 << 4) ) >> 4; };
 
     struct Registers {
-        Register8 a, f, b, c, d, e, h, l;
-        Register16 sp, pc;
+        Byte a, f, b, c, d, e, h, l;
+        Word sp, pc;
     }registers;
     MMU & mmu;
 	Byte add(Byte a, Byte b) {
@@ -67,7 +69,7 @@ private:
 		if (UINT16_MAX - a > b) {
 			setC();
 		}
-		//ÕâÀïÔ­Êé¿´²»¶®£¨GBCPUman P91£©£¬Ö±½Ó³­µÄÉÏÃæÄÇ¸ö£¬´íÁËÒª¸Ä
+		//ï¿½ï¿½ï¿½ï¿½Ô­ï¿½é¿´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½GBCPUman P91ï¿½ï¿½ï¿½ï¿½Ö±ï¿½Ó³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½
 		resetZ();
 		resetN();
 		return a + b;
@@ -290,7 +292,7 @@ private:
 			resetC();
 		}
 		return res;
-		// LSB of n set to 0(LSBÖ¸¶þ½øÖÆÊý×îÓÒ²àÒ»Î»)
+		// LSB of n set to 0(LSBÖ¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò²ï¿½Ò»Î»)
 	}
 
 	Byte sra(Byte a) {
@@ -332,7 +334,7 @@ private:
 			resetC();
 		}
 		return res;
-		//MSB set to 0£¨MSBÖ¸¶þ½øÖÆÊý×î¸ßÎ»£©
+		//MSB set to 0ï¿½ï¿½MSBÖ¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
 	}
 
 	void bit(Byte b,Byte a) {
@@ -355,11 +357,14 @@ private:
     void initMap();
     std::function<Byte(void)> opMap[0x100];
 	std::function<Byte(void)> opCBMap[0x100];
+
+
 public:
     void step(){
         Byte opNum = mmu.readByte(registers.pc);
-        int p = (opMap[opNum])();
-        std::cout << "w";
+		std::cout << "pc: 0x" << std::hex << registers.pc << " opNum: 0x" << std::hex<< (int)opNum << std::endl;
+
+		int p = (opMap[opNum])();
         registers.pc++;
     }
 

@@ -1,15 +1,14 @@
-+//
+// cpu...
 // Created by dell on 2019/4/16.
 //
 
 #include "CPU.h"
 #include <iostream>
 void CPU::initMap() {
+
 	auto ld8 = [](Byte &lhs, Byte rhs) { lhs = rhs; };
 	auto ld16 = [](Word &lhs, Word rhs) { lhs = rhs; };
-
-
-
+	
 	auto getR16 = [](Byte high, Byte low)->Word { return high << 8 | low; };
 	auto setR16 = [](Byte & high, Byte & low, Word t) { high = t >> 8; low = t & 0xFF; };
 	auto getHL = [this, getR16]()->Word { return getR16(registers.h, registers.l); };
