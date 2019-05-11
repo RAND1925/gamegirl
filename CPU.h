@@ -50,27 +50,21 @@ private:
     };
 
     Word add(Word a, Word b){
-		if (UINT8_MAX - a > b) {
-			setH();
-		}
-		if (UINT16_MAX - a > b) {
-			setC();
-		}
-		resetN();
-        return a + b;
+		Word sum = a + b;
+		Word half = (a & 0xFFF) + (b & 0xFFF);
+		half > 0xFFF ? setH() : resetH();
+		sum > 0xFFFF ? setN() : resetN();
+		return sum & 0xFFFF;
     };
 
 	Word addSp(Word a, Word b) {
-		if (UINT8_MAX - a > b) {
-			setH();
-		}
-		if (UINT16_MAX - a > b) {
-			setC();
-		}
+		Word sum = a + b;
+		(sum & 0xF) < (a & 0xF) ? setH() : resetH();
+		(sum & 0xFF) < (a & 0xFF) > 0xFFFF ? setN() : resetN();
 		//这里原书看不懂（GBCPUman P91），直接抄的上面那个，错了要改
 		resetZ();
 		resetN();
-		return a + b;
+		return sum;
 	}
 	Byte sub(Byte a, Byte b) {
 		setN();
@@ -149,6 +143,18 @@ private:
 		return a - 1;
 	}
 
+	void push16(Word val) {
+		mmu.writeByte(registers.sp, val);
+		registers.sp -= 2;
+		//according to gb instructions25, I thought it should be +=2
+	}
+	Word pop16() {
+		registers.sp += 2;
+		//same as above
+		Word val = mmu.readWord(registers.sp - 2);
+		val |= mmu.readWord(registers.sp - 1);//according to gb instructions25, idk why
+		return val;
+	}
 	Byte swap(Byte a) {
 		if (a == 0)
 		{
@@ -349,6 +355,11 @@ private:
 
 	Byte res(Byte b, Byte a) {
 		return a & !(1 << b);
+	}
+
+	void call(Word addr) {
+		push16(registers.pc);
+		registers.pc = addr;
 	}
 
 
