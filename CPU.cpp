@@ -1,15 +1,14 @@
-//
+// cpu...
 // Created by dell on 2019/4/16.
 //
 
 #include "CPU.h"
 #include <iostream>
 void CPU::initMap() {
+
 	auto ld8 = [](Byte &lhs, Byte rhs) { lhs = rhs; };
 	auto ld16 = [](Word &lhs, Word rhs) { lhs = rhs; };
-
-
-
+	
 	auto getR16 = [](Byte high, Byte low)->Word { return high << 8 | low; };
 	auto setR16 = [](Byte & high, Byte & low, Word t) { high = t >> 8; low = t & 0xFF; };
 	auto getHL = [this, getR16]()->Word { return getR16(registers.h, registers.l); };
@@ -219,7 +218,7 @@ void CPU::initMap() {
 	opMap[0x9C] = [this, &ld8]() {ld8(registers.a, sbc(registers.a, registers.h)); return 4; };
 	opMap[0x9D] = [this, &ld8]() {ld8(registers.a, sbc(registers.a, registers.l)); return 4; };
 	opMap[0x9E] = [this, &ld8, &getHL]() {ld8(registers.a, sbc(registers.a, mmu.readByte(getHL()))); return 8; };
-	//�����#�������opcode���ʺ�����ɾ����
+	//GB CPU P83
 
 	//and
 	opMap[0xA7] = [this, &ld8]() {ld8(registers.a, andAL(registers.a, registers.a)); return 4; };
@@ -309,7 +308,7 @@ void CPU::initMap() {
 	opMap[0x3B] = [this, &ld16]() {ld16(registers.sp, dec(registers.sp)); return 8; };
 
 	opMap[0xCB] = [this, &getImmediateValue8]() {return opCBMap[getImmediateValue8()](); };
-	//����
+	
 	//swap
 	opCBMap[0x37] = [this, &ld8]() {ld8(registers.a, swap(registers.a)); return 8; };
 	opCBMap[0x30] = [this, &ld8]() {ld8(registers.b, swap(registers.b)); return 8; };
@@ -475,5 +474,5 @@ void CPU::initMap() {
 	opMap[0xD0] = [this, &ld16]() {if (!getC()) { ld16(registers.pc, pop16()); }return 8; };
 	opMap[0xD8] = [this, &ld16]() {if (getC()) { ld16(registers.pc, pop16()); }return 8; };
 	//todo: reti
-	opMap[0xD9] = [this, &ld16]() { ld16(registers.pc, pop16());/* enable interupts here */ return 8; };
+	opMap[0xD9] = [this, &ld16]() { ld16(registers.pc, pop16());/* todo enable interupts here */ return 8; };
 };

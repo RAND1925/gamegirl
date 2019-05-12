@@ -7,8 +7,10 @@
 
 #include <functional>
 #include <iostream>
+#include <iomanip>
 #include "common.h"
-#include "Op.h"
+#include "MMU.h"
+
 class CPU {
 private:
         using FlagSetter = std::function<void(void)>;
@@ -27,8 +29,8 @@ private:
         FlagGetter getC = [this]() -> Byte { return (registers.f & (1 << 4) ) >> 4; };
 
     struct Registers {
-        Register8 a, f, b, c, d, e, h, l;
-        Register16 sp, pc;
+        Byte a, f, b, c, d, e, h, l;
+        Word sp, pc;
     }registers;
     MMU & mmu;
 	Byte add(Byte a, Byte b) {
@@ -58,10 +60,19 @@ private:
     };
 
 	Word addSp(Word a, Word b) {
+<<<<<<< HEAD
 		Word sum = a + b;
 		(sum & 0xF) < (a & 0xF) ? setH() : resetH();
 		(sum & 0xFF) < (a & 0xFF) > 0xFFFF ? setN() : resetN();
-		//这里原书看不懂（GBCPUman P91），直接抄的上面那个，错了要改
+=======
+		if (UINT8_MAX - a > b) {
+			setH();
+		}
+		if (UINT16_MAX - a > b) {
+			setC();
+		}
+		//GBCPUman P91
+>>>>>>> 82db410df430f93e96acfc8e0ba4bf1800901676
 		resetZ();
 		resetN();
 		return sum;
@@ -296,7 +307,7 @@ private:
 			resetC();
 		}
 		return res;
-		// LSB of n set to 0(LSB指二进制数最右侧一位)
+		// LSB of n set to 0(LSB is the last bit)
 	}
 
 	Byte sra(Byte a) {
@@ -338,7 +349,7 @@ private:
 			resetC();
 		}
 		return res;
-		//MSB set to 0（MSB指二进制数最高位）
+		//MSB set to 0   MSB is the first bit
 	}
 
 	void bit(Byte b,Byte a) {
@@ -366,11 +377,14 @@ private:
     void initMap();
     std::function<Byte(void)> opMap[0x100];
 	std::function<Byte(void)> opCBMap[0x100];
+
+
 public:
     void step(){
         Byte opNum = mmu.readByte(registers.pc);
-        int p = (opMap[opNum])();
-        std::cout << "w";
+		std::cout << "pc: 0x" << std::hex << registers.pc << " opNum: 0x" << std::hex<< (int)opNum << std::endl;
+
+		int p = (opMap[opNum])();
         registers.pc++;
     }
 
