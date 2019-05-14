@@ -5,11 +5,10 @@
 #include "CPU.h"
 #include <iostream>
 void CPU::initMap() {
-
 	auto ld8 = [](Byte &lhs, Byte rhs) { lhs = rhs; };
 	auto ld16 = [](Word &lhs, Word rhs) { lhs = rhs; };
-	
-	auto getR16 = [](Byte high, Byte low)->Word { return high << 8 | low; };
+
+	auto getR16 = [](Byte high, Byte low)->Word { return (high << 8) | low; };
 	auto setR16 = [](Byte & high, Byte & low, Word t) { high = t >> 8; low = t & 0xFF; };
 	auto getHL = [this, getR16]()->Word { return getR16(registers.h, registers.l); };
 	auto getBC = [this, getR16]()->Word { return getR16(registers.b, registers.c); };
@@ -26,8 +25,8 @@ void CPU::initMap() {
 	auto getSignedImmediateValue8 = [this]()->SByte { return mmu.readSByte(registers.pc++); };
 
 	auto nothing = [this]() { std::cout << "nothing" << std::endl; return 0; };
-	for (int i = 0; i < 0x100; ++i) {
-		opMap[i] = nothing;
+	for (auto & s: opMap) {
+		s = nothing;
 	}
 	// ld A into others;
 	opMap[0x02] = [this, &getBC]() {mmu.writeByte(mmu.readByte(getBC()), registers.a); return 8; };
@@ -159,7 +158,7 @@ void CPU::initMap() {
 
 	//ldhl sp
 	opMap[0xF8] = [this, &setHL, &getImmediateValue16]() {setHL(add(registers.sp, getImmediateValue16())); return 12; };
-	
+
 	//ld(nn) sp
 	opMap[0x08] = [this, &getImmediateValue16]() {mmu.writeWord(getImmediateValue16(), registers.sp); return 20; };
 
@@ -294,7 +293,7 @@ void CPU::initMap() {
 
 	//add sp
 	opMap[0xE8] = [this, &ld16, &getImmediateValue16]() {ld16(registers.sp,addSp(registers.sp,getImmediateValue16())); return 16; };
-	
+
 	//inc
 	opMap[0x03] = [this, &setBC, &getBC]() {setBC(inc(mmu.readWord(getBC()))); return 8; };
 	opMap[0x13] = [this, &setDE, &getDE]() {setDE(inc(mmu.readWord(getDE()))); return 8; };
@@ -332,7 +331,7 @@ void CPU::initMap() {
 
 	//nop
 	opMap[0x00] = [this]() {return 4; };
-	//todo: halt 0x76
+	//todo: halt 0x76 ok
 	//todo: stop 1000
 	//todo: EI DI 0xF3 0xF4
 
@@ -456,7 +455,6 @@ void CPU::initMap() {
 	opMap[0xCC] = [this, &ld16, &getImmediateValue16]() {if (getZ()) { mmu.writeByte(registers.sp, registers.a); ld16(registers.sp, getImmediateValue16()); } return 12; };
 	opMap[0xD4] = [this, &ld16, &getImmediateValue16]() {if (!getC()) { mmu.writeByte(registers.sp, registers.a); ld16(registers.sp, getImmediateValue16()); }return 12; };
 	opMap[0xDC] = [this, &ld16, &getImmediateValue16]() {if (getC()) { mmu.writeByte(registers.sp, registers.a); ld16(registers.sp, getImmediateValue16()); }return 12; };
-	//todo:restart rst
 	//ret
 	opMap[0xC9] = [this, &ld16, &getImmediateValue16, &ld8]() {ld8(registers.a, mmu.readByte(registers.sp)); ld16(registers.sp, getImmediateValue16()); return 8; };
 	//ret cc
@@ -466,4 +464,25 @@ void CPU::initMap() {
 	opMap[0xD8] = [this, &ld16, &getImmediateValue16, &ld8]() {if (getC()) { ld8(registers.a, mmu.readByte(registers.sp)); ld16(registers.sp, getImmediateValue16()); }return 8; };
 	//todo: reti
 
-};
+
+	//interrupt
+	opMap[0xF3] = [this](){states.interruptMasterEnabled = true; return 4; };
+	opMap[0xFB] = [this](){states.interruptMasterEnabled = false; return 4; };
+	opMap[0x76] = [this](){states.halt = true; return 4; };
+
+
+	opMap[0xC7] = [this](){rsv(); registers.sp -=2; mmu.writeWord(registers.sp, registers.pc); registers.pc = 0x00; return 32;};
+	opMap[0xCF] = [this](){rsv(); registers.sp -=2; mmu.writeWord(registers.sp, registers.pc); registers.pc = 0x08; return 32;};
+	opMap[0xD7] = [this](){rsv(); registers.sp -=2; mmu.writeWord(registers.sp, registers.pc); registers.pc = 0x10; return 32;};
+	opMap[0xDF] = [this](){rsv(); registers.sp -=2; mmu.writeWord(registers.sp, registers.pc); registers.pc = 0x18; return 32;};
+	opMap[0xE7] = [this](){rsv(); registers.sp -=2; mmu.writeWord(registers.sp, registers.pc); registers.pc = 0x20; return 32;};
+	opMap[0xEF] = [this](){rsv(); registers.sp -=2; mmu.writeWord(registers.sp, registers.pc); registers.pc = 0x28; return 32;};
+	opMap[0xF7] = [this](){rsv(); registers.sp -=2; mmu.writeWord(registers.sp, registers.pc); registers.pc = 0x30; return 32;};
+	opMap[0xFF] = [this](){rsv(); registers.sp -=2; mmu.writeWord(registers.sp, registers.pc); registers.pc = 0x38; return 32;};
+
+	//DI & EI
+
+	opMap[0xF3] = [this](){states.interruptMasterEnabled = false; return 4; };
+	opMap[0xFB] = [this](){states.interruptMasterEnabled = false; return 4; };
+
+}

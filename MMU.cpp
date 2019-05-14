@@ -13,9 +13,9 @@ Byte MMU::readByte(Word address)
     }
 }
 Word MMU::readWord(Word address){
-    return readByte(address) + (readByte(address + 1) << 8);
+    return readByte(address) | (readByte(address + 1) << 8);
 }
-SByte MMU::readSByte(Word address) {
+SByte MMU::readSByte(Word address){
     for (auto & s: spaces){
         if (s->accepts(address)){
             return s->getByte(address);

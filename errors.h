@@ -9,12 +9,13 @@
 #include <iostream>
 #include <string>
 
-void warning(std::string s){
+void warning(const std::string & s){
     std::cout << "WARNING!" << s << std::endl;
-}
+};
 
-void error(std::string s){
+void error(const std::string & s){
     std::cout << "ERROR!" << s << std::endl;
-}
+};
+
 
 #endif //CPPGB_ERRORS_H

@@ -21,5 +21,9 @@ class ZRam: public AddressSpace {
     void setByte(Word address, Byte value) override {
         bytes[address - offset] = value;
     }
+
+    Byte & bindRegister(Word address){
+        return bytes[address];
+    }
 };
 #endif //CPPGB_ZRAM_H

@@ -15,6 +15,7 @@ class Rom: public AddressSpace{
 private:
     std::array<Byte, length> bytes;
 public:
+
     Rom(char* c, Word romLength){
         std::copy(c, c + romLength, bytes.begin());
     };

@@ -25,14 +25,10 @@ int main() {
     mmu.addAddressSpace(&rom);
     WRam<0xC000, 8_kb + 0x1E00> wRam;
     mmu.addAddressSpace(&wRam);
-
     ZRam<0xFF80, 0xFFFF - 0xFF80> zRam;
     mmu.addAddressSpace(&zRam);
 
     CPU cpu(mmu);
-    while (1){
-        cpu.step();
-    }
-
+    cpu.cycle();
 
 }

@@ -4,7 +4,7 @@
 
 #ifndef CPPGB_COMMON_H
 #define CPPGB_COMMON_H
-#include <stdint.h>
+#include <cstdint>
 
     using Byte = uint8_t;
     using Word = uint16_t;
@@ -12,6 +12,23 @@
 
     inline constexpr Word operator "" _kb(const unsigned long long w){
         return w << 10;
+    };
+
+    template <Byte p>
+    Byte getBit(const Byte b){
+        return (b & (1 << p) ) >> p;
+    };
+    template <Byte p>
+    void setBit(Byte & b){
+        b |= (1 << p);
     }
+    template <Byte p>
+    void resetBit(Byte & b){
+        b &= ~(1 << p);
+    };
+
+    enum class RegistersName: Word{
+            IF = 0xFFFF
+        };
 
 #endif //CPPGBUI_COMMON_H
