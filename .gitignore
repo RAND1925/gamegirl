@@ -294,3 +294,4 @@ __pycache__/
 *.app
 
 /.idea
+/cmake
