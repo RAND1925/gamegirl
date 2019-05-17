@@ -30,6 +30,7 @@ void windows::end()
 }
 void windows::setPixelColor(int pos_x, int pos_y, int color)
 {
+    SDL_UnlockSurface(surface);
     //the pixel matrix 
     //note: nut for 1 level array
     Uint32 *pixels = (Uint32 *)surface->pixels;
