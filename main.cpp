@@ -4,7 +4,6 @@
 #include <memory>
 
 #include "common.h"
-#include "Mem.h"
 #include "MMU.h"
 #include "CPU.h"
 #include "Rom.h"
@@ -22,7 +21,7 @@ int main() {
     gameFile.close();
 
     MMU mmu;
-    Rom<0x0000, 32_kb> rom(gameBinaryString, 8_kb);
+    Rom<0x0000, 32_kb> rom(gameBinaryString, ROM_VOL);
     mmu.addAddressSpace(&rom);
     WRam<0xC000, 8_kb + 0x1E00> wRam;
     mmu.addAddressSpace(&wRam);
@@ -30,11 +29,6 @@ int main() {
     mmu.addAddressSpace(&zRam);
 
     CPU cpu(mmu);
-    int p = mmu.readByte(0);
-    while (1){
-        cpu.step();
-    }
-    Byte a = mmu.readByte(0x50);
-    return 0;
+    cpu.cycle();
 
 }
