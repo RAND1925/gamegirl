@@ -45,7 +45,7 @@ public:
         return  bytes[address - offset];
     };
     void setByte(Word address, Byte value) override {
-        warning("write to rom");
+      //  warning("write to rom");
         bytes[address - offset] = value;
     };
     void loadRom(char* c, Word romLength){

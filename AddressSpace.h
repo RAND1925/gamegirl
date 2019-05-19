@@ -5,7 +5,7 @@
 #ifndef CPPGB_ADDRESSSPACE_H
 #define CPPGB_ADDRESSSPACE_H
 
-
+#include"common.h"
 class AddressSpace {
 public:
     virtual bool accepts(Word address) = 0;
