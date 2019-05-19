@@ -319,7 +319,7 @@ void CPU::initMap() {
 	opCBMap[0x35] = [this, &ld8]() {ld8(registers.l, swap(registers.l)); return 8; };
 	opCBMap[0x36] = [this, &getHL, &setHL]() {mmu.writeByte(getHL(),swap(mmu.readByte(getHL()))); return 16; };
 
-	//todo: daa 0x27
+	opMap[0x27]=[this](){daa();return 4;};
 
 	//cpl
 	opMap[0x2F] = [this, &ld8]() {ld8(registers.a, cpl(registers.a)); return 4; };
@@ -332,9 +332,7 @@ void CPU::initMap() {
 
 	//nop
 	opMap[0x00] = [this]() {return 4; };
-	//todo: halt 0x76
 	//todo: stop 1000
-	//todo: EI DI 0xF3 0xF4
 
 	//rlca
 	opMap[0x07] = [this, &ld8]() { ld8(registers.a, rlc(registers.a)); return 4; };
@@ -433,6 +431,15 @@ void CPU::initMap() {
 	opCBMap[0xC5] = [this, &getImmediateValue8]() { set(getImmediateValue8(), registers.l); return 8; };
 	opCBMap[0xC6] = [this, &getHL, &getImmediateValue8]() {set(getImmediateValue8(), mmu.readByte(getHL())); return 16; };
 
+	//res
+    opCBMap[0x87] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.a); return 8; };
+    opCBMap[0x80] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.b); return 8; };
+    opCBMap[0x81] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.c); return 8; };
+    opCBMap[0x82] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.d); return 8; };
+    opCBMap[0x83] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.e); return 8; };
+    opCBMap[0x84] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.h); return 8; };
+    opCBMap[0x85] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.l); return 8; };
+    opCBMap[0x86] = [this, &getHL, &getImmediateValue8]() {res(getImmediateValue8(), mmu.readByte(getHL())); return 16; };
 	//jp
 	opMap[0xC3] = [this, &ld16, &getImmediateValue16]() {ld16(registers.pc, getImmediateValue16()); return 12; };
 	//jp cc
@@ -473,6 +480,6 @@ void CPU::initMap() {
 	opMap[0xC8] = [this, &ld16]() {if (getZ()) { ld16(registers.pc, pop16()); }return 8; };
 	opMap[0xD0] = [this, &ld16]() {if (!getC()) { ld16(registers.pc, pop16()); }return 8; };
 	opMap[0xD8] = [this, &ld16]() {if (getC()) { ld16(registers.pc, pop16()); }return 8; };
-	//todo: reti
+	//reti
 	opMap[0xD9] = [this, &ld16]() { ld16(registers.pc, pop16());/* todo enable interupts here */ return 8; };
 };

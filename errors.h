@@ -8,13 +8,12 @@
 #include <exception>
 #include <iostream>
 #include <string>
-
+/*
 void warning(std::string s){
     std::cout << "WARNING!" << s << std::endl;
 }
-
 void error(std::string s){
     std::cout << "ERROR!" << s << std::endl;
-}
+}*/
 
 #endif //CPPGB_ERRORS_H
