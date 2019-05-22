@@ -12,6 +12,10 @@ public:
     void end();
     //set the certain pixel's color
     void setPixelColor(int pos_x,int pos_y,int color);
+    //
+
+    //todo: Joypad and communiate about the ram to store the input 
+    //todo
 private:
     SDL_Window *win;
     SDL_Surface *surface;
