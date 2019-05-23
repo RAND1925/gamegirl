@@ -217,7 +217,7 @@ void CPU::initMap() {
 	opMap[0x9C] = [this, &ld8]() {ld8(registers.a, sbc(registers.a, registers.h)); return 4; };
 	opMap[0x9D] = [this, &ld8]() {ld8(registers.a, sbc(registers.a, registers.l)); return 4; };
 	opMap[0x9E] = [this, &ld8, &getHL]() {ld8(registers.a, sbc(registers.a, mmu.readByte(getHL()))); return 8; };
-	//�����#�������opcode���ʺ�����ɾ����
+	//GB CPU P83
 
 	//and
 	opMap[0xA7] = [this, &ld8]() {ld8(registers.a, andAL(registers.a, registers.a)); return 4; };
@@ -307,7 +307,7 @@ void CPU::initMap() {
 	opMap[0x3B] = [this, &ld16]() {ld16(registers.sp, dec(registers.sp)); return 8; };
 
 	opMap[0xCB] = [this, &getImmediateValue8]() {return opCBMap[getImmediateValue8()](); };
-	//����
+
 	//swap
 	opCBMap[0x37] = [this, &ld8]() {ld8(registers.a, swap(registers.a)); return 8; };
 	opCBMap[0x30] = [this, &ld8]() {ld8(registers.b, swap(registers.b)); return 8; };
@@ -318,7 +318,7 @@ void CPU::initMap() {
 	opCBMap[0x35] = [this, &ld8]() {ld8(registers.l, swap(registers.l)); return 8; };
 	opCBMap[0x36] = [this, &getHL, &setHL]() {mmu.writeByte(getHL(),swap(mmu.readByte(getHL()))); return 16; };
 
-	//todo: daa 0x27
+	opMap[0x27]=[this](){daa();return 4;};
 
 	//cpl
 	opMap[0x2F] = [this, &ld8]() {ld8(registers.a, cpl(registers.a)); return 4; };
@@ -432,57 +432,63 @@ void CPU::initMap() {
 	opCBMap[0xC5] = [this, &getImmediateValue8]() { set(getImmediateValue8(), registers.l); return 8; };
 	opCBMap[0xC6] = [this, &getHL, &getImmediateValue8]() {set(getImmediateValue8(), mmu.readByte(getHL())); return 16; };
 
+	//res
+    opCBMap[0x87] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.a); return 8; };
+    opCBMap[0x80] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.b); return 8; };
+    opCBMap[0x81] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.c); return 8; };
+    opCBMap[0x82] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.d); return 8; };
+    opCBMap[0x83] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.e); return 8; };
+    opCBMap[0x84] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.h); return 8; };
+    opCBMap[0x85] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.l); return 8; };
+    opCBMap[0x86] = [this, &getHL, &getImmediateValue8]() {res(getImmediateValue8(), mmu.readByte(getHL())); return 16; };
 	//jp
-	opMap[0xC3] = [this, &ld16, &getImmediateValue16]() {ld16(registers.sp, getImmediateValue16()); return 12; };
+	opMap[0xC3] = [this, &ld16, &getImmediateValue16]() {ld16(registers.pc, getImmediateValue16()); return 12; };
 	//jp cc
-	opMap[0xC2] = [this, &ld16, &getImmediateValue16]() {if(!getZ()) ld16(registers.sp, getImmediateValue16()); return 12; };
-	opMap[0xCA] = [this, &ld16, &getImmediateValue16]() {if(getZ()) ld16(registers.sp, getImmediateValue16()); return 12; };
-	opMap[0xD2] = [this, &ld16, &getImmediateValue16]() {if(!getC()) ld16(registers.sp, getImmediateValue16()); return 12; };
-	opMap[0xDA] = [this, &ld16, &getImmediateValue16]() {if(getC()) ld16(registers.sp, getImmediateValue16()); return 12; };
+	opMap[0xC2] = [this, &ld16, &getImmediateValue16]() {if(!getZ()) ld16(registers.pc, getImmediateValue16()); return 12; };
+	opMap[0xCA] = [this, &ld16, &getImmediateValue16]() {if(getZ()) ld16(registers.pc, getImmediateValue16()); return 12; };
+	opMap[0xD2] = [this, &ld16, &getImmediateValue16]() {if(!getC()) ld16(registers.pc, getImmediateValue16()); return 12; };
+	opMap[0xDA] = [this, &ld16, &getImmediateValue16]() {if(getC()) ld16(registers.pc, getImmediateValue16()); return 12; };
 	//jp hl
-	opMap[0xE9] = [this, &ld16, &getHL]() {ld16(registers.sp, mmu.readWord(getHL())); return 4; };
+	opMap[0xE9] = [this, &ld16, &getHL]() {ld16(registers.pc, mmu.readWord(getHL())); return 4; };
 	//jr
-	opMap[0x18] = [this, &ld16, &getSignedImmediateValue8]() {ld16(registers.sp, registers.sp + getSignedImmediateValue8()); return 8; };
+	opMap[0x18] = [this, &ld16, &getSignedImmediateValue8]() {ld16(registers.pc, registers.pc + getSignedImmediateValue8()); return 8; };
 	//jr cc
-	opMap[0x20] = [this, &ld16, &getSignedImmediateValue8]() {if(!getZ()) ld16(registers.sp, registers.sp + getSignedImmediateValue8()); return 8; };
-	opMap[0x28] = [this, &ld16, &getSignedImmediateValue8]() {if(getZ()) ld16(registers.sp, registers.sp + getSignedImmediateValue8()); return 8; };
-	opMap[0x30] = [this, &ld16, &getSignedImmediateValue8]() {if(!getC()) ld16(registers.sp, registers.sp + getSignedImmediateValue8()); return 8; };
-	opMap[0x38] = [this, &ld16, &getSignedImmediateValue8]() {if(getC()) ld16(registers.sp, registers.sp + getSignedImmediateValue8()); return 8; };
+	opMap[0x20] = [this, &ld16, &getSignedImmediateValue8]() {if(!getZ()) ld16(registers.pc, registers.pc + getSignedImmediateValue8()); return 8; };
+	opMap[0x28] = [this, &ld16, &getSignedImmediateValue8]() {if(getZ()) ld16(registers.pc, registers.pc + getSignedImmediateValue8()); return 8; };
+	opMap[0x30] = [this, &ld16, &getSignedImmediateValue8]() {if(!getC()) ld16(registers.pc, registers.pc + getSignedImmediateValue8()); return 8; };
+	opMap[0x38] = [this, &ld16, &getSignedImmediateValue8]() {if(getC()) ld16(registers.pc, registers.pc + getSignedImmediateValue8()); return 8; };
 	//call
-	opMap[0xCD] = [this, &ld16, &getImmediateValue16]() {mmu.writeByte(registers.sp, registers.a); ld16(registers.sp, getImmediateValue16()); return 12; };
+	opMap[0xCD] = [this, &ld16, &getImmediateValue16]() { call(getImmediateValue16()); return 12; };
 	//call cc
-	opMap[0xC4] = [this, &ld16, &getImmediateValue16]() {if (!getZ()) { mmu.writeByte(registers.sp, registers.a); ld16(registers.sp, getImmediateValue16()); } return 12; };
-	opMap[0xCC] = [this, &ld16, &getImmediateValue16]() {if (getZ()) { mmu.writeByte(registers.sp, registers.a); ld16(registers.sp, getImmediateValue16()); } return 12; };
-	opMap[0xD4] = [this, &ld16, &getImmediateValue16]() {if (!getC()) { mmu.writeByte(registers.sp, registers.a); ld16(registers.sp, getImmediateValue16()); }return 12; };
-	opMap[0xDC] = [this, &ld16, &getImmediateValue16]() {if (getC()) { mmu.writeByte(registers.sp, registers.a); ld16(registers.sp, getImmediateValue16()); }return 12; };
+	opMap[0xC4] = [this, &ld16, &getImmediateValue16]() {if (!getZ()) { call(getImmediateValue16()); } return 12; };
+	opMap[0xCC] = [this, &ld16, &getImmediateValue16]() {if (getZ()) { call(getImmediateValue16()); } return 12; };
+	opMap[0xD4] = [this, &ld16, &getImmediateValue16]() {if (!getC()) { call(getImmediateValue16()); }return 12; };
+	opMap[0xDC] = [this, &ld16, &getImmediateValue16]() {if (getC()) { call(getImmediateValue16()); }return 12; };
+
 	//ret
-	opMap[0xC9] = [this, &ld16, &getImmediateValue16, &ld8]() {ld8(registers.a, mmu.readByte(registers.sp)); ld16(registers.sp, getImmediateValue16()); return 8; };
+	opMap[0xC7] = [this]() {call(0x00); return 32; };
+	opMap[0xCF] = [this]() {call(0x08); return 32; };
+	opMap[0xD7] = [this]() {call(0x10); return 32; };
+	opMap[0xDF] = [this]() {call(0x18); return 32; };
+	opMap[0xE7] = [this]() {call(0x20); return 32; };
+	opMap[0xEF] = [this]() {call(0x28); return 32; };
+	opMap[0xF7] = [this]() {call(0x30); return 32; };
+	opMap[0xFF] = [this]() {call(0x38); return 32; };
+	//ret
+	opMap[0xC9] = [this, &ld16]() { ld16(registers.pc, pop16()); return 8; };
 	//ret cc
-	opMap[0xC0] = [this, &ld16, &getImmediateValue16, &ld8]() {if (!getZ()) { ld8(registers.a, mmu.readByte(registers.sp)); ld16(registers.sp, getImmediateValue16()); } return 8; };
-	opMap[0xC8] = [this, &ld16, &getImmediateValue16, &ld8]() {if (getZ()) { ld8(registers.a, mmu.readByte(registers.sp)); ld16(registers.sp, getImmediateValue16()); }return 8; };
-	opMap[0xD0] = [this, &ld16, &getImmediateValue16, &ld8]() {if (!getC()) { ld8(registers.a, mmu.readByte(registers.sp)); ld16(registers.sp, getImmediateValue16()); }return 8; };
-	opMap[0xD8] = [this, &ld16, &getImmediateValue16, &ld8]() {if (getC()) { ld8(registers.a, mmu.readByte(registers.sp)); ld16(registers.sp, getImmediateValue16()); }return 8; };
-	//todo: reti
+	opMap[0xC0] = [this, &ld16]() {if (!getZ()) { ld16(registers.pc, pop16()); } return 8; };
+	opMap[0xC8] = [this, &ld16]() {if (getZ()) { ld16(registers.pc, pop16()); }return 8; };
+	opMap[0xD0] = [this, &ld16]() {if (!getC()) { ld16(registers.pc, pop16()); }return 8; };
+	opMap[0xD8] = [this, &ld16]() {if (getC()) { ld16(registers.pc, pop16()); }return 8; };
+	//reti
+	opMap[0xD9] = [this, &ld16]() { ld16(registers.pc, pop16());states.interruptMasterEnabled = true; return 8; };
+    //interrupt
+    opMap[0xF3] = [this](){states.interruptMasterEnabled = true; return 4; };
+    opMap[0xFB] = [this](){states.interruptMasterEnabled = false; return 4; };
+    opMap[0x76] = [this](){states.halt = true; return 4; };
+    //DI & EI
 
-
-	//interrupt
-	opMap[0xF3] = [this](){states.interruptMasterEnabled = true; return 4; };
-	opMap[0xFB] = [this](){states.interruptMasterEnabled = false; return 4; };
-	opMap[0x76] = [this](){states.halt = true; return 4; };
-
-
-	opMap[0xC7] = [this](){rsv(); registers.sp -=2; mmu.writeWord(registers.sp, registers.pc); registers.pc = 0x00; return 32;};
-	opMap[0xCF] = [this](){rsv(); registers.sp -=2; mmu.writeWord(registers.sp, registers.pc); registers.pc = 0x08; return 32;};
-	opMap[0xD7] = [this](){rsv(); registers.sp -=2; mmu.writeWord(registers.sp, registers.pc); registers.pc = 0x10; return 32;};
-	opMap[0xDF] = [this](){rsv(); registers.sp -=2; mmu.writeWord(registers.sp, registers.pc); registers.pc = 0x18; return 32;};
-	opMap[0xE7] = [this](){rsv(); registers.sp -=2; mmu.writeWord(registers.sp, registers.pc); registers.pc = 0x20; return 32;};
-	opMap[0xEF] = [this](){rsv(); registers.sp -=2; mmu.writeWord(registers.sp, registers.pc); registers.pc = 0x28; return 32;};
-	opMap[0xF7] = [this](){rsv(); registers.sp -=2; mmu.writeWord(registers.sp, registers.pc); registers.pc = 0x30; return 32;};
-	opMap[0xFF] = [this](){rsv(); registers.sp -=2; mmu.writeWord(registers.sp, registers.pc); registers.pc = 0x38; return 32;};
-
-	//DI & EI
-
-	opMap[0xF3] = [this](){states.interruptMasterEnabled = false; return 4; };
-	opMap[0xFB] = [this](){states.interruptMasterEnabled = false; return 4; };
-
-}
+    opMap[0xF3] = [this](){states.interruptMasterEnabled = false; return 4; };
+    opMap[0xFB] = [this](){states.interruptMasterEnabled = true; return 4; };
+};
