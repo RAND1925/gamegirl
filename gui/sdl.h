@@ -15,6 +15,7 @@ public:
     //
 
     //todo: Joypad and communiate about the ram to store the input 
+    bool getJoypad();
     //todo
 private:
     SDL_Window *win;
