@@ -297,4 +297,4 @@ __pycache__/
 /cmake*
 /build
 /.vscode
-/gui
+/gui/

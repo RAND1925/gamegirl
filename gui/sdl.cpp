@@ -1,6 +1,6 @@
 #include <string>
 #include <iostream>
-#include "common.h"
+#include "../common.h"
 #include "sdl.h"
 void windows::initWindow(int WINDOW_WIDTH, int WINDOW_HEIGHT, int pos_x, int pos_y, std::string title_window)
 {
@@ -12,7 +12,7 @@ void windows::initWindow(int WINDOW_WIDTH, int WINDOW_HEIGHT, int pos_x, int pos
     window_width = WINDOW_WIDTH;
     ;
     window_height = WINDOW_HEIGHT;
-
+    
     //about the clock to fresh
 
     //let *surface get the image from the *win

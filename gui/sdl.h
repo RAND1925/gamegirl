@@ -1,7 +1,7 @@
 #include <SDL2/SDL.h>
 #include <string>
-#include "Mem.h"
-#include "common.h"
+
+#include "../common.h"
 
 class windows
 {
