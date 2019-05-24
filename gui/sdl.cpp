@@ -22,11 +22,12 @@ void windows::initWindow(int WINDOW_WIDTH, int WINDOW_HEIGHT, int pos_x, int pos
     //todo : fill the surface with some color
     auto pixel_format = SDL_MapRGB(surface->format, 193, 0, 120);
     SDL_FillRect(surface, NULL, pixel_format);
-}
+}    
 
-//temparory address of the joypad
+
 // this function CANNOT call ReadMemory(0xFF00) it must access it directly from m_Rom[0xFF00]
 // because ReadMemory traps this address
+//temparory address of the joypad
 Byte joypad_C0 = 0x0f;
 Byte joypad_C1 = 0x0f;
 bool windows::getJoypad()
@@ -125,6 +126,16 @@ bool windows::getJoypad()
     return true;
     //the return value is used to determine if it's end;
 }
+/*
+todo on the mem and mmu about the joypad：
+    define the specific "READ" and "WRITE"
+    READ: 
+          if column is 0001 | xxxx return back joypad_c1
+          if column is 0010 | xxxx return back joypad_c0
+    WRITE:
+           get the column from the Byte joypad_c1/c0
+*/
+
 
 void windows::end()
 {
