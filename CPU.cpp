@@ -331,9 +331,9 @@ void CPU::initMap() {
 
 	//nop
 	opMap[0x00] = [this]() {return 4; };
-	//todo: halt 0x76 ok
+	
 	//todo: stop 1000
-	//todo: EI DI 0xF3 0xF4
+	
 
 	//rlca
 	opMap[0x07] = [this, &ld8]() { ld8(registers.a, rlc(registers.a)); return 4; };

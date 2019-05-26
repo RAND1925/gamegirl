@@ -11,7 +11,11 @@
 
 template <Word offset, Word length>
 class WRam: public AddressSpace {
+    
+    
     std::array<Byte, length> bytes;
+
+    
     bool accepts(Word address) override{
         return address >= offset && address < offset + length;
     }

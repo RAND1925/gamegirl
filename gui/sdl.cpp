@@ -2,6 +2,24 @@
 #include <iostream>
 #include "../common.h"
 #include "sdl.h"
+void windows::addTime(int clock)
+{/*
+OAM -> VRAM -> HBlank -> VBlank
+Period	                GPU mode number	    Time spent (clocks)
+Scanline (accessing OAM)	2	                 80
+Scanline (accessing VRAM)	3	                172
+Horizontal blank	        0	                204
+
+One line (scan and blank)		                456
+Vertical blank	            1	                4560 (10 lines)
+Full frame (scans and vblank)		            70224
+*/
+
+    
+}
+
+
+
 void windows::initWindow(int WINDOW_WIDTH, int WINDOW_HEIGHT, int pos_x, int pos_y, std::string title_window)
 {
     //init the sdl system
@@ -24,9 +42,19 @@ void windows::initWindow(int WINDOW_WIDTH, int WINDOW_HEIGHT, int pos_x, int pos
     SDL_FillRect(surface, NULL, pixel_format);
 }    
 
-
-// this function CANNOT call ReadMemory(0xFF00) it must access it directly from m_Rom[0xFF00]
-// because ReadMemory traps this address
+/*joypad:
+ this function CANNOT call ReadMemory(0xFF00) it must access it directly from m_Rom[0xFF00]
+ because ReadMemory traps this address
+*/
+/*
+todo on the mem and mmu about the joypad：
+    define the specific "READ" and "WRITE"
+    READ: 
+          if column is 0001 | xxxx return back joypad_c1
+          if column is 0010 | xxxx return back joypad_c0
+    WRITE:
+           get the column from the Byte joypad_c1/c0
+*/
 //temparory address of the joypad
 Byte joypad_C0 = 0x0f;
 Byte joypad_C1 = 0x0f;
@@ -126,22 +154,9 @@ bool windows::getJoypad()
     return true;
     //the return value is used to determine if it's end;
 }
-/*
-todo on the mem and mmu about the joypad：
-    define the specific "READ" and "WRITE"
-    READ: 
-          if column is 0001 | xxxx return back joypad_c1
-          if column is 0010 | xxxx return back joypad_c0
-    WRITE:
-           get the column from the Byte joypad_c1/c0
-*/
 
 
-void windows::end()
-{
-    SDL_FreeSurface(surface);
-    SDL_Quit();
-}
+
 
 void windows::setPixelColor(int pos_x, int pos_y, int color)
 {
@@ -152,4 +167,9 @@ void windows::setPixelColor(int pos_x, int pos_y, int color)
     //note: why same color data
     auto pixel_format = surface->format;
     pixels[pos_y * 160 + pos_x] = SDL_MapRGB(pixel_format, color, color, color);
+}
+void windows::end()
+{
+    SDL_FreeSurface(surface);
+    SDL_Quit();
 }

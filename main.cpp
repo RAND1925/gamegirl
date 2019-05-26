@@ -23,10 +23,17 @@ int main() {
     MMU mmu;
     Rom<0x0000, 32_kb> rom(gameBinaryString, ROM_VOL);
     mmu.addAddressSpace(&rom);
+
+
     WRam<0xC000, 8_kb + 0x1E00> wRam;
     mmu.addAddressSpace(&wRam);
+
+
+    
     ZRam<0xFF80, 0xFFFF - 0xFF80> zRam;
     mmu.addAddressSpace(&zRam);
+
+    
 
     CPU cpu(mmu);
     cpu.cycle();
