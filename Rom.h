@@ -1,6 +1,6 @@
-//
+// 0000-8000 rom and bios
 // Created by dell on 2019/5/8.
-// 0000-8000 rom
+//
 
 #ifndef CPPGB_ROM_H
 #define CPPGB_ROM_H
@@ -8,16 +8,19 @@
 #include "AddressSpace.h"
 #include "errors.h"
 #include <array>
-
-using std::array;
+#include <algorithm>
 
 template <Word offset, Word length>
 class Rom: public AddressSpace{
 private:
-    vector<Byte> bytes;
+    std::array<Byte, length> bytes;
 public:
-    Rom(char* c, Word romLength): bytes(c, c + romLength){};
-    array<Byte, 0x100> bios= {
+
+    Rom(char* c, Word romLength){
+        std::copy(c, c + romLength, bytes.begin());
+    };
+    //todo : use bios
+    std::array<Byte, 0x100> bios= {
             0x31, 0xFE, 0xFF, 0xAF, 0x21, 0xFF, 0x9F, 0x32, 0xCB, 0x7C, 0x20, 0xFB, 0x21, 0x26, 0xFF, 0x0E,
             0x11, 0x3E, 0x80, 0x32, 0xE2, 0x0C, 0x3E, 0xF3, 0xE2, 0x32, 0x3E, 0x77, 0x77, 0x3E, 0xFC, 0xE0,
             0x47, 0x11, 0x04, 0x01, 0x21, 0x10, 0x80, 0x1A, 0xCD, 0x95, 0x00, 0xCD, 0x96, 0x00, 0x13, 0x7B,
@@ -42,7 +45,7 @@ public:
         return  bytes[address - offset];
     };
     void setByte(Word address, Byte value) override {
-        warning("write to rom");
+      //  warning("write to rom");
         bytes[address - offset] = value;
     };
     void loadRom(char* c, Word romLength){

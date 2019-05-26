@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
-project(CPPGB)
+project(gamegirl)
 
 set(CMAKE_CXX_STANDARD 17)
-add_executable(CPPGB main.cpp CPU.cpp CPU.h common.h Op.cpp Op.h MMU.cpp MMU.h)
+
+aux_source_directory(. sourece_files)
+add_executable(gamegirl ${sourece_files})

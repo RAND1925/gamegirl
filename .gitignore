@@ -294,5 +294,9 @@ __pycache__/
 *.app
 
 /.idea
+<<<<<<< HEAD
 /.vscode
 /build
+=======
+/cmake*
+>>>>>>> 3170dceb144d0b24109bd77c888b992d267978c4

@@ -1,4 +1,4 @@
-//
+// exception handle
 // Created by dell on 2019/5/8.
 //
 
@@ -6,14 +6,16 @@
 #define CPPGB_ERRORS_H
 
 #include <exception>
-
 #include <iostream>
-void warning(char *s){
-    cout << "WARNING!" << s;
-}
+#include <string>
 
-void error(char *s){
-    cout << "ERROR!" << s;
-}
+void warning(const std::string & s){
+    std::cout << "WARNING!" << s << std::endl;
+};
+
+void error(const std::string & s){
+    std::cout << "ERROR!" << s << std::endl;
+};
+
 
 #endif //CPPGB_ERRORS_H
