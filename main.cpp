@@ -32,6 +32,8 @@ int main() {
     mmu.addAddressSpace(&timer);
 
     CPU cpu(mmu);
-    cpu.cycle();
+    while(true) {
+        timer.increase(cpu.cycle());
+    }
 
 }

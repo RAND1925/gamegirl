@@ -13,14 +13,14 @@
 
 class Timer: public AddressSpace {
 private:
-    int mainClock=0;
-    int counter=0;
-    int divider=0;
-    int threshold=0;
-    Word regDiv=0xFF04;//reg means register divider
-    Word regTima=0xFF05;//counter
-    Word regTma=0xFF06;//modulator
-    Word regTac=0xFF07;//control
+    Byte mainClock=0;
+    Byte subClock=0;
+    Byte divider=0;
+    Byte threshold=0;
+    Byte regDiv;//reg means register divider ff04
+    Byte regTima;//counter ff05
+    Byte regTma;//modulator ff06
+    Byte regTac;//control ff07
     MMU &mmu;
     bool check();
     bool step();
@@ -34,19 +34,19 @@ public:
     Byte getByte(Word address) override {
         switch (address)
         {
-            case 0xFF04: return mmu.readByte(regDiv);
-            case 0xFF05: return mmu.readByte(regTima);
-            case 0xFF06: return mmu.readByte(regTma);
-            case 0xFF07: return mmu.readByte(regTac);
+            case 0xFF04: return regDiv;
+            case 0xFF05: return regTima;
+            case 0xFF06: return regTma;
+            case 0xFF07: return regTac;
         }
     }
     void setByte(Word address, Byte value) override {
         switch (address)
         {
-            case 0xFF04: mmu.writeByte(regDiv,0);break;
-            case 0xFF05: mmu.writeByte(regTima,value);break;
-            case 0xFF06: mmu.writeByte(regTma,value);break;
-            case 0xFF07: mmu.writeByte(regTac,value & 7);break;
+            case 0xFF04: regDiv=0;break;
+            case 0xFF05: regTima=value;break;
+            case 0xFF06: regTma=value;break;
+            case 0xFF07: regTac=(value & 7);break;
         }
     }
 };

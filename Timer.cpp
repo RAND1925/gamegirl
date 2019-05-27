@@ -5,27 +5,27 @@
 #include "Timer.h"
 
 Byte Timer::increase(Byte cycle) {
-    counter+=cycle;
-    if(counter>=4){
+    subClock+=cycle;
+    if(subClock>=4) {
         mainClock++;
-        counter-=4;
+        subClock -= 4;
         divider++;
-        if(divider==16){
-            mmu.writeByte(regDiv,(mmu.readByte(regDiv)+1)&255);
-            divider=0;
+        if (divider == 16) {
+            regDiv++;
+            divider = 0;
         }
     }
     if(check()){
-        return getByte(regTma);
+        return getByte(0xFF06);
         //interrupt here
     }
     else{
-        return NULL;
+        return 0;
     }
 }
 bool Timer::check() {
-    if(mmu.readByte(regTac)%4){
-        switch (mmu.readByte(regTac)%3){
+    if(regTac%4){
+        switch (regTac%3){
             case 0:threshold=64;break;
             case 1:threshold=4;break;
             case 2:threshold=4;break;
@@ -41,9 +41,9 @@ bool Timer::check() {
 
 bool Timer::step() {
     mainClock=0;
-    mmu.writeByte(regTima,mmu.readByte(regTima)+1);
-    if(mmu.readByte(regTima)>255){
-        mmu.writeByte(regTima,mmu.readByte(regTma));
+    regTima++;
+    if(regTima==0){//should be >255 here but it is Byte
+        regTima=regTma;
         Byte add=mmu.readByte(0xFF0F);
         add |= (1<<2);
         mmu.writeByte(0xFF0F,add);

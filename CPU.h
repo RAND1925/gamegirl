@@ -357,13 +357,11 @@ private:
         initRegisters();
         initMap();
     };
-    void cycle(){
-    	while(true){
+    Byte cycle(){
     		readStates();
-			int timing = step();
+			Byte timing = step();
 			writeStates();//display
-
-		}
+			return timing;
       }
 
     void initRegisters(){
