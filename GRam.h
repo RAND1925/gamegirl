@@ -39,5 +39,6 @@ class GRam : public AddressSpace
     
     //judge if it's direction or select
     Byte KeyColumn = 0x00;
+   
 };
 #endif //CPPGB_GRAM_H

@@ -14,14 +14,30 @@ public:
     void end();
     //set the certain pixel's color
     void setPixelColor(int pos_x, int pos_y, int color);
-    //add gpu clock
+    //it's the main cycle of the gpu
     void addTime(int clock);
+    //choose the mode and the status matched with the mode
     void setMode(int mode);
     //fersh the windows 
     void fresh(){SDL_UpdateWindowSurface(win)};
     //to compare the 0xff44 0xff45 to judge if it's a interrupt
     void setLCYStatus();
-    //todo: Joypad and communiate about the ram to store the input
+
+
+    /*
+    Bit 7 - Not used        Bit 6 - Not used
+    Bit 5 - P15 Select Button Keys (0=Select)
+    Bit 4 - P14 Select Direction Keys (0=Select) 
+    Bit 3 - P13 Input Down  or Start(0=Pressed) (Read Only)
+    Bit 2 - P12 Input Up    or Select (0=Pressed) (Read Only) 
+    Bit 1 - P11 Input Left  or Button B (0=Pressed) (Read Only) 
+    Bit 0 - P10 Input Right or Button A (0=Pressed) (Read Only)
+    
+    8bit: 0000 | 0000 
+
+    column 1 direction ->0001 | xxxx
+    column 0 select    ->0010 | xxxx
+    */
     bool getJoypad();
 
     int CurrentLine = 0;

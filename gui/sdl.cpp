@@ -1,12 +1,20 @@
 #include <string>
 #include <iostream>
-
-
 #include "sdl.h"
+
+bool windows::isLcdEnabled()
+{
+    
+}
+
+
+
+
 void windows::addTime(int clock)
 {
     setInterruptFlag();
     // warn !!! todo check isLCDenabled if() acoordig to the oxff41
+    isLcdEnabled();
     //increase the gpu clock
     InerClock += clock;
    
@@ -109,20 +117,7 @@ void windows::initWindow(int WINDOW_WIDTH, int WINDOW_HEIGHT, int pos_x, int pos
 
 bool windows::getJoypad()
 {
-    /*
-    Bit 7 - Not used        Bit 6 - Not used
-    Bit 5 - P15 Select Button Keys (0=Select)
-    Bit 4 - P14 Select Direction Keys (0=Select) 
-    Bit 3 - P13 Input Down  or Start(0=Pressed) (Read Only)
-    Bit 2 - P12 Input Up    or Select (0=Pressed) (Read Only) 
-    Bit 1 - P11 Input Left  or Button B (0=Pressed) (Read Only) 
-    Bit 0 - P10 Input Right or Button A (0=Pressed) (Read Only)
     
-    8bit: 0000 | 0000 
-
-    column 1 direction ->0001 | xxxx
-    column 0 select    ->0010 | xxxx
-    */
     bool isQuit = false;
     while (SDL_PollEvent(&e))
     {
