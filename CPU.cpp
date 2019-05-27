@@ -465,6 +465,7 @@ void CPU::initMap() {
 	opMap[0xD4] = [this, &ld16, &getImmediateValue16]() {if (!getC()) { call(getImmediateValue16()); }return 12; };
 	opMap[0xDC] = [this, &ld16, &getImmediateValue16]() {if (getC()) { call(getImmediateValue16()); }return 12; };
 
+<<<<<<< HEAD
 	//ret
 	opMap[0xC7] = [this]() {call(0x00); return 32; };
 	opMap[0xCF] = [this]() {call(0x08); return 32; };
@@ -475,6 +476,18 @@ void CPU::initMap() {
 	opMap[0xF7] = [this]() {call(0x30); return 32; };
 	opMap[0xFF] = [this]() {call(0x38); return 32; };
 	//ret
+=======
+	//ret
+	opMap[0xC7] = [this]() {call(0x00); return 32; };
+	opMap[0xCF] = [this]() {call(0x08); return 32; };
+	opMap[0xD7] = [this]() {call(0x10); return 32; };
+	opMap[0xDF] = [this]() {call(0x18); return 32; };
+	opMap[0xE7] = [this]() {call(0x20); return 32; };
+	opMap[0xEF] = [this]() {call(0x28); return 32; };
+	opMap[0xF7] = [this]() {call(0x30); return 32; };
+	opMap[0xFF] = [this]() {call(0x38); return 32; };
+	//ret
+>>>>>>> 0de90b7d2414faa65086b9fdcfa849b1f77c1f4e
 	opMap[0xC9] = [this, &ld16]() { ld16(registers.pc, pop16()); return 8; };
 	//ret cc
 	opMap[0xC0] = [this, &ld16]() {if (!getZ()) { ld16(registers.pc, pop16()); } return 8; };
