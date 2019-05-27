@@ -2,8 +2,8 @@
 // Created by dell on 2019/5/7.
 //
 
-#ifndef CPPGB_ADDRESSSPACE_H
-#define CPPGB_ADDRESSSPACE_H
+#ifndef GAMEGIRL_ADDRESSSPACE_H
+#define GAMEGIRL_ADDRESSSPACE_H
 
 #include"common.h"
 class AddressSpace {
@@ -14,4 +14,4 @@ public:
 };
 
 
-#endif //CPPGB_ADDRESSSPACE_H
+#endif //GAMEGIRL_ADDRESSSPACE_H

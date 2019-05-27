@@ -2,8 +2,8 @@
 // Created by dell on 2019/5/8.
 //
 
-#ifndef CPPGB_WRAM_H
-#define CPPGB_WRAM_H
+#ifndef GAMEGIRL_WRAM_H
+#define GAMEGIRL_WRAM_H
 
 #include "common.h"
 #include "AddressSpace.h"
@@ -12,6 +12,7 @@
 template <Word offset, Word length>
 class WRam: public AddressSpace {
     std::array<Byte, length> bytes;
+public:
     bool accepts(Word address) override{
         return address >= offset && address < offset + length;
     }
@@ -24,4 +25,4 @@ class WRam: public AddressSpace {
 };
 
 
-#endif //CPPGB_WRAM_H
+#endif //GAMEGIRL_WRAM_H

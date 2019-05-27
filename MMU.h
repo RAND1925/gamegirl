@@ -2,8 +2,8 @@
 // Created by dell on 2019/4/17.
 //
 
-#ifndef CPPGB_MMU_H
-#define CPPGB_MMU_H
+#ifndef GAMEGIRL_MMU_H
+#define GAMEGIRL_MMU_H
 
 #include "common.h"
 #include "AddressSpace.h"
@@ -29,4 +29,4 @@ public:
 };
 
 
-#endif //CPPGB_MMU_H
+#endif //GAMEGIRL_MMU_H
