@@ -2,22 +2,20 @@
 #include <iostream>
 #include "sdl.h"
 
-bool windows::isLcdEnabled()
+bool windows::getBit(int pos, Byte &byte)
 {
-    
+    return (byte >> pos) & 1;
 }
-
-
-
-
 void windows::addTime(int clock)
 {
     setInterruptFlag();
-    // warn !!! todo check isLCDenabled if() acoordig to the oxff41
-    isLcdEnabled();
+    // check isLCDenabled if() acoordig to the oxff40
+    Byte status_LCD=GRam::getByte(LCDC_ADDRESS);
+    if (!getBit(7,status_LCD))
+        return;
     //increase the gpu clock
     InerClock += clock;
-   
+
     /*
         OAM -> VRAM -> HBlank -> VBlank
         Period	                GPU mode number	    Time spent (clocks)
@@ -29,7 +27,7 @@ void windows::addTime(int clock)
         Vertical blank	            1	                4560 (10 lines)
         Full frame (scans and vblank)		            70224
     */
-    
+
     switch (CurrentMode)
     {
     case MODE_OAM:
@@ -58,11 +56,11 @@ void windows::addTime(int clock)
             draw(line_y);
 
             ly++;
-            GRam::setByte(LY_ADDRESS,ly);
-            if(line_y>=144)//call for the interrrput 
+            GRam::setByte(LY_ADDRESS, ly);
+            if (line_y >= 144) //call for the interrrput
             {
                 setMode(MODE_VBLANK);
-                
+
                 fresh();
             }
             else
@@ -70,26 +68,42 @@ void windows::addTime(int clock)
                 //less than 144 ,comtinue to get the line
                 setMode(MODE_OAM);
             }
-            
         }
         break;
     case MODE_VBLANK:
         //todo about the Vblank interrrupt
-        Byte line_y= (InerClock/456)+144;
-        if(InerClock>=456*10)
+        Byte line_y = (InerClock / 456) + 144;
+        if (InerClock >= 456 * 10)
         {
             //back to the oam,reset the stat
             setMode(MODE_OAM);
-            InerClock-=456*10;
-            GRam::setByte(LY_ADDRESS,0);
+            InerClock -= 456 * 10;
+            GRam::setByte(LY_ADDRESS, 0);
         }
         else
-            GRam::setByte(LY_ADDRESS,line_y);
+            GRam::setByte(LY_ADDRESS, line_y);
         break;
     default:
         break;
     }
     setLCYStatus();
+}
+
+void windows::setMode(int mode)
+{
+    if (CurrentMode == mode)
+        return;
+    CurrentMode = mode;
+    Byte status_LCDC = GRam::ReadByte(STAT_ADDRESS);
+
+    //rese the 0bit and 1bit of the status
+    //and 1111|1100
+    status_LCDC &= 0xFC;
+    //set the current mode
+    status_LCDC |= CurrentMode;
+
+    //todo call for interrupt
+    Byte interrupt_flag =GRam::getByte(IF_ADDRESS);
 }
 
 void windows::initWindow(int WINDOW_WIDTH, int WINDOW_HEIGHT, int pos_x, int pos_y, std::string title_window)
@@ -114,10 +128,9 @@ void windows::initWindow(int WINDOW_WIDTH, int WINDOW_HEIGHT, int pos_x, int pos
     SDL_FillRect(surface, NULL, pixel_format);
 }
 
-
 bool windows::getJoypad()
 {
-    
+
     bool isQuit = false;
     while (SDL_PollEvent(&e))
     {
@@ -135,7 +148,7 @@ bool windows::getJoypad()
                 GRam::joypad_C1 &= 0xE;
                 break;
             case SDLK_LEFT:
-               GRam::jopad_C1 &= 0xD;
+                GRam::jopad_C1 &= 0xD;
                 break;
             case SDLK_UP:
                 GRam::joypad_C1 &= 0xB;

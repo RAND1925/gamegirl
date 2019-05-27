@@ -2,8 +2,10 @@
 #include <SDL2/SDL.h>
 #include <string>
 #include "const.h"
-#include"../ZRam.h"
+#include "../ZRam.h"
 #include "../common.h"
+
+
 
 class windows
 {
@@ -18,11 +20,11 @@ public:
     void addTime(int clock);
     //choose the mode and the status matched with the mode
     void setMode(int mode);
-    //fersh the windows 
+    //fersh the windows
     void fresh(){SDL_UpdateWindowSurface(win)};
     //to compare the 0xff44 0xff45 to judge if it's a interrupt
     void setLCYStatus();
-
+    bool getBit(int pos, Byte &byte);
 
     /*
     Bit 7 - Not used        Bit 6 - Not used
