@@ -1,10 +1,8 @@
+#pragma once
 #include <SDL2/SDL.h>
 #include <string>
-
+#include "const.h"
 #include "../common.h"
-
-const LCDC
-
 
 class windows
 {
@@ -14,16 +12,23 @@ public:
     //destory the surface
     void end();
     //set the certain pixel's color
-    void setPixelColor(int pos_x,int pos_y,int color);
+    void setPixelColor(int pos_x, int pos_y, int color);
     //add gpu clock
     void addTime(int clock);
-
-    //todo: Joypad and communiate about the ram to store the input 
+    void setMode(int mode);
+    //fersh the windows 
+    void fresh(){SDL_UpdateWindowSurface(win)};
+    //todo: Joypad and communiate about the ram to store the input
     bool getJoypad();
-    //todo
+
+    int CurrentLine = 0;
+    int CurrentMode = 0;
+    int counter = 0;
+
 private:
     SDL_Window *win;
     SDL_Surface *surface;
     int window_width;
     int window_height;
+    int InerClock = 0;
 };
