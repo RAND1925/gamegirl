@@ -1,6 +1,7 @@
 #include <string>
 #include <iostream>
-#include "../common.h"
+
+
 #include "sdl.h"
 void windows::addTime(int clock)
 {
@@ -8,18 +9,19 @@ void windows::addTime(int clock)
     // warn !!! todo check isLCDenabled if() acoordig to the oxff41
     //increase the gpu clock
     InerClock += clock;
+   
     /*
-OAM -> VRAM -> HBlank -> VBlank
-Period	                GPU mode number	    Time spent (clocks)
-Scanline (accessing OAM)	2	                 80
-Scanline (accessing VRAM)	3	                172
-Horizontal blank	        0	                204
+        OAM -> VRAM -> HBlank -> VBlank
+        Period	                GPU mode number	    Time spent (clocks)
+        Scanline (accessing OAM)	2	                 80
+        Scanline (accessing VRAM)	3	                172
+        Horizontal blank	        0	                204
 
-One line (scan and blank)		                456
-Vertical blank	            1	                4560 (10 lines)
-Full frame (scans and vblank)		            70224
-*/
-
+        One line (scan and blank)		                456
+        Vertical blank	            1	                4560 (10 lines)
+        Full frame (scans and vblank)		            70224
+    */
+    
     switch (CurrentMode)
     {
     case MODE_OAM:
@@ -44,11 +46,11 @@ Full frame (scans and vblank)		            70224
         {
             InerClock -= 205; //back to 0;
             //get the current line to draw
-            Byte line_y = readbyte(LY_ADDRESS);
+            Byte line_y = GRam::getByte(LY_ADDRESS);
             draw(line_y);
 
             ly++;
-            write(LY_ADDRESS,ly);
+            GRam::setByte(LY_ADDRESS,ly);
             if(line_y>=144)//call for the interrrput 
             {
                 setMode(MODE_VBLANK);
@@ -71,10 +73,10 @@ Full frame (scans and vblank)		            70224
             //back to the oam,reset the stat
             setMode(MODE_OAM);
             InerClock-=456*10;
-            writebyte(LY_ADDRESS,0);
+            GRam::setByte(LY_ADDRESS,0);
         }
         else
-            writebyte(LY_ADDRESS,line_y);
+            GRam::setByte(LY_ADDRESS,line_y);
         break;
     default:
         break;
@@ -104,22 +106,7 @@ void windows::initWindow(int WINDOW_WIDTH, int WINDOW_HEIGHT, int pos_x, int pos
     SDL_FillRect(surface, NULL, pixel_format);
 }
 
-/*joypad:
- this function CANNOT call ReadMemory(0xFF00) it must access it directly from m_Rom[0xFF00]
- because ReadMemory traps this address
-*/
-/*
-todo on the mem and mmu about the joypad：
-    define the specific "READ" and "WRITE"
-    READ: 
-          if column is 0001 | xxxx return back joypad_c1
-          if column is 0010 | xxxx return back joypad_c0
-    WRITE:
-           get the column from the Byte joypad_c1/c0
-*/
-//temparory address of the joypad
-Byte joypad_C0 = 0x0f;
-Byte joypad_C1 = 0x0f;
+
 bool windows::getJoypad()
 {
     /*
@@ -150,30 +137,30 @@ bool windows::getJoypad()
                 isQuit = true;
                 break;
             case SDLK_RIGHT:
-                joypad_C1 &= 0xE;
+                GRam::joypad_C1 &= 0xE;
                 break;
             case SDLK_LEFT:
-                joypad_C1 &= 0xD;
+               GRam::jopad_C1 &= 0xD;
                 break;
             case SDLK_UP:
-                joypad_C1 &= 0xB;
+                GRam::joypad_C1 &= 0xB;
                 break;
             case SDLK_DOWN:
-                joypad_C1 &= 0x7;
+                GRam::joypad_C1 &= 0x7;
                 break;
 
             //for column 0
             case SDLK_z:
-                joypad_C0 &= 0xE;
+                GRam::joypad_C0 &= 0xE;
                 break;
             case SDLK_x:
-                joypad_C0 &= 0xD;
+                GRam::joypad_C0 &= 0xD;
                 break;
             case SDLK_SPACE:
-                joypad_C0 &= 0xB;
+                GRam::joypad_C0 &= 0xB;
                 break;
             case SDLK_RETURN;
-                joypad_C0 &=0x7;
+                GRam::joypad_C0 &=0x7;
                 break;
             }
         }
@@ -183,30 +170,30 @@ bool windows::getJoypad()
             {
             //for column 1
             case SDLK_RIGHT:
-                joypad_C1 |= 0x1;
+                GRam::joypad_C1 |= 0x1;
                 break;
             case SDLK_LEFT:
-                joypad_C1 |= 0x2;
+                GRam::joypad_C1 |= 0x2;
                 break;
             case SDLK_UP:
-                joypad_C1 |= 0x4;
+                GRam::joypad_C1 |= 0x4;
                 break;
             case SDLK_DOWN:
-                joypad_C1 |= 0x8;
+                GRam::joypad_C1 |= 0x8;
                 break;
 
             //for column 0
             case SDLK_z:
-                joypad_C0 |= 0x1;
+                GRam::joypad_C0 |= 0x1;
                 break;
             case SDLK_x:
-                joypad_C0 |= 0x2;
+                GRam::joypad_C0 |= 0x2;
                 break;
             case SDLK_SPACE:
-                joypad_C0 |= 0x4;
+                GRam::joypad_C0 |= 0x4;
                 break;
             case SDLK_RETURN;
-                joypad_C0 |= 0x8;
+                GRam::joypad_C0 |= 0x8;
                 break;
             }
         }

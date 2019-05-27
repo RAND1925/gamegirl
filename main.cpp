@@ -33,7 +33,7 @@ int main()
     ZRam<0xFF80, 0xFFFF - 0xFF80> zRam;
     mmu.addAddressSpace(&zRam);
 
-    GRam<0xFF00,0xFF00-0xFF7F> gRam;
+    GRam<0xFF00,0xFF7F-0xFF00> gRam;
     mmu.addAddressSpace(&gRam);
 
 
