@@ -33,7 +33,8 @@ int main() {
 
     CPU cpu(mmu);
     while(true) {
-        timer.increase(cpu.cycle());
+        Byte timing=cpu.cycle();
+        timer.increase(timing);
     }
 
 }
