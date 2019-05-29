@@ -1,6 +1,6 @@
 #include <string>
 #include <iostream>
-#include "sdl.h"
+#include "gpu.h"
 
 bool windows::getBit(int pos, Byte &byte)
 {
@@ -10,11 +10,11 @@ void windows::addTime(int clock)
 {
     setInterruptFlag();
     // check isLCDenabled if() acoordig to the oxff40
-    Byte status_LCD=GRam::getByte(LCDC_ADDRESS);
-    if (!getBit(7,status_LCD))
+    Byte statusLCD=GRam::getByte(LCDC_ADDRESS);
+    if (!getBit(7,statusLCD))
         return;
     //increase the gpu clock
-    InerClock += clock;
+    inerClock += clock;
 
     /*
         OAM -> VRAM -> HBlank -> VBlank
@@ -28,29 +28,28 @@ void windows::addTime(int clock)
         Full frame (scans and vblank)		            70224
     */
 
-    switch (CurrentMode)
+    switch (currentMode)
     {
     case MODE_OAM:
-
-        if (InerClock >= 79)
+        if (inerClock >= 79)
         {
-            InerClock -= 79;
+            inerClock -= 79;
             setMode(MODE_VRAM);
         }
 
         break;
     case MODE_VRAM:
 
-        if (InerClock >= 172)
+        if (inerClock >= 172)
         {
-            InerClock -= 172;
+            inerClock -= 172;
             setMode(MODE_HBLANK);
         }
         break;
     case MODE_HBLANK:
-        if (InerClock >= 205)
+        if (inerClock >= 205)
         {
-            InerClock -= 205; //back to 0;
+            inerClock -= 205; //back to 0;
             //get the current line to draw
             Byte line_y = GRam::getByte(LY_ADDRESS);
             draw(line_y);
@@ -72,12 +71,12 @@ void windows::addTime(int clock)
         break;
     case MODE_VBLANK:
         //todo about the Vblank interrrupt
-        Byte line_y = (InerClock / 456) + 144;
-        if (InerClock >= 456 * 10)
+        Byte line_y = (inerClock / 456) + 144;
+        if (inerClock >= 456 * 10)
         {
             //back to the oam,reset the stat
             setMode(MODE_OAM);
-            InerClock -= 456 * 10;
+            inerClock -= 456 * 10;
             GRam::setByte(LY_ADDRESS, 0);
         }
         else
@@ -91,31 +90,31 @@ void windows::addTime(int clock)
 
 void windows::setMode(int mode)
 {
-    if (CurrentMode == mode)
+    if (currentMode == mode)
         return;
-    CurrentMode = mode;
-    Byte status_LCDC = GRam::ReadByte(STAT_ADDRESS);
+    currentMode = mode;
+    Byte statusLCDC = GRam::ReadByte(STAT_ADDRESS);
 
     //rese the 0bit and 1bit of the status
     //and 1111|1100
-    status_LCDC &= 0xFC;
+    statusLCDC &= 0xFC;
     //set the current mode
-    status_LCDC |= CurrentMode;
+    statusLCDC |= currentMode;
 
     //todo call for interrupt
-    Byte interrupt_flag =GRam::getByte(IF_ADDRESS);
+    Byte interruptflag =GRam::getByte(IF_ADDRESS);
 }
 
-void windows::initWindow(int WINDOW_WIDTH, int WINDOW_HEIGHT, int pos_x, int pos_y, std::string title_window)
+void windows::initWindow(int height, int width , int pos_x, int pos_y, std::string title_window)
 {
     //init the sdl system
     SDL_Init(SDL_INIT_VIDEO);
     //init the window  to use
-    win = SDL_CreateWindow(title_window.c_str(), pos_x, pos_y, WINDOW_WIDTH, WINDOW_WIDTH, SDL_WINDOW_SHOWN);
+    win = SDL_CreateWindow(title_window.c_str(), pos_x, pos_y, width, height, SDL_WINDOW_SHOWN);
     //init the var of width and height
-    window_width = WINDOW_WIDTH;
-    ;
-    window_height = WINDOW_HEIGHT;
+    windowWidth = width;
+    
+    windowheight = height;
 
     //about the clock to fresh
 
@@ -145,7 +144,7 @@ bool windows::getJoypad()
                 isQuit = true;
                 break;
             case SDLK_RIGHT:
-                GRam::joypad_C1 &= 0xE;
+                mmu::joypad_C1 &= 0xE;
                 break;
             case SDLK_LEFT:
                 GRam::jopad_C1 &= 0xD;
@@ -205,15 +204,13 @@ bool windows::getJoypad()
                 break;
             }
         }
+        // for the interrupt
     }
     if(isQuit)
         return false;
     return true;
     //the return value is used to determine if it's end;
 }
-
-
-
 
 void windows::setPixelColor(int pos_x, int pos_y, int color)
 {
@@ -222,8 +219,8 @@ void windows::setPixelColor(int pos_x, int pos_y, int color)
     //note: nut for 1 level array
     Uint32 *pixels = (Uint32 *)surface->pixels;
     //note: why same color data
-    auto pixel_format = surface->format;
-    pixels[pos_y * 160 + pos_x] = SDL_MapRGB(pixel_format, color, color, color);
+    auto pixelFormat = surface->format;
+    pixels[pos_y * 160 + pos_x] = SDL_MapRGB(pixelFormat, color, color, color);
 }
 void windows::end()
 {

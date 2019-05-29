@@ -2,8 +2,46 @@
 #include <SDL2/SDL.h>
 #include <string>
 #include "const.h"
-#include "../ZRam.h"
+#include "../GRam.h"
 #include "../common.h"
+
+template <Word offset, Word length>
+class GPU: public AddressSpace
+{
+    std::array<Byte, length> bytes;
+
+    bool accepts(Word address) override
+    {
+        //ff44
+        return (address >= offset && address < offset + length)||(address==0xFF44);
+    }
+    Byte getByte(Word address) override
+    {
+        if (address == 0xFF00)
+        {
+            if (KeyColumn == 0x10)
+                return joypad_C0;
+            else if (KeyColumn == 0x20)
+                return joypad_C1;
+        }
+        else
+            return bytes[address - offset];
+    }
+    void setByte(Word address, Byte value) override
+    {
+        if (address == 0xFF00)
+            KeyColumn = value &= 0x30; //get the high 4 bit of the value
+        else
+            bytes[address - offset] = value;
+    }
+    //two byte to store joypad information
+    Byte joypad_C0 = 0x0F;
+    Byte joypad_C1 = 0x0F;
+    
+    //judge if it's direction or select
+    Byte KeyColumn = 0x00;
+   
+};
 
 
 
@@ -12,22 +50,27 @@ class windows
 public:
     //create the window and init the private var
     void initWindow(int WINDOW_WIDTH, int WINDOW_HEIGHT, int pos_x, int pos_Y, std::string title_window);
+
     //destory the surface
     void end();
+
     //set the certain pixel's color
     void setPixelColor(int pos_x, int pos_y, int color);
+    
     //it's the main cycle of the gpu
     void addTime(int clock);
+
     //choose the mode and the status matched with the mode
     void setMode(int mode);
+
     //fersh the windows
     void fresh(){SDL_UpdateWindowSurface(win)};
+
     //to compare the 0xff44 0xff45 to judge if it's a interrupt
     void setLCYStatus();
-    bool getBit(int pos, Byte &byte);
 
-    /*
-    Bit 7 - Not used        Bit 6 - Not used
+
+    /*    Bit 7 - Not used        Bit 6 - Not used
     Bit 5 - P15 Select Button Keys (0=Select)
     Bit 4 - P14 Select Direction Keys (0=Select) 
     Bit 3 - P13 Input Down  or Start(0=Pressed) (Read Only)
@@ -42,14 +85,14 @@ public:
     */
     bool getJoypad();
 
-    int CurrentLine = 0;
-    int CurrentMode = 0;
+    int currentLine = 0;
+    int currentMode = 0;
     int counter = 0;
 
 private:
     SDL_Window *win;
     SDL_Surface *surface;
-    int window_width;
-    int window_height;
-    int InerClock = 0;
+    int windowWidth;
+    int windowHeight;
+    int inerClock = 0;
 };

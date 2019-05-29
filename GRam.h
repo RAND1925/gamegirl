@@ -5,6 +5,10 @@
 #include "AddressSpace.h"
 #include <array>
 
+
+//set some registers in the class 
+
+
 template <Word offset, Word length>
 class GRam : public AddressSpace
 {
@@ -12,7 +16,8 @@ class GRam : public AddressSpace
 
     bool accepts(Word address) override
     {
-        return address >= offset && address < offset + length;
+        //ff44
+        return (address >= offset && address < offset + length)||(address==0xFF44);
     }
     Byte getByte(Word address) override
     {

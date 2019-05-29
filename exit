@@ -37,7 +37,7 @@ Date:   Mon May 27 22:57:30 2019 +0800
      // warn !!! todo check isLCDenabled if() acoordig to the oxff41[m
 [32m+[m[32m    isLcdEnabled();[m
      //increase the gpu clock[m
-     InerClock += clock;[m
+     inerClock += clock;[m
     [m
 [36m@@ -109,20 +117,7 @@[m [mvoid windows::initWindow(int WINDOW_WIDTH, int WINDOW_HEIGHT, int pos_x, int pos[m
  [m
@@ -96,4 +96,4 @@ Date:   Mon May 27 22:57:30 2019 +0800
 [32m+[m[32m    */[m
      bool getJoypad();[m
  [m
-     int CurrentLine = 0;[m
+     int currentLine = 0;[m
