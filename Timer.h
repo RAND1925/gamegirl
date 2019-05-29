@@ -32,8 +32,7 @@ public:
         return address>=0xFF04 && address<=0xFF07;
     }
     Byte getByte(Word address) override {
-        switch (address)
-        {
+        switch (address){
             case 0xFF04: return regDiv;
             case 0xFF05: return regTima;
             case 0xFF06: return regTma;
@@ -41,8 +40,7 @@ public:
         }
     }
     void setByte(Word address, Byte value) override {
-        switch (address)
-        {
+        switch (address) {
             case 0xFF04: regDiv=0;break;
             case 0xFF05: regTima=value;break;
             case 0xFF06: regTma=value;break;

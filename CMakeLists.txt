@@ -4,4 +4,4 @@ project(gamegirl)
 set(CMAKE_CXX_STANDARD 17)
 
 aux_source_directory(. sourece_files)
-add_executable(gamegirl ${sourece_files} Timer.cpp Timer.h)
+add_executable(gamegirl ${sourece_files})
