@@ -18,7 +18,4 @@ const Word WX_ADDRESS = 0xFF0B;
 
 const Word IF_ADDRESS = 0xFF0F;
 
-const int MODE_VRAM = 3;
-const int MODE_OAM = 2;
-const int MODE_HBLANK = 0;
-const int MODE_VBLANK = 1;
+

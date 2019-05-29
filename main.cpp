@@ -9,11 +9,11 @@
 #include "Rom.h"
 #include "WRam.h"
 #include "ZRam.h"
-#include "GRam.h"
+#include"gui/gpu.h"
 const Word ROM_VOL = 16_kb;
 #define FILE_PATH "D:\\Tetris.gb"
 
-int main()
+int WinMain(int argc, char *argv[])
 {
 
     std::ifstream gameFile;
@@ -33,10 +33,11 @@ int main()
     ZRam<0xFF80, 0xFFFF - 0xFF80> zRam;
     mmu.addAddressSpace(&zRam);
 
-    GRam<0xFF00,0xFF7F-0xFF00> gRam;
-    mmu.addAddressSpace(&gRam);
+    GPU<0x8000,0x9FFF-0x8000> gpu;
+    mmu.addAddressSpace(&gpu);
 
 
     CPU cpu(mmu);
     cpu.cycle();
+    return 0;
 }

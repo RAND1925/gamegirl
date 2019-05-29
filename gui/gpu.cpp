@@ -2,11 +2,11 @@
 #include <iostream>
 #include "gpu.h"
 
-bool windows::getBit(int pos, Byte &byte)
+bool GPU::getBit(int pos, Byte &byte)
 {
     return (byte >> pos) & 1;
 }
-void windows::addTime(int clock)
+void GPU::addTime(int clock)
 {
     setInterruptFlag();
     // check isLCDenabled if() acoordig to the oxff40
@@ -88,7 +88,7 @@ void windows::addTime(int clock)
     setLCYStatus();
 }
 
-void windows::setMode(int mode)
+void GPU::setMode(int mode)
 {
     if (currentMode == mode)
         return;
@@ -105,7 +105,7 @@ void windows::setMode(int mode)
     Byte interruptflag =GRam::getByte(IF_ADDRESS);
 }
 
-void windows::initWindow(int height, int width , int pos_x, int pos_y, std::string title_window)
+void GPU::initWindow(int height, int width , int pos_x, int pos_y, std::string title_window)
 {
     //init the sdl system
     SDL_Init(SDL_INIT_VIDEO);
@@ -127,7 +127,7 @@ void windows::initWindow(int height, int width , int pos_x, int pos_y, std::stri
     SDL_FillRect(surface, NULL, pixel_format);
 }
 
-bool windows::getJoypad()
+bool GPU::getJoypad()
 {
 
     bool isQuit = false;
@@ -135,7 +135,7 @@ bool windows::getJoypad()
     {
         if (e.type == SDL_Quit)
             isQuit == true;
-        if (e.type == SDL_KEYDOWN)
+        if (e.type == SDL_keyDOWN)
         {
             switch (e.key.keysym.sym)
             {
@@ -171,7 +171,7 @@ bool windows::getJoypad()
                 break;
             }
         }
-        else if (e.type == SDL_KEYUP)
+        else if (e.type == SDL_keyUP)
         {
             switch (e.key.keysym.sym)
             {
@@ -212,7 +212,7 @@ bool windows::getJoypad()
     //the return value is used to determine if it's end;
 }
 
-void windows::setPixelColor(int pos_x, int pos_y, int color)
+void GPU::setPixelColor(int pos_x, int pos_y, int color)
 {
     SDL_UnlockSurface(surface);
     //the pixel matrix
@@ -222,7 +222,7 @@ void windows::setPixelColor(int pos_x, int pos_y, int color)
     auto pixelFormat = surface->format;
     pixels[pos_y * 160 + pos_x] = SDL_MapRGB(pixelFormat, color, color, color);
 }
-void windows::end()
+void GPU::end()
 {
     SDL_FreeSurface(surface);
     SDL_Quit();

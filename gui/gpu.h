@@ -1,28 +1,31 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <string>
+#include <vector>
 #include "const.h"
-#include "../GRam.h"
 #include "../common.h"
+#include "../MMU.h"
+#include "../AddressSpace.h"
 
 template <Word offset, Word length>
-class GPU: public AddressSpace
+class GPU : public AddressSpace
 {
+public:
     std::array<Byte, length> bytes;
-
+    //std::vector<Byte> registerGPU;
     bool accepts(Word address) override
     {
         //ff44
-        return (address >= offset && address < offset + length)||(address==0xFF44);
+        return (address >= offset && address < offset + length) || (address == 0xFF44);
     }
     Byte getByte(Word address) override
     {
         if (address == 0xFF00)
         {
-            if (KeyColumn == 0x10)
-                return joypad_C0;
-            else if (KeyColumn == 0x20)
-                return joypad_C1;
+            if (keyColumn == 0x10)
+                return joypadC0;
+            else if (keyColumn == 0x20)
+                return joypadC1;
         }
         else
             return bytes[address - offset];
@@ -30,33 +33,22 @@ class GPU: public AddressSpace
     void setByte(Word address, Byte value) override
     {
         if (address == 0xFF00)
-            KeyColumn = value &= 0x30; //get the high 4 bit of the value
+            keyColumn = value &= 0x30; //get the high 4 bit of the value
         else
             bytes[address - offset] = value;
     }
-    //two byte to store joypad information
-    Byte joypad_C0 = 0x0F;
-    Byte joypad_C1 = 0x0F;
-    
-    //judge if it's direction or select
-    Byte KeyColumn = 0x00;
-   
-};
 
-
-
-class windows
-{
-public:
     //create the window and init the private var
-    void initWindow(int WINDOW_WIDTH, int WINDOW_HEIGHT, int pos_x, int pos_Y, std::string title_window);
+    void initWindow(int height, int width,
+                    int pos_x, int pos_Y,
+                    std::string title_window);
 
     //destory the surface
     void end();
 
     //set the certain pixel's color
     void setPixelColor(int pos_x, int pos_y, int color);
-    
+
     //it's the main cycle of the gpu
     void addTime(int clock);
 
@@ -64,15 +56,14 @@ public:
     void setMode(int mode);
 
     //fersh the windows
-    void fresh(){SDL_UpdateWindowSurface(win)};
+    void fresh() { SDL_UpdateWindowSurface(win); };
 
     //to compare the 0xff44 0xff45 to judge if it's a interrupt
     void setLCYStatus();
 
-
-    /*    Bit 7 - Not used        Bit 6 - Not used
-    Bit 5 - P15 Select Button Keys (0=Select)
-    Bit 4 - P14 Select Direction Keys (0=Select) 
+    /*Bit 7 - Not used        Bit 6 - Not used
+    Bit 5 - P15 Select Button keys (0=Select)
+    Bit 4 - P14 Select Direction keys (0=Select) 
     Bit 3 - P13 Input Down  or Start(0=Pressed) (Read Only)
     Bit 2 - P12 Input Up    or Select (0=Pressed) (Read Only) 
     Bit 1 - P11 Input Left  or Button B (0=Pressed) (Read Only) 
@@ -88,6 +79,12 @@ public:
     int currentLine = 0;
     int currentMode = 0;
     int counter = 0;
+    //two byte to store joypad information
+    Byte joypadC0 = 0x0F;
+    Byte joypadC1 = 0x0F;
+
+    //judge if it's direction or select
+    Byte keyColumn = 0x00;
 
 private:
     SDL_Window *win;
@@ -95,4 +92,8 @@ private:
     int windowWidth;
     int windowHeight;
     int inerClock = 0;
+    const int MODE_VRAM = 3;
+    const int MODE_OAM = 2;
+    const int MODE_HBLANK = 0;
+    const int MODE_VBLANK = 1;
 };
