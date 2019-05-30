@@ -2,8 +2,8 @@
 // Created by dell on 2019/5/8.
 //
 
-#ifndef CPPGB_ROM_H
-#define CPPGB_ROM_H
+#ifndef GAMEGIRL_ROM_H
+#define GAMEGIRL_ROM_H
 
 #include "AddressSpace.h"
 #include "errors.h"
@@ -54,4 +54,4 @@ public:
         bytes.assign(c, c + romLength);
     };
 };
-#endif //CPPGB_ROM_H
+#endif //GAMEGIRL_ROM_H

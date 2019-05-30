@@ -38,4 +38,4 @@ public:
 };
 
 
-#endif //CPPGB_ADDRESSSPACE_H
+#endif //GAMEGIRL_ADDRESSSPACE_H

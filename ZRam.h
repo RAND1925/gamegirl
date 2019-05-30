@@ -2,8 +2,8 @@
 // Created by dell on 2019/5/8.
 //
 
-#ifndef CPPGB_ZRAM_H
-#define CPPGB_ZRAM_H
+#ifndef GAMEGIRL_ZRAM_H
+#define GAMEGIRL_ZRAM_H
 
 #include "common.h"
 #include "AddressSpace.h"
@@ -12,6 +12,7 @@
 template <Word offset, Word length>
 class ZRam: public AddressSpace {
     std::array<Byte, length> bytes;
+public:
     bool accepts(Word address) override{
         return address >= offset && address < offset + length;
     }
@@ -26,4 +27,4 @@ class ZRam: public AddressSpace {
         return bytes[address];
     }
 };
-#endif //CPPGB_ZRAM_H
+#endif //GAMEGIRL_ZRAM_H

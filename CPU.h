@@ -2,8 +2,8 @@
 // Created by dell on 2019/4/16.
 //
 
-#ifndef CPPGB_CPU_H
-#define CPPGB_CPU_H
+#ifndef GAMEGIRL_CPU_H
+#define GAMEGIRL_CPU_H
 
 #include <functional>
 #include <iostream>
@@ -357,13 +357,11 @@ private:
         initRegisters();
         initMap();
     };
-    void cycle(){
-    	while(true){
+    Byte cycle(){
     		readStates();
-			int timing = step();
+			Byte timing = step();
 			writeStates();//display
-
-		}
+			return timing;
       }
 
     void initRegisters(){
@@ -391,4 +389,4 @@ private:
 };
 
 
-#endif //CPPGB_CPU_H
+#endif //GAMEGIRL_CPU_H

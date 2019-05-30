@@ -2,8 +2,8 @@
 // Created by dell on 2019/4/17.
 //
 
-#ifndef CPPGB_COMMON_H
-#define CPPGB_COMMON_H
+#ifndef GAMEGIRL_COMMON_H
+#define GAMEGIRL_COMMON_H
 #include <cstdint>
 
     using Byte = uint8_t;
@@ -31,4 +31,4 @@
             IF = 0xFFFF
         };
 
-#endif //CPPGBUI_COMMON_H
+#endif //GAMEGIRL_COMMON_H

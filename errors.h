@@ -2,8 +2,8 @@
 // Created by dell on 2019/5/8.
 //
 
-#ifndef CPPGB_ERRORS_H
-#define CPPGB_ERRORS_H
+#ifndef GAMEGIRL_ERRORS_H
+#define GAMEGIRL_ERRORS_H
 
 #include <exception>
 #include <iostream>
@@ -18,4 +18,4 @@ void error(const std::string & s){
 };
 
 
-#endif //CPPGB_ERRORS_H
+#endif //GAMEGIRL_ERRORS_H
