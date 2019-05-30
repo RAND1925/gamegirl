@@ -7,15 +7,17 @@
 #include "../MMU.h"
 #include "../AddressSpace.h"
 
-
 //todo :
 // change the var name
 // complete the merge  from gpu
-template <Word offset, Word length>
+//template <Word offset, Word length>
 class GPU : public AddressSpace
 {
-public:
     std::array<Byte, length> bytes;
+
+public:
+    /***********************************************/
+    //this is the certain format of the addressSpace
     //std::vector<Byte> registerGPU;
     bool accepts(Word address) override
     {
@@ -41,52 +43,55 @@ public:
         else
             bytes[address - offset] = value;
     }
+    /***********************************************/
+    //these is the func used in software windows
 
     //create the window and init the private var
     void initWindow(int height, int width,
                     int pos_x, int pos_Y,
                     std::string title_window);
-
+    //set the certain pixel's color
+    void setPixelColor(int pos_x, int pos_y, int color);
+    //fersh the windows
+    void fresh() { SDL_UpdateWindowSurface(win); }
     //destory the surface
     void end();
 
-    //set the certain pixel's color
-    void setPixelColor(int pos_x, int pos_y, int color);
-
+    /***********************************************/
+    
     //it's the main cycle of the gpu
     void addTime(int clock);
-
     //choose the mode and the status matched with the mode
     void setMode(int mode);
-
-    //fersh the windows
-    void fresh() { SDL_UpdateWindowSurface(win); };
-
     //to compare the 0xff44 0xff45 to judge if it's a interrupt
     void setLCYStatus();
 
-    /*Bit 7 - Not used        Bit 6 - Not used
-    Bit 5 - P15 Select Button keys (0=Select)
-    Bit 4 - P14 Select Direction keys (0=Select) 
-    Bit 3 - P13 Input Down  or Start(0=Pressed) (Read Only)
-    Bit 2 - P12 Input Up    or Select (0=Pressed) (Read Only) 
-    Bit 1 - P11 Input Left  or Button B (0=Pressed) (Read Only) 
-    Bit 0 - P10 Input Right or Button A (0=Pressed) (Read Only)
-    
-    8bit: 0000 | 0000 
-
-    column 1 direction ->0001 | xxxx
-    column 0 select    ->0010 | xxxx
-    */
+    //get the input and judge if it's quit or not
     bool getJoypad();
+    //set the joypad interrupt
+    void interruptJoypad();
 
+    /***********************************************/
+    //these are some func used to do the IF and BitOperation
+    //request the IF
+    void setInterruptFlag(int bit, bool _bool);
+    //set certain pos in &byte
+    void SetBit(Byte &byte, int pos, bool value)
+    {
+        byte ^= (-value ^ byte) & (1 << pos);
+    }
+    //get certain pos in &byte
+    bool getBit(int pos, Byte &byte) { return (byte >> pos) & 1; }
+
+    /***********************************************/
+
+    //some var used to scan
     int currentLine = 0;
     int currentMode = 0;
     int counter = 0;
     //two byte to store joypad information
     Byte joypadC0 = 0x0F;
     Byte joypadC1 = 0x0F;
-
     //judge if it's direction or select
     Byte keyColumn = 0x00;
 
@@ -96,6 +101,7 @@ private:
     int windowWidth;
     int windowHeight;
     int inerClock = 0;
+
     const int MODE_VRAM = 3;
     const int MODE_OAM = 2;
     const int MODE_HBLANK = 0;

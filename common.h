@@ -13,7 +13,7 @@
     inline constexpr Word operator "" _kb(const unsigned long long w){
         return w << 10;
     };
-
+    //todo: remove the tempalte to change 
     template <Byte p>
     Byte getBit(const Byte b){
         return (b & (1 << p) ) >> p;

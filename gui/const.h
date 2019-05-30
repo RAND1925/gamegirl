@@ -44,7 +44,3 @@ extern const int FLAG_SUBTRACT;
 extern const int FLAG_HALFCARRY;
 extern const int FLAG_CARRY;
 
-extern const int MODE_VRAM;
-extern const int MODE_OAM;
-extern const int MODE_HBLANK;
-extern const int MODE_VBLANK;

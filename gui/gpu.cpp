@@ -1,17 +1,14 @@
 #include <string>
 #include <iostream>
 #include "gpu.h"
-
-bool GPU::getBit(int pos, Byte &byte)
-{
-    return (byte >> pos) & 1;
-}
 void GPU::addTime(int clock)
 {
-    setInterruptFlag();
+    //reset the flag
+    setInterruptFlag(0, false);
+    setInterruptFlag(1, false);
     // check isLCDenabled if() acoordig to the oxff40
-    Byte statusLCD=GRam::getByte(LCDC_ADDRESS);
-    if (!getBit(7,statusLCD))
+    Byte statusLCD = MMU::readByte(LCDC_ADDRESS);
+    if (!getBit(7, statusLCD))
         return;
     //increase the gpu clock
     inerClock += clock;
@@ -51,11 +48,11 @@ void GPU::addTime(int clock)
         {
             inerClock -= 205; //back to 0;
             //get the current line to draw
-            Byte line_y = GRam::getByte(LY_ADDRESS);
+            Byte line_y = MMU::readByte(LY_ADDRESS);
             draw(line_y);
 
-            ly++;
-            GRam::setByte(LY_ADDRESS, ly);
+            line_y++;
+            MMU::writeByte(LY_ADDRESS, line_y);
             if (line_y >= 144) //call for the interrrput
             {
                 setMode(MODE_VBLANK);
@@ -77,10 +74,10 @@ void GPU::addTime(int clock)
             //back to the oam,reset the stat
             setMode(MODE_OAM);
             inerClock -= 456 * 10;
-            GRam::setByte(LY_ADDRESS, 0);
+            MMU::writeByte(LY_ADDRESS, 0);
         }
         else
-            GRam::setByte(LY_ADDRESS, line_y);
+            MMU::writeByte(LY_ADDRESS, line_y);
         break;
     default:
         break;
@@ -93,7 +90,7 @@ void GPU::setMode(int mode)
     if (currentMode == mode)
         return;
     currentMode = mode;
-    Byte statusLCDC = GRam::ReadByte(STAT_ADDRESS);
+    Byte statusLCDC = MMU::readByte(STAT_ADDRESS);
 
     //rese the 0bit and 1bit of the status
     //and 1111|1100
@@ -102,18 +99,18 @@ void GPU::setMode(int mode)
     statusLCDC |= currentMode;
 
     //todo call for interrupt
-    Byte interruptflag =GRam::getByte(IF_ADDRESS);
+    Byte interruptflag = MMU::readByte(IF_ADDRESS);
 }
 
-void GPU::initWindow(int height, int width , int pos_x, int pos_y, std::string title_window)
+void GPU::initWindow(int height, int width, int pos_x, int pos_y, std::string title_window)
 {
     //init the sdl system
     SDL_Init(SDL_INIT_VIDEO);
     //init the window  to use
-    win = SDL_CreateWindow(title_window.c_str(), pos_x, pos_y, width, height, SDL_WINDOW_SHOWN);
+    win = SDL_CreateWindow(title_window.c_str(), pos_x, pos_y, width, height, SDL_WINDOW_SHOWN);h
     //init the var of width and height
     windowWidth = width;
-    
+
     windowheight = height;
 
     //about the clock to fresh
@@ -139,37 +136,38 @@ bool GPU::getJoypad()
         {
             switch (e.key.keysym.sym)
             {
-            //for column 1
             case SDLK_ESCAPE:
                 isQuit = true;
                 break;
+            //for column 1
             case SDLK_RIGHT:
-                mmu::joypad_C1 &= 0xE;
+                joypad_C1 &= 0xE;
                 break;
             case SDLK_LEFT:
-                GRam::jopad_C1 &= 0xD;
+                jopad_C1 &= 0xD;
                 break;
             case SDLK_UP:
-                GRam::joypad_C1 &= 0xB;
+                joypad_C1 &= 0xB;
                 break;
             case SDLK_DOWN:
-                GRam::joypad_C1 &= 0x7;
+                joypad_C1 &= 0x7;
                 break;
 
             //for column 0
             case SDLK_z:
-                GRam::joypad_C0 &= 0xE;
+                joypad_C0 &= 0xE;
                 break;
             case SDLK_x:
-                GRam::joypad_C0 &= 0xD;
+                joypad_C0 &= 0xD;
                 break;
             case SDLK_SPACE:
-                GRam::joypad_C0 &= 0xB;
+                joypad_C0 &= 0xB;
                 break;
             case SDLK_RETURN;
-                GRam::joypad_C0 &=0x7;
+                  joypad_C0 &=0x7;
                 break;
             }
+            interruptJoypad();
         }
         else if (e.type == SDL_keyUP)
         {
@@ -177,41 +175,60 @@ bool GPU::getJoypad()
             {
             //for column 1
             case SDLK_RIGHT:
-                GRam::joypad_C1 |= 0x1;
+                joypad_C1 |= 0x1;
                 break;
             case SDLK_LEFT:
-                GRam::joypad_C1 |= 0x2;
+                joypad_C1 |= 0x2;
                 break;
             case SDLK_UP:
-                GRam::joypad_C1 |= 0x4;
+                joypad_C1 |= 0x4;
                 break;
             case SDLK_DOWN:
-                GRam::joypad_C1 |= 0x8;
+                joypad_C1 |= 0x8;
                 break;
 
             //for column 0
             case SDLK_z:
-                GRam::joypad_C0 |= 0x1;
+                joypad_C0 |= 0x1;
                 break;
             case SDLK_x:
-                GRam::joypad_C0 |= 0x2;
+                joypad_C0 |= 0x2;
                 break;
             case SDLK_SPACE:
-                GRam::joypad_C0 |= 0x4;
+                joypad_C0 |= 0x4;
                 break;
             case SDLK_RETURN;
-                GRam::joypad_C0 |= 0x8;
+                  joypad_C0 |= 0x8;
                 break;
             }
         }
         // for the interrupt
     }
+    
     if(isQuit)
         return false;
     return true;
     //the return value is used to determine if it's end;
 }
-
+void GPU::interruptJoypad()
+{
+    bool isRequestIF;
+    // player pressed button and programmer intersted in button
+    if (keyColumn == 0x10&&joypadC0!=0x0f)
+        isRequestIF==true;
+    // player pressed directional and programmer interested
+    else if (keyColumn == 0x20&&joypadC1!=0x0f)
+        isRequestIF==true;
+    //set the IF
+    if(isRequestIF)
+        setInterruptFlag(4,true);
+}
+void setInterruptFlag(int pos, bool _bool)
+{
+    Byte requestFlag= MMU::readByte(IF_ADDRESS);
+    SetBit(requesttFlag,pos,_bool);
+    MMU::writeByte(IF_ADDRESS,requestFlag);
+}
 void GPU::setPixelColor(int pos_x, int pos_y, int color)
 {
     SDL_UnlockSurface(surface);
