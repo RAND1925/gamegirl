@@ -7,6 +7,10 @@
 #include "../MMU.h"
 #include "../AddressSpace.h"
 
+
+//todo :
+// change the var name
+// complete the merge  from gpu
 template <Word offset, Word length>
 class GPU : public AddressSpace
 {
@@ -16,7 +20,7 @@ public:
     bool accepts(Word address) override
     {
         //ff44
-        return (address >= offset && address < offset + length) || (address == 0xFF44);
+        return (address >= offset && address < offset + length);
     }
     Byte getByte(Word address) override
     {
