@@ -95,11 +95,31 @@ void GPU::setMode(int mode)
     //rese the 0bit and 1bit of the status
     //and 1111|1100
     statusLCDC &= 0xFC;
-    //set the current mode
-    statusLCDC |= currentMode;
+    //set the current mode into bit0 bit1
+    statusLCDC|=currentMode&0x03;
+    bool interruptFlag ;
+    switch (mode)
+    {
+    case MODE_VBLANK:
+        if(getBit(4,statusLCDC))
+            interruptFlag=true;
+        break;
+    case MODE_HBLANK:
+        if(getBit(3,statusLCDC))
+            interruptFlag=true;
+        break;
+    case MODE_OAM:
+        if(getBit(5,statusLCDC))
+            interruptFlag=true;
+        break;
+    default:
+        break;
+    }
+    if(interruptFlag)
+        setInterruptFlag(1,true);
+    if(mode==MODE_VBLANK)
+        setInterruptFlag(0,true);
 
-    //todo call for interrupt
-    Byte interruptflag = MMU::readByte(IF_ADDRESS);
 }
 
 void GPU::initWindow(int height, int width, int pos_x, int pos_y, std::string title_window)

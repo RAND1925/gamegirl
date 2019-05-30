@@ -73,6 +73,7 @@ public:
 
     /***********************************************/
     //these are some func used to do the IF and BitOperation
+    
     //request the IF
     void setInterruptFlag(int bit, bool _bool);
     //set certain pos in &byte

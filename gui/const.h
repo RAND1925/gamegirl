@@ -17,6 +17,7 @@ extern const Word WX_ADDRESS;
 
 extern const Word IE_ADDRESS;
 /*
+FF0F:
     Bit 0: V-Blank  Interrupt Request (INT 40h)  (1=Request)
     Bit 1: LCD STAT Interrupt Request (INT 48h)  (1=Request)
     Bit 2: Timer    Interrupt Request (INT 50h)  (1=Request)
