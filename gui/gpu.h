@@ -58,26 +58,25 @@ public:
     void end();
 
     /***********************************************/
-    
+
     //it's the main cycle of the gpu
     void addTime(int clock);
     //choose the mode and the status matched with the mode
     void setMode(int mode);
-    //to compare the 0xff44 0xff45 to judge if it's a interrupt
-    void setLCYStatus();
 
     //get the input and judge if it's quit or not
     bool getJoypad();
     //set the joypad interrupt
     void interruptJoypad();
-
+    //to compare the 0xff44 0xff45 to judge if it's a interrupt
+    void setLCYInterrupt();
     /***********************************************/
     //these are some func used to do the IF and BitOperation
-    
+
     //request the IF
     void setInterruptFlag(int bit, bool _bool);
     //set certain pos in &byte
-    void SetBit(Byte &byte, int pos, bool value)
+    void setBit(Byte &byte, int pos, bool value)
     {
         byte ^= (-value ^ byte) & (1 << pos);
     }

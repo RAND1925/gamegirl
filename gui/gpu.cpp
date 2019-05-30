@@ -249,6 +249,15 @@ void setInterruptFlag(int pos, bool _bool)
     SetBit(requesttFlag,pos,_bool);
     MMU::writeByte(IF_ADDRESS,requestFlag);
 }
+void GPU::setLCYInterrupt()
+{
+    Byte line_y=MMU::readByte(LY_ADDRESS);
+    Byte line_y_cp=MMU::readByte(LYC_ADDRESS);
+    Byte statusLCDC=MMU::readByte(STAT_ADDRESS);
+    //write to the stat bit 2
+    setBit(statusLCDC,2,line_y==line_y_cp);
+    MMU::writeByte(STAT_ADDRESS,statusLCDC);
+}
 void GPU::setPixelColor(int pos_x, int pos_y, int color)
 {
     SDL_UnlockSurface(surface);
