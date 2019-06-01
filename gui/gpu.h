@@ -102,6 +102,6 @@ private:
     int windowWidth;
     int windowHeight;
     int inerClock = 0;
-
+    const int colorMap[4]={255,200,100,0};
     
 };
