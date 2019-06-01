@@ -63,9 +63,10 @@ public:
     void addTime(int clock);
     //choose the mode and the status matched with the mode
     void setMode(int mode);
-
     //get the input and judge if it's quit or not
     bool getJoypad();
+    //draw the video ram and set it tohe surface windows
+    void draw(int yLine);
     //set the joypad interrupt
     void interruptJoypad();
     //to compare the 0xff44 0xff45 to judge if it's a interrupt
@@ -81,7 +82,7 @@ public:
         byte ^= (-value ^ byte) & (1 << pos);
     }
     //get certain pos in &byte
-    bool getBit(int pos, Byte &byte) { return (byte >> pos) & 1; }
+    bool getBit(int pos, Byte byte) { return (byte >> pos) & 1; }
 
     /***********************************************/
 
@@ -102,8 +103,5 @@ private:
     int windowHeight;
     int inerClock = 0;
 
-    const int MODE_VRAM = 3;
-    const int MODE_OAM = 2;
-    const int MODE_HBLANK = 0;
-    const int MODE_VBLANK = 1;
+    
 };
