@@ -6,7 +6,7 @@
 #include "../common.h"
 #include "../MMU.h"
 #include "../AddressSpace.h"
-
+using std::vector;
 //todo :
 // change the var name
 // complete the merge  from gpu
@@ -43,6 +43,22 @@ public:
         else
             bytes[address - offset] = value;
     }
+    //OAM  FE00-FE9F
+    class SpriteInfo:
+    {
+        
+        public:
+           
+            Byte y{ 0 };
+       
+            Byte x{ 0 };
+       
+            Byte tile{ 0 };
+        
+            Byte flags{ 0 };
+
+            SpriteInfo(int id);
+    }
     /***********************************************/
     //these is the func used in software windows
 
@@ -65,6 +81,7 @@ public:
     void setMode(int mode);
     //get the input and judge if it's quit or not
     bool getJoypad();
+    vector<SpriteInfo> getSprites(int yline);
     //draw the video ram and set it tohe surface windows
     void draw(int yLine);
     //set the joypad interrupt
@@ -72,6 +89,7 @@ public:
     //to compare the 0xff44 0xff45 to judge if it's a interrupt
     void setLCYInterrupt();
     /***********************************************/
+    
     //these are some func used to do the IF and BitOperation
 
     //request the IF

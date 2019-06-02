@@ -1,6 +1,6 @@
-
 #include <string>
 #include <iostream>
+#include <algorithm>
 #include "gpu.h"
 void GPU::addTime(int clock)
 {
@@ -123,7 +123,7 @@ void GPU::draw(int yLine)
     Byte lcdc = MMU::readByte(LCDC_ADDRESS);
     Byte xScroll = MMU::readByte(SCX_ADDRESS);
     Byte yScroll = MMU::readByte(SCY_ADDRESS);
-    
+
     //to decide which mao tile to use
     bool flagTile = getBit(4, lcdc);
     //In the first case, patterns have signed numbers from 0 to 255
@@ -162,14 +162,44 @@ void GPU::draw(int yLine)
                 int numTile;
                 if (flagtile)
                     numTile = MMU::readByte(mapTile + (yTile * 32) + tileX);
-                else if(!flagTile)
+                else if (!flagTile)
                     numTile = (SByte)(MMU::readByte(mapTile + (yTile * 32) + tileX));
-                colorA=MMU::readByte(dataTile+(numTile*16)+(yPixel*2));
-                colorB=MMU::readByte(dataTile+(numTile*16)+(yPixel*2)+1);
-                lastPixel=xTile;
+                colorA = MMU::readByte(dataTile + (numTile * 16) + (yPixel * 2));
+                colorB = MMU::readByte(dataTile + (numTile * 16) + (yPixel * 2) + 1);
+                lastPixel = xTile;
             }
-            int color=(((colorA>>xPixel)&1)<<1) | ((colorB>>xPixel)&1);
-            setPixelColor(counter,yLine,colorMap[color]);
+            int color = (((colorA >> xPixel) & 1) << 1) | ((colorB >> xPixel) & 1);
+            setPixelColor(counter, yLine, colorMap[color]);
+        }
+    }
+
+    //put sprite ito draw
+    vector<SpriteInfo> spriteData = getSprites(yLine);
+    int size = spriteData.size();
+    if (size >= 10)
+        size = 10;
+    for (int i = size - 1; i >= 0 : i++)
+    {
+        SpriteInfo tempSprite = spriteData[i];
+        int yPixel = yLine - tempSprite.y + 16;
+        bool xReserve = getBit(5, tempSprite.flags);
+        bool yReserve = getBit(6, tempSprite.flags);
+        bool propirty = getBit(7, tempSprite.flags);
+        Byte tileSprite = tempSprite.tile | 0x01;
+        yPixel -= 8;
+        if (yReserve)
+            yPixel = 7 - yPixel;
+        Byte colorA = MMU::readByte(0x8000 + tileSprite * 16 + yPixel * 2);
+        Byte colorB = MMU::readByte(0x8000 + tileSprite * 16 + yPixel * 2 = 1);
+        for (int x = 0; x < 8; ++x)
+        {
+            if (tempSprite.x + x - 8 < 0)
+                continue;
+            int xPixel = 8 - x % 8 - 1;
+            if (xReserve)
+                xPixel = 8 - xPixel - 1 = 0;
+            int color = (((colorA >> xPixel) & 1) << 1) | ((colorB >> xPixel) & 1);
+            setPixelColor(tempSprite.x + x - 8, ly, colorMap[color]);
         }
     }
 }
@@ -238,6 +268,31 @@ void GPU::setPixelColor(int pos_x, int pos_y, int color)
     auto pixelFormat = surface->format;
     pixels[pos_y * 160 + pos_x] = SDL_MapRGB(pixelFormat, color, color, color);
 }
+
+vector<GPU::SpriteInfo> GPU::getSprites(int yLine)
+{
+    vector<SpriteInfo> sprites;
+    for (int _no = 0; i < 40 : ++i)
+    {
+        SpriteInfo it = SpriteInfo(_no);
+        //check if it's in the line
+        if (!(it.y == 0 || it.y >= 160 || yLine <= it.y - 16 || yLine >= it.y))
+        {
+            sprites.push_back(it);
+        }
+    }
+
+    //sort by x pos
+    sort(sprites.begin(), sprites.end(), [](const SpriteInfo &left, const SpriteInfo &right) { return left.x < right.x; });
+    return sprites;
+}
+
+GPU::SpriteInfo::SpriteInfo(int id)
+    : y(MMU::readByte(0xFE00 + id * 4 + 0)),
+      x(MMU::readByte(0xFE00 + id * 4 + 1)),
+      tile(MMU::readByte(0xFE00 + id * 4 + 2)),
+      flags(MMU::readByte(0xFE00 + id * 4 + 3)) {}
+
 bool GPU::getJoypad()
 {
     bool isQuit = false;
