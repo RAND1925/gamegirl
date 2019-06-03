@@ -11,22 +11,22 @@
 #include "common.h"
 #include "MMU.h"
 
-class CPU {
+class CPU: public AddressSpace {
 private:
         using FlagSetter = std::function<void(void)>;
         using FlagGetter = std::function<Byte(void)>;
-        FlagSetter setZ = [this]() { registers.f |= (1 << 7); };
-        FlagSetter setN = [this]() { registers.f |= (1 << 6); };
-        FlagSetter setH = [this]() { registers.f |= (1 << 5); };
-        FlagSetter setC = [this]() { registers.f |= (1 << 4); };
-        FlagSetter resetZ = [this]() { registers.f &= ~(1 << 7); };
-        FlagSetter resetN = [this]() { registers.f &= ~(1 << 6); };
-        FlagSetter resetH = [this]() { registers.f &= ~(1 << 5); };
-        FlagSetter resetC = [this]() { registers.f &= ~(1 << 4); };
-        FlagGetter getZ = [this]() -> Byte { return (registers.f & (1 << 7) ) >> 7; };
-        FlagGetter getN = [this]() -> Byte { return (registers.f & (1 << 6) ) >> 6; };
-        FlagGetter getH = [this]() -> Byte { return (registers.f & (1 << 5) ) >> 5; };
-        FlagGetter getC = [this]() -> Byte { return (registers.f & (1 << 4) ) >> 4; };
+        FlagSetter setZ = [this]() {setBit(registers.f, 7); };
+        FlagSetter setN = [this]() {setBit(registers.f, 6); };
+        FlagSetter setH = [this]() {setBit(registers.f, 5); };
+        FlagSetter setC = [this]() {setBit(registers.f, 5); };
+        FlagSetter resetZ = [this]() { resetBit(registers.f, 7); };
+        FlagSetter resetN = [this]() { resetBit(registers.f, 6); };
+        FlagSetter resetH = [this]() { resetBit(registers.f, 5); };
+        FlagSetter resetC = [this]() { resetBit(registers.f, 4); };
+        FlagGetter getZ = [this]() -> Byte { return getBit(registers.f, 7); };
+        FlagGetter getN = [this]() -> Byte { return getBit(registers.f, 6); };
+        FlagGetter getH = [this]() -> Byte { return getBit(registers.f, 5); };
+        FlagGetter getC = [this]() -> Byte { return getBit(registers.f, 4); };
 
     struct Registers {
         Byte a, f, b, c, d, e, h, l;
@@ -34,11 +34,10 @@ private:
     }registers, backup;
     struct States{
         bool interruptMasterEnabled = true;
-        bool interruptEnabled = true;
-        Byte interruptFlag = true;
+        Byte interruptEnabled = 0;
+        Byte interruptFlag = 0;
         bool halt = false;
         bool stop = false;
-
     }states;
 
 
@@ -295,23 +294,14 @@ private:
 	    registers = backup;
 	}
 
-	template<Byte address>
-	Byte restart(){
+	void restart(Word addr){
         rsv();
-        registers.sp -=2;
-        mmu.writeWord(registers.sp, registers.pc);
-        registers.pc = address;
-        return 32;
+        call(addr);
 	}
 
     void initMap();
     std::function<Byte(void)> opMap[0x100];
 	std::function<Byte(void)> opCBMap[0x100];
-    std::function<Byte(void)> rst40 = [this](){ return restart<0x40>(); };
-    std::function<Byte(void)> rst48 = [this](){ return restart<0x48>(); };
-    std::function<Byte(void)> rst50 = [this](){ return restart<0x50>(); };
-    std::function<Byte(void)> rst58 = [this](){ return restart<0x58>(); };
-    std::function<Byte(void)> rst60 = [this](){ return restart<0x60>(); };
   public:
     Byte step(){
     	Byte timing = 4;
@@ -319,21 +309,12 @@ private:
         if (hasInterrupt && states.interruptMasterEnabled){
             states.halt = false;
             states.interruptMasterEnabled = false;
-			std::cout << "interrupt: " << states.interruptFlag << std::endl;
-			if (getBit<0>(states.interruptFlag)){
-				return rst40();
-			}
-			if (getBit<1>(states.interruptFlag)){
-				return rst48();
-			}
-			if (getBit<2>(states.interruptFlag)){
-				return rst50();
-			}
-			if (getBit<3>(states.interruptFlag)){
-				return rst58();
-			}
-			if (getBit<4>(states.interruptFlag)){
-				return rst60();
+			std::cout << "interrupt: " << (int)states.interruptFlag << std::endl;
+			for(Byte i = 0; i < 8; ++i){
+				if (getBit(states.interruptFlag, i)){
+					restart(0x40 + (i<<3));
+					return 32;
+				}
 			}
         }
         else {
@@ -346,8 +327,6 @@ private:
 				registers.pc++;
 				timing = opMap[opNum]();
 				std::cout << "pc:" << std::hex << registers.pc << " opNum: " << std::hex << (int)opNum << std::endl;
-
-
             }
         }
         return timing;
@@ -358,9 +337,7 @@ private:
         initMap();
     };
     Byte cycle(){
-    		readStates();
-			Byte timing = step();
-			writeStates();//display
+    		Byte timing = step();
 			return timing;
       }
 
@@ -378,14 +355,26 @@ private:
 
         //todo: init registers in zram;
     };
-    void readStates(){
-    	states.interruptFlag = mmu.readByte(0xFF0F);
-    	states.interruptEnabled = mmu.readByte(0xFFFF);
+    bool accepts(Word address) override{
+		return address == 0xFF0F || address == 0xFFFF;
     }
-    void writeStates(){
-    	mmu.writeByte(0xFF0F, states.interruptFlag);
- 		mmu.writeByte(0xFFFF, states.interruptEnabled);
+    Byte getByte(Word address) override{
+		if (address == 0xFF0F){
+			return 	states.interruptEnabled ? 1 : 0;
+		}
+    	else{
+			return states.interruptFlag;
+    	}
     }
+
+	void setByte(Word address, Byte value) override{
+		if (address == 0xFF0F){
+			states.interruptEnabled  = value;
+		}
+		else{
+			states.interruptFlag = value;
+		}
+	}
 };
 
 

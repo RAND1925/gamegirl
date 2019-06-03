@@ -14,21 +14,9 @@
         return w << 10;
     };
 
-    template <Byte p>
-    Byte getBit(const Byte b){
-        return (b & (1 << p) ) >> p;
-    };
-    template <Byte p>
-    void setBit(Byte & b){
-        b |= (1 << p);
-    }
-    template <Byte p>
-    void resetBit(Byte & b){
-        b &= ~(1 << p);
-    };
+    Byte getBit(const Byte b, const Byte p);
+    void setBit(Byte & b, const Byte p);
+    void resetBit(Byte & b, const Byte p);
 
-    enum class RegistersName: Word{
-            IF = 0xFFFF
-        };
 
 #endif //GAMEGIRL_COMMON_H
