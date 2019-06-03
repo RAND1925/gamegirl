@@ -9,13 +9,12 @@
 #include "AddressSpace.h"
 
 #include <vector>
-#include <memory>
+#include <array>
 
-using std::vector;
 class MMU {
 private:
-    vector<AddressSpace *> spaces;
-
+    std::vector<AddressSpace *> spaces;
+    std::array<Byte, 32_kb> unusedSpaces;
 public:
 	void addAddressSpace(AddressSpace * s){
 		spaces.push_back(s);

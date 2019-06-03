@@ -34,11 +34,10 @@ private:
     }registers, backup;
     struct States{
         bool interruptMasterEnabled = true;
-        bool interruptEnabled = true;
-        Byte interruptFlag = true;
+        Byte interruptEnabled = 0;
+        Byte interruptFlag = 0;
         bool halt = false;
         bool stop = false;
-
     }states;
 
 
@@ -310,7 +309,7 @@ private:
         if (hasInterrupt && states.interruptMasterEnabled){
             states.halt = false;
             states.interruptMasterEnabled = false;
-			std::cout << "interrupt: " << states.interruptFlag << std::endl;
+			std::cout << "interrupt: " << (int)states.interruptFlag << std::endl;
 			for(Byte i = 0; i < 8; ++i){
 				if (getBit(states.interruptFlag, i)){
 					restart(0x40 + (i<<3));

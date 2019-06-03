@@ -3,6 +3,7 @@
 //
 
 #include "MMU.h"
+#include <iostream>
 
 Byte MMU::readByte(Word address){
     for (AddressSpace *s : spaces){
@@ -10,7 +11,8 @@ Byte MMU::readByte(Word address){
             return s->getByte(address);
         }
     }
-
+    std::cout << address << ":unused[read]" << std::endl;
+    return unusedSpaces[address];
 }
 
 Word MMU::readWord(Word address){
@@ -26,8 +28,11 @@ void MMU::writeByte(Word address, Byte value){
     for (auto & s: spaces){
         if (s->accepts(address)){
             s->setByte(address, value);
+            return;
         }
     }
+    std::cout << address << ":unused[write]" << std::endl;
+    unusedSpaces[address] = value;
 }
 
 void MMU::writeWord(Word address, Word value){
