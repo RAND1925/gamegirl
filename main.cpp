@@ -36,5 +36,4 @@ int main() {
         Byte timing=cpu.cycle();
         timer.increase(timing);
     }
-
 }
