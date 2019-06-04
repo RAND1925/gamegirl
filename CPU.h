@@ -282,9 +282,16 @@ private:
         return a & ~(1 << b);
 	}
 
+	void jump(Word addr){
+		registers.pc = addr;
+	}
+	void jr(Byte r){
+		registers.pc += (SByte)r;
+	}
+
 	void call(Word addr) {
 		push16(registers.pc);
-		registers.pc = addr;
+		jump(addr);
 	}
 
 	void rsv(){
@@ -304,8 +311,18 @@ private:
 	std::function<Byte(void)> opCBMap[0x100];
   public:
     Byte step(){
+
     	Byte timing = 4;
-        bool hasInterrupt = states.interruptEnabled & states.interruptFlag;
+    	std::cout << "a:" << std::hex << (int)registers.a << ' '
+				  << "f:" << std::hex << (int)registers.f << ' '
+				  << "d:" << std::hex << (int)registers.d << ' '
+				  << "e:" << std::hex << (int)registers.e << ' '
+				  << "h:" << std::hex << (int)registers.h << ' '
+				  << "l:" << std::hex << (int)registers.l << ' '
+				  << "sp:" << std::hex << (int)registers.sp << ' '
+				  << "pc:" << std::hex << (int)registers.pc << std::endl;
+
+		bool hasInterrupt = states.interruptEnabled & states.interruptFlag;
         if (hasInterrupt && states.interruptMasterEnabled){
             states.halt = false;
             states.interruptMasterEnabled = false;
@@ -324,9 +341,10 @@ private:
             }
             else {
 				Byte opNum = mmu.readByte(registers.pc);
+
 				registers.pc++;
 				timing = opMap[opNum]();
-				std::cout << "pc:" << std::hex << registers.pc << " opNum: " << std::hex << (int)opNum << std::endl;
+				std::cout << " opNum: " << std::hex << (int)opNum << std::endl;
             }
         }
         return timing;
@@ -339,11 +357,11 @@ private:
     Byte cycle(){
     		Byte timing = step();
 			return timing;
-      }
+    }
 
     void initRegisters(){
         registers.a = 0x01;
-        registers.f = 0x80;
+        registers.f = 0xB0;
         registers.b = 0x00;
         registers.c = 0x13;
         registers.d = 0x00;
@@ -360,9 +378,8 @@ private:
     }
     Byte getByte(Word address) override{
 		if (address == 0xFF0F){
-			return 	states.interruptEnabled ? 1 : 0;
-		}
-    	else{
+			return states.interruptEnabled;
+		} else {
 			return states.interruptFlag;
     	}
     }
@@ -370,8 +387,7 @@ private:
 	void setByte(Word address, Byte value) override{
 		if (address == 0xFF0F){
 			states.interruptEnabled  = value;
-		}
-		else{
+		} else {
 			states.interruptFlag = value;
 		}
 	}

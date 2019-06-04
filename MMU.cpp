@@ -19,11 +19,6 @@ Word MMU::readWord(Word address){
     return readByte(address) | (readByte(address + 1) << 8);
 }
 
-SByte MMU::readSByte(Word address){
-    Byte b = readByte(address);
-    return b > 127 ? b - 256: b;
-}
-
 void MMU::writeByte(Word address, Byte value){
     for (auto & s: spaces){
         if (s->accepts(address)){
