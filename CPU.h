@@ -34,8 +34,8 @@ private:
     }registers, backup;
     struct States{
         bool interruptMasterEnabled = true;
-        bool interruptEnabled = true;
-        Byte interruptFlag = true;
+        Byte interruptEnabled = 0;
+        Byte interruptFlag = 0;
         bool halt = false;
         bool stop = false;
 
@@ -361,7 +361,7 @@ private:
     }
     Byte getByte(Word address) override{
 		if (address == 0xFF0F){
-			return 	states.interruptEnabled ? 1 : 0;
+			return states.interruptEnabled;
 		}
     	else{
 			return states.interruptFlag;

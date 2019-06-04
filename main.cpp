@@ -6,31 +6,28 @@
 #include "common.h"
 #include "MMU.h"
 #include "CPU.h"
-#include "Rom.h"
 #include "WRam.h"
 #include "ZRam.h"
 #include "Timer.h"
-const Word ROM_VOL = 16_kb;
+#include "Cartridge.h"
 #define FILE_PATH "D:\\Tetris.gb"
 
 int main() {
 
     std::ifstream gameFile;
     gameFile.open(FILE_PATH, std::ios::binary);
-    char gameBinaryString[ROM_VOL];
-    gameFile.read(gameBinaryString, ROM_VOL);
+    CartridgeDriver cartridgeDriver(gameFile);
     gameFile.close();
 
+    std::cout << "loading game:" << cartridgeDriver.getTitle() << std::endl;
     MMU mmu;
-    Rom<0x0000, 32_kb> rom(gameBinaryString, ROM_VOL);
-    mmu.addAddressSpace(&rom);
-    WRam<0xC000, 8_kb + 0x1E00> wRam;
+    WRam<0xC000, 8_kByte + 0x1E00> wRam;
     mmu.addAddressSpace(&wRam);
     ZRam<0xFF80, 127> zRam;
     mmu.addAddressSpace(&zRam);
     Timer timer(mmu);
     mmu.addAddressSpace(&timer);
-
+    mmu.addAddressSpace(&cartridgeDriver);
     CPU cpu(mmu);
     while(true) {
         Byte timing=cpu.cycle();
