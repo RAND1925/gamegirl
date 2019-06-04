@@ -14,7 +14,7 @@
 class MMU {
 private:
     std::vector<AddressSpace *> spaces;
-    std::array<Byte, 32_kb> unusedSpaces;
+    std::array<Byte, 64_kByte> unusedSpaces;
 public:
 	void addAddressSpace(AddressSpace * s){
 		spaces.push_back(s);
@@ -22,7 +22,6 @@ public:
 
     Byte readByte(Word address);
     Word readWord(Word address);
-	SByte readSByte(Word address);
     void writeByte(Word address, Byte value);
     void writeWord(Word address, Word value);
 };

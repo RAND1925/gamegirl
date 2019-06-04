@@ -10,8 +10,11 @@
     using Word = uint16_t;
     using SByte = int8_t;
 
-    inline constexpr Word operator "" _kb(const unsigned long long w){
+    inline constexpr Word operator "" _kByte(const unsigned long long w){
         return w << 10;
+    };
+    inline constexpr Word operator "" _kbit(const unsigned long long w){
+        return w << 7;
     };
 
     Byte getBit(const Byte b, const Byte p);

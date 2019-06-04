@@ -16,8 +16,8 @@ Byte Timer::increase(Byte cycle) {
         }
     }
     if(check()){
-        return getByte(0xFF06);
-        //interrupt here
+
+        return regTma;
     }
     else{
         return 0;
@@ -44,9 +44,9 @@ bool Timer::step() {
     regTima++;
     if(regTima==0){//should be >255 here but it is Byte
         regTima=regTma;
-        Byte add=mmu.readByte(0xFF0F);
-        add |= (1<<2);
-        mmu.writeByte(0xFF0F,add);
+        Byte oldIF=mmu.readByte(0xFF0F);
+        setBit(oldIF, 2);
+        mmu.writeByte(0xFF0F,oldIF);
         return true;
     }
     return false;
