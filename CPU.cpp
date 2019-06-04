@@ -3,6 +3,7 @@
 //
 
 #include "CPU.h"
+#include "common.h"
 #include <iostream>
 void CPU::initMap() {
 	auto ld8 = [](Byte &lhs, Byte rhs) { lhs = rhs; };
@@ -308,17 +309,8 @@ void CPU::initMap() {
 
 	opMap[0xCB] = [this, &getImmediateValue8]() {return opCBMap[getImmediateValue8()](); };
 
-	//swap
-	opCBMap[0x37] = [this, &ld8]() {ld8(registers.a, swap(registers.a)); return 8; };
-	opCBMap[0x30] = [this, &ld8]() {ld8(registers.b, swap(registers.b)); return 8; };
-	opCBMap[0x31] = [this, &ld8]() {ld8(registers.c, swap(registers.c)); return 8; };
-	opCBMap[0x32] = [this, &ld8]() {ld8(registers.d, swap(registers.d)); return 8; };
-	opCBMap[0x33] = [this, &ld8]() {ld8(registers.e, swap(registers.e)); return 8; };
-	opCBMap[0x34] = [this, &ld8]() {ld8(registers.h, swap(registers.h)); return 8; };
-	opCBMap[0x35] = [this, &ld8]() {ld8(registers.l, swap(registers.l)); return 8; };
-	opCBMap[0x36] = [this, &getHL, &setHL]() {mmu.writeByte(getHL(),swap(mmu.readByte(getHL()))); return 16; };
-
-	opMap[0x27]=[this](){daa();return 4;};
+	//
+	opMap[0x27] = [this](){daa();return 4;};
 
 	//cpl
 	opMap[0x2F] = [this, &ld8]() {ld8(registers.a, cpl(registers.a)); return 4; };
@@ -331,9 +323,8 @@ void CPU::initMap() {
 
 	//nop
 	opMap[0x00] = [this]() {return 4; };
-	
+
 	//todo: stop 1000
-	
 
 	//rlca
 	opMap[0x07] = [this, &ld8]() { ld8(registers.a, rlc(registers.a)); return 4; };
@@ -466,14 +457,14 @@ void CPU::initMap() {
 	opMap[0xDC] = [this, &ld16, &getImmediateValue16]() {if (getC()) { call(getImmediateValue16()); }return 12; };
 
 	//ret
-	opMap[0xC7] = [this]() {call(0x00); return 32; };
-	opMap[0xCF] = [this]() {call(0x08); return 32; };
-	opMap[0xD7] = [this]() {call(0x10); return 32; };
-	opMap[0xDF] = [this]() {call(0x18); return 32; };
-	opMap[0xE7] = [this]() {call(0x20); return 32; };
-	opMap[0xEF] = [this]() {call(0x28); return 32; };
-	opMap[0xF7] = [this]() {call(0x30); return 32; };
-	opMap[0xFF] = [this]() {call(0x38); return 32; };
+	opMap[0xC7] = [this]() {restart(0x00); return 32; };
+	opMap[0xCF] = [this]() {restart(0x08); return 32; };
+	opMap[0xD7] = [this]() {restart(0x10); return 32; };
+	opMap[0xDF] = [this]() {restart(0x18); return 32; };
+	opMap[0xE7] = [this]() {restart(0x20); return 32; };
+	opMap[0xEF] = [this]() {restart(0x28); return 32; };
+	opMap[0xF7] = [this]() {restart(0x30); return 32; };
+	opMap[0xFF] = [this]() {restart(0x38); return 32; };
 	//ret
 	opMap[0xC9] = [this, &ld16]() { ld16(registers.pc, pop16()); return 8; };
 	//ret cc
@@ -484,11 +475,12 @@ void CPU::initMap() {
 	//reti
 	opMap[0xD9] = [this, &ld16]() { ld16(registers.pc, pop16());states.interruptMasterEnabled = true; return 8; };
     //interrupt
-    opMap[0xF3] = [this](){states.interruptMasterEnabled = true; return 4; };
-    opMap[0xFB] = [this](){states.interruptMasterEnabled = false; return 4; };
+
+    //stop
+    opMap[0x10] = [this, &getImmediateValue8](){states.stop = true; getImmediateValue8(); return 4; };
+
     opMap[0x76] = [this](){states.halt = true; return 4; };
     //DI & EI
-
     opMap[0xF3] = [this](){states.interruptMasterEnabled = false; return 4; };
     opMap[0xFB] = [this](){states.interruptMasterEnabled = true; return 4; };
 };

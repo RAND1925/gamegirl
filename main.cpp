@@ -24,23 +24,19 @@ int WinMain(int argc, char *argv[])
     gameFile.close();
 
     MMU mmu;
+
     Rom<0x0000, 32_kb> rom(gameBinaryString, ROM_VOL);
-    mmu.addAddressSpace(&rom);
-
-
     WRam<0xC000, 8_kb + 0x1E00> wRam;
-    mmu.addAddressSpace(&wRam);
-
-    ZRam<0xFF80, 0xFFFF - 0xFF80> zRam;
-    mmu.addAddressSpace(&zRam);
+    ZRam<0xFF80, 127> zRam;
     Timer timer(mmu);
-    mmu.addAddressSpace(&timer);
-
-    GPU<0x8000,0x9FFF-0x8000> gpu;
-    mmu.addAddressSpace(&gpu);
-
-
     CPU cpu(mmu);
+
+    mmu.addAddressSpace(&wRam);
+    mmu.addAddressSpace(&rom);
+    mmu.addAddressSpace(&zRam);
+    mmu.addAddressSpace(&timer);
+    mmu.addAddressSpace(&cpu);
+
     while(true) {
         Byte timing=cpu.cycle();
         timer.increase(timing);
