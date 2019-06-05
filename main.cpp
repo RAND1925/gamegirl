@@ -5,41 +5,28 @@
 
 #include "common.h"
 #include "MMU.h"
-#include "CPU.h"
-#include "Rom.h"
 #include "WRam.h"
 #include "ZRam.h"
 #include"gpu.h"
 #include "Timer.h"
-const Word ROM_VOL = 16_kb;
-#define FILE_PATH "D:\\Tetris.gb"
+#include "Cartridge.h"
+#include "InterruptManager.h"
+#include "CPU.h"
+#include "CycleCounter.h"
 
 int WinMain(int argc, char *argv[])
 {
 
-    std::ifstream gameFile;
-    gameFile.open(FILE_PATH, std::ios::binary);
-    char gameBinaryString[ROM_VOL];
-    gameFile.read(gameBinaryString, ROM_VOL);
-    gameFile.close();
+    const std::string FILE_PATH("D:\\bgbtest.gb");
+    cartridgeDriver.openFile(FILE_PATH);
 
-    MMU mmu;
-
-    Rom<0x0000, 32_kb> rom(gameBinaryString, ROM_VOL);
-    WRam<0xC000, 8_kb + 0x1E00> wRam;
-    ZRam<0xFF80, 127> zRam;
-    Timer timer(mmu);
-    CPU cpu(mmu);
-
-    mmu.addAddressSpace(&wRam);
-    mmu.addAddressSpace(&rom);
-    mmu.addAddressSpace(&zRam);
+    cpu.initMap();
     mmu.addAddressSpace(&timer);
-    mmu.addAddressSpace(&cpu);
+    mmu.addAddressSpace(&cartridgeDriver);
+    mmu.addAddressSpace(&wRam);
+    mmu.addAddressSpace(&interruptManager);
+    mmu.addAddressSpace(&zRam);
 
-    while(true) {
-        Byte timing=cpu.cycle();
-        timer.increase(timing);
-    }
+    cycleCounter.cycle();
 
 }

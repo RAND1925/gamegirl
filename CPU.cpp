@@ -5,13 +5,15 @@
 #include "CPU.h"
 #include "common.h"
 #include <iostream>
+
+CPU cpu;
 void CPU::initMap() {
 	auto ld8 = [](Byte &lhs, Byte rhs) { lhs = rhs; };
 	auto ld16 = [](Word &lhs, Word rhs) { lhs = rhs; };
 
 	auto getR16 = [](Byte high, Byte low)->Word { return (high << 8) | low; };
-	auto setR16 = [](Byte & high, Byte & low, Word t) { high = t >> 8; low = t & 0xFF; };
-	auto getHL = [this, getR16]()->Word { return getR16(registers.h, registers.l); };
+	auto setR16 = [](Byte & high, Byte & low, Word t) { high = (Byte)(t >> (Byte)8); low = (Byte)(t & (Byte)0xFF); };
+ 	auto getHL = [this, getR16]()->Word { return getR16(registers.h, registers.l); };
 	auto getBC = [this, getR16]()->Word { return getR16(registers.b, registers.c); };
 	auto getDE = [this, getR16]()->Word { return getR16(registers.d, registers.e); };
 	auto setHL = [this, setR16](Word t) { setR16(registers.h, registers.l, t); };
@@ -23,7 +25,8 @@ void CPU::initMap() {
 		registers.pc += 2;
 		return v;
 	};
-	auto getSignedImmediateValue8 = [this]()->SByte { return mmu.readSByte(registers.pc++); };
+	auto getSignedImmediateValue8 = [this]()->SByte { Byte tmp = mmu.readByte(registers.pc++);
+		return  tmp > 127 ? tmp - 0x100: tmp; };
 
 	auto nothing = [this]() { std::cout << "nothing" << std::endl; return 0; };
 	for (auto & s: opMap) {
@@ -37,7 +40,7 @@ void CPU::initMap() {
 	opMap[0x0A] = [this, &ld8, &getBC]() {ld8(registers.a, mmu.readByte(getBC())); return 8; };
 	opMap[0x1A] = [this, &ld8, &getDE]() {ld8(registers.a, mmu.readByte(getDE())); return 8; };
 	opMap[0xFA] = [this, &ld8, &getImmediateValue16]() {
-		ld8(registers.a, mmu.readWord(getImmediateValue16()));
+		ld8(registers.a, mmu.readByte(getImmediateValue16()));
 		return 16;
 	};
 
@@ -152,13 +155,12 @@ void CPU::initMap() {
 	opMap[0x01] = [this, &setBC, &getImmediateValue16]() {setBC(getImmediateValue16()); return 12; };
 	opMap[0x11] = [this, &setDE, &getImmediateValue16]() {setDE(getImmediateValue16()); return 12; };
 	opMap[0x21] = [this, &setHL, &getImmediateValue16]() {setHL(getImmediateValue16()); return 12; };
-	opMap[0x31] = [this, &ld16, &getImmediateValue16]() {ld16(registers.sp, getImmediateValue16()); return 12; };
+	opMap[0x31] = [this, &ld16, &getImmediateValue16]() {
+		Word tmp = getImmediateValue16();
+		ld16(registers.sp, tmp); return 12; };
 
 	//sp
-	opMap[0xF9] = [this, &ld16, &getHL]() {ld16(registers.sp, getHL()); return 8; };
-
-	//ldhl sp
-	opMap[0xF8] = [this, &setHL, &getImmediateValue16]() {setHL(add(registers.sp, getImmediateValue16())); return 12; };
+	// gisters.sp, getImmediateValue16())); return 12; };
 
 	//ld(nn) sp
 	opMap[0x08] = [this, &getImmediateValue16]() {mmu.writeWord(getImmediateValue16(), registers.sp); return 20; };
@@ -309,7 +311,7 @@ void CPU::initMap() {
 
 	opMap[0xCB] = [this, &getImmediateValue8]() {return opCBMap[getImmediateValue8()](); };
 
-	//
+	//daa
 	opMap[0x27] = [this](){daa();return 4;};
 
 	//cpl
@@ -323,8 +325,6 @@ void CPU::initMap() {
 
 	//nop
 	opMap[0x00] = [this]() {return 4; };
-
-	//todo: stop 1000
 
 	//rlca
 	opMap[0x07] = [this, &ld8]() { ld8(registers.a, rlc(registers.a)); return 4; };
@@ -433,30 +433,30 @@ void CPU::initMap() {
     opCBMap[0x85] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.l); return 8; };
     opCBMap[0x86] = [this, &getHL, &getImmediateValue8]() {res(getImmediateValue8(), mmu.readByte(getHL())); return 16; };
 	//jp
-	opMap[0xC3] = [this, &ld16, &getImmediateValue16]() {ld16(registers.pc, getImmediateValue16()); return 12; };
+	opMap[0xC3] = [this, &ld16, &getImmediateValue16]() {jump(getImmediateValue16()); return 12; };
 	//jp cc
-	opMap[0xC2] = [this, &ld16, &getImmediateValue16]() {if(!getZ()) ld16(registers.pc, getImmediateValue16()); return 12; };
-	opMap[0xCA] = [this, &ld16, &getImmediateValue16]() {if(getZ()) ld16(registers.pc, getImmediateValue16()); return 12; };
-	opMap[0xD2] = [this, &ld16, &getImmediateValue16]() {if(!getC()) ld16(registers.pc, getImmediateValue16()); return 12; };
-	opMap[0xDA] = [this, &ld16, &getImmediateValue16]() {if(getC()) ld16(registers.pc, getImmediateValue16()); return 12; };
+	opMap[0xC2] = [this, &ld16, &getImmediateValue16]() {if(!getZ()) jump(getImmediateValue16()); return 12; };
+	opMap[0xCA] = [this, &ld16, &getImmediateValue16]() {if(getZ()) jump(getImmediateValue16()); return 12; };
+	opMap[0xD2] = [this, &ld16, &getImmediateValue16]() {if(!getC()) jump(getImmediateValue16()); return 12; };
+	opMap[0xDA] = [this, &ld16, &getImmediateValue16]() {if(getC()) jump(getImmediateValue16()); return 12; };
 	//jp hl
-	opMap[0xE9] = [this, &ld16, &getHL]() {ld16(registers.pc, mmu.readWord(getHL())); return 4; };
+	opMap[0xE9] = [this, &ld16, &getHL]() {jump(mmu.readWord(getHL())); return 4; };
 	//jr
-	opMap[0x18] = [this, &ld16, &getSignedImmediateValue8]() {ld16(registers.pc, registers.pc + getSignedImmediateValue8()); return 8; };
+	opMap[0x18] = [this, &ld16, &getImmediateValue8]() {jr(getImmediateValue8()); return 8; };
 	//jr cc
-	opMap[0x20] = [this, &ld16, &getSignedImmediateValue8]() {if(!getZ()) ld16(registers.pc, registers.pc + getSignedImmediateValue8()); return 8; };
-	opMap[0x28] = [this, &ld16, &getSignedImmediateValue8]() {if(getZ()) ld16(registers.pc, registers.pc + getSignedImmediateValue8()); return 8; };
-	opMap[0x30] = [this, &ld16, &getSignedImmediateValue8]() {if(!getC()) ld16(registers.pc, registers.pc + getSignedImmediateValue8()); return 8; };
-	opMap[0x38] = [this, &ld16, &getSignedImmediateValue8]() {if(getC()) ld16(registers.pc, registers.pc + getSignedImmediateValue8()); return 8; };
+	opMap[0x20] = [this, &ld16, &getImmediateValue8]() {if(!getZ()) jr(getImmediateValue8()); return 8; };
+	opMap[0x28] = [this, &ld16, &getImmediateValue8]() {if(getZ()) jr(getImmediateValue8()); return 8; };
+	opMap[0x30] = [this, &ld16, &getImmediateValue8]() {if(!getC()) jr(getImmediateValue8()); return 8; };
+	opMap[0x38] = [this, &ld16, &getImmediateValue8]() {if(getC()) jr(getImmediateValue8()); return 8; };
 	//call
 	opMap[0xCD] = [this, &ld16, &getImmediateValue16]() { call(getImmediateValue16()); return 12; };
 	//call cc
 	opMap[0xC4] = [this, &ld16, &getImmediateValue16]() {if (!getZ()) { call(getImmediateValue16()); } return 12; };
 	opMap[0xCC] = [this, &ld16, &getImmediateValue16]() {if (getZ()) { call(getImmediateValue16()); } return 12; };
-	opMap[0xD4] = [this, &ld16, &getImmediateValue16]() {if (!getC()) { call(getImmediateValue16()); }return 12; };
-	opMap[0xDC] = [this, &ld16, &getImmediateValue16]() {if (getC()) { call(getImmediateValue16()); }return 12; };
+	opMap[0xD4] = [this, &ld16, &getImmediateValue16]() {if (!getC()) { call(getImmediateValue16()); } return 12; };
+	opMap[0xDC] = [this, &ld16, &getImmediateValue16]() {if (getC()) { call(getImmediateValue16()); } return 12; };
 
-	//ret
+	//restart
 	opMap[0xC7] = [this]() {restart(0x00); return 32; };
 	opMap[0xCF] = [this]() {restart(0x08); return 32; };
 	opMap[0xD7] = [this]() {restart(0x10); return 32; };
@@ -473,14 +473,13 @@ void CPU::initMap() {
 	opMap[0xD0] = [this, &ld16]() {if (!getC()) { ld16(registers.pc, pop16()); }return 8; };
 	opMap[0xD8] = [this, &ld16]() {if (getC()) { ld16(registers.pc, pop16()); }return 8; };
 	//reti
-	opMap[0xD9] = [this, &ld16]() { ld16(registers.pc, pop16());states.interruptMasterEnabled = true; return 8; };
-    //interrupt
+	opMap[0xD9] = [this, &ld16]() { ld16(registers.pc, pop16());interruptManager.setIME(true); return 8; };
 
     //stop
-    opMap[0x10] = [this, &getImmediateValue8](){states.stop = true; getImmediateValue8(); return 4; };
-
-    opMap[0x76] = [this](){states.halt = true; return 4; };
+    opMap[0x10] = [this, &getImmediateValue8](){interruptManager.setStop(true); getImmediateValue8(); return 4; };
+    //halt
+    opMap[0x76] = [this](){interruptManager.setHalt(true); return 4; };
     //DI & EI
-    opMap[0xF3] = [this](){states.interruptMasterEnabled = false; return 4; };
-    opMap[0xFB] = [this](){states.interruptMasterEnabled = true; return 4; };
+    opMap[0xF3] = [this](){interruptManager.setIME(false); return 4; };
+    opMap[0xFB] = [this](){interruptManager.setIME(true); return 4; };
 };

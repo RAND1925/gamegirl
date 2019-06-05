@@ -21,13 +21,11 @@ private:
     Byte regTima;//counter ff05
     Byte regTma;//modulator ff06
     Byte regTac;//control ff07
-    MMU &mmu;
     bool check();
     bool step();
 public:
-    Timer(MMU &mmu1):mmu(mmu1){}
+    Timer (){};
     Byte increase(Byte cycle);
-
     bool accepts(Word address) override{
         return address>=0xFF04 && address<=0xFF07;
     }
@@ -48,6 +46,6 @@ public:
         }
     }
 };
-
+ extern Timer timer;
 
 #endif //GAMEGIRL_TIMER_H
