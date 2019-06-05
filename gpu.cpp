@@ -9,7 +9,7 @@ void GPU::addTime(int clock)
     setInterruptFlag(1, false);
     // check isLCDenabled if() acoordig to the oxff40
     Byte statusLCD = MMU::readByte(LCDC_ADDRESS);
-    if (!getBit(7, statusLCD))
+    if (!getBit(statusLCD,7 ))
         return;
     //increase the gpu clock
     inerClock += clock;
@@ -96,15 +96,15 @@ void GPU::setMode(int mode)
     switch (mode)
     {
     case MODE_VBLANK:
-        if (getBit(4, statusLCDC))
+        if (getBit(statusLCDC,4))
             interruptFlag = true;
         break;
     case MODE_HBLANK:
-        if (getBit(3, statusLCDC))
+        if (getBit(statusLCDC,3))
             interruptFlag = true;
         break;
     case MODE_OAM:
-        if (getBit(5, statusLCDC))
+        if (getBit(statusLCDC,5))
             interruptFlag = true;
         break;
     default:
@@ -125,23 +125,23 @@ void GPU::draw(int yLine)
     Byte yScroll = MMU::readByte(SCY_ADDRESS);
 
     //to decide which mao tile to use
-    bool flagTile = getBit(4, lcdc);
+    bool flagTile = getBit(lcdc,4);
     //In the first case, patterns have signed numbers from 0 to 255
     //(i.e. pattern #0 lies at address $8000).
     // In the second case, patterns have signed numbers from -128 to 127 //(i.e. pattern #0 lies at address $9000).
     Byte dataTile, mapTile;
     if (flagTile)
-        dataTile = 0x9000;
+        dataTile =(Byte) 0x9000;
     else
-        dataTile = 0x8000;
+        dataTile =(Byte) 0x8000;
 
     //get the map
-    if (getBit(3, lcdc))
-        mapTile = 0x9800;
+    if (getBit(lcdc,3))
+        mapTile =(Byte) 0x9800;
     else
-        mapTile = 0x9C00;
+        mapTile =(Byte) 0x9C00;
     //check the display is enable or not
-    if (getBit(0, lcdc))
+    if (getBit(lcdc,0))
     {
         int yDraw = (yLine + yScroll) % 256;
 
@@ -152,18 +152,18 @@ void GPU::draw(int yLine)
         for (size_t counter = 0; counter < 160; counter++)
         {
             int xDraw = (counter + xScroll) % 256;
-            int xTile = x / 8;
-            int yTile = y / 8;
-            int xPixel = 8 - x % 8 - 1;
-            int yPixel = y % 8;
+            int xTile = xDraw / 8;
+            int yTile = yDraw / 8;
+            int xPixel = 8 - xDraw % 8 - 1;
+            int yPixel = yDraw % 8;
 
             if (xTile != lastPixel) //a new tile
             {
                 int numTile;
-                if (flagtile)
-                    numTile = MMU::readByte(mapTile + (yTile * 32) + tileX);
+                if (flagTile)
+                    numTile = MMU::readByte(mapTile + (yTile * 32) + xTile);
                 else if (!flagTile)
-                    numTile = (SByte)(MMU::readByte(mapTile + (yTile * 32) + tileX));
+                    numTile = (SByte)(MMU::readByte(mapTile + (yTile * 32) + xTile));
                 colorA = MMU::readByte(dataTile + (numTile * 16) + (yPixel * 2));
                 colorB = MMU::readByte(dataTile + (numTile * 16) + (yPixel * 2) + 1);
                 lastPixel = xTile;
@@ -174,32 +174,32 @@ void GPU::draw(int yLine)
     }
 
     //put sprite ito draw
-    vector<SpriteInfo> spriteData = getSprites(yLine);
+    std::vector<SpriteInfo> spriteData = getSprites(yLine);
     int size = spriteData.size();
     if (size >= 10)
         size = 10;
-    for (int i = size - 1; i >= 0 : i++)
+    for (int i = size - 1; i >= 0; i++)
     {
         SpriteInfo tempSprite = spriteData[i];
         int yPixel = yLine - tempSprite.y + 16;
-        bool xReserve = getBit(5, tempSprite.flags);
-        bool yReserve = getBit(6, tempSprite.flags);
-        bool propirty = getBit(7, tempSprite.flags);
+        bool xReserve = getBit(tempSprite.flags,5);
+        bool yReserve = getBit(tempSprite.flags,6);
+        bool propirty = getBit(tempSprite.flags,7);
         Byte tileSprite = tempSprite.tile | 0x01;
         yPixel -= 8;
         if (yReserve)
             yPixel = 7 - yPixel;
         Byte colorA = MMU::readByte(0x8000 + tileSprite * 16 + yPixel * 2);
-        Byte colorB = MMU::readByte(0x8000 + tileSprite * 16 + yPixel * 2 = 1);
+        Byte colorB = MMU::readByte(0x8000 + tileSprite * 16 + yPixel * 2 + 1);
         for (int x = 0; x < 8; ++x)
         {
             if (tempSprite.x + x - 8 < 0)
                 continue;
             int xPixel = 8 - x % 8 - 1;
             if (xReserve)
-                xPixel = 8 - xPixel - 1 = 0;
+                xPixel = 8 - xPixel - 1 ;
             int color = (((colorA >> xPixel) & 1) << 1) | ((colorB >> xPixel) & 1);
-            setPixelColor(tempSprite.x + x - 8, ly, colorMap[color]);
+            setPixelColor(tempSprite.x + x - 8, yLine, colorMap[color]);
         }
     }
 }
@@ -209,11 +209,10 @@ void GPU::initWindow(int height, int width, int pos_x, int pos_y, std::string ti
     SDL_Init(SDL_INIT_VIDEO);
     //init the window  to use
     win = SDL_CreateWindow(title_window.c_str(), pos_x, pos_y, width, height, SDL_WINDOW_SHOWN);
-    h
-        //init the var of width and height
-        windowWidth = width;
+    //init the var of width and height
+    windowWidth = width;
 
-    windowheight = height;
+    windowHeight = height;
 
     //about the clock to fresh
 
@@ -243,10 +242,10 @@ void GPU::interruptJoypad()
     if (isRequestIF)
         setInterruptFlag(4, true);
 }
-void setInterruptFlag(int pos, bool _bool)
+void GPU::setInterruptFlag(int pos, bool _bool)
 {
     Byte requestFlag = MMU::readByte(IF_ADDRESS);
-    SetBit(requesttFlag, pos, _bool);
+    setBiT(requestFlag, pos, _bool);
     MMU::writeByte(IF_ADDRESS, requestFlag);
 }
 void GPU::setLCYInterrupt()
@@ -255,7 +254,7 @@ void GPU::setLCYInterrupt()
     Byte yLine_cp = MMU::readByte(LYC_ADDRESS);
     Byte statusLCDC = MMU::readByte(STAT_ADDRESS);
     //write to the stat bit 2
-    setBit(statusLCDC, 2, yLine == yLine_cp);
+    setBiT(statusLCDC, 2, yLine == yLine_cp);
     MMU::writeByte(STAT_ADDRESS, statusLCDC);
 }
 void GPU::setPixelColor(int pos_x, int pos_y, int color)
@@ -269,12 +268,12 @@ void GPU::setPixelColor(int pos_x, int pos_y, int color)
     pixels[pos_y * 160 + pos_x] = SDL_MapRGB(pixelFormat, color, color, color);
 }
 
-vector<GPU::SpriteInfo> GPU::getSprites(int yLine)
+std::vector<GPU::SpriteInfo> GPU::getSprites(int yLine)
 {
-    vector<SpriteInfo> sprites;
-    for (int _no = 0; i < 40 : ++i)
+    std::vector<SpriteInfo> sprites;
+    for (int i = 0; i < 40; ++i)
     {
-        SpriteInfo it = SpriteInfo(_no);
+        SpriteInfo it = SpriteInfo(i);
         //check if it's in the line
         if (!(it.y == 0 || it.y >= 160 || yLine <= it.y - 16 || yLine >= it.y))
         {
@@ -298,9 +297,9 @@ bool GPU::getJoypad()
     bool isQuit = false;
     while (SDL_PollEvent(&e))
     {
-        if (e.type == SDL_Quit)
+        if (e.type == SDL_QUIT)
             isQuit == true;
-        if (e.type == SDL_keyDOWN)
+        if (e.type == SDL_KEYDOWN)
         {
             switch (e.key.keysym.sym)
             {
@@ -309,69 +308,69 @@ bool GPU::getJoypad()
                 break;
             //for column 1
             case SDLK_RIGHT:
-                joypad_C1 &= 0xE;
+                joypadC1 &= 0xE;
                 break;
             case SDLK_LEFT:
-                jopad_C1 &= 0xD;
+                joypadC1 &= 0xD;
                 break;
             case SDLK_UP:
-                joypad_C1 &= 0xB;
+                joypadC1 &= 0xB;
                 break;
             case SDLK_DOWN:
-                joypad_C1 &= 0x7;
+                joypadC1 &= 0x7;
                 break;
 
             //for column 0
             case SDLK_z:
-                joypad_C0 &= 0xE;
+                joypadC0 &= 0xE;
                 break;
             case SDLK_x:
-                joypad_C0 &= 0xD;
+                joypadC0 &= 0xD;
                 break;
             case SDLK_SPACE:
-                joypad_C0 &= 0xB;
+                joypadC0 &= 0xB;
                 break;
-            case SDLK_RETURN;
-                joypad_C0 &=0x7;
+            case SDLK_RETURN:
+                joypadC0 &= 0x7;
                 break;
             }
             interruptJoypad();
         }
-        else if (e.type == SDL_keyUP)
+        else if (e.type == SDL_KEYUP)
         {
             switch (e.key.keysym.sym)
             {
             //for column 1
             case SDLK_RIGHT:
-                joypad_C1 |= 0x1;
+                joypadC1 |= 0x1;
                 break;
             case SDLK_LEFT:
-                joypad_C1 |= 0x2;
+                joypadC1 |= 0x2;
                 break;
             case SDLK_UP:
-                joypad_C1 |= 0x4;
+                joypadC1 |= 0x4;
                 break;
             case SDLK_DOWN:
-                joypad_C1 |= 0x8;
+                joypadC1 |= 0x8;
                 break;
 
             //for column 0
             case SDLK_z:
-                joypad_C0 |= 0x1;
+                joypadC0 |= 0x1;
                 break;
             case SDLK_x:
-                joypad_C0 |= 0x2;
+                joypadC0 |= 0x2;
                 break;
             case SDLK_SPACE:
-                joypad_C0 |= 0x4;
+                joypadC0 |= 0x4;
                 break;
-            case SDLK_RETURN;
-                joypad_C0 |= 0x8;
+            case SDLK_RETURN:
+                joypadC0 |= 0x8;
                 break;
             }
         }
     }
-    if(isQuit)
+    if (isQuit)
         return false;
     else
         return true;

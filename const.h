@@ -1,4 +1,4 @@
-#include "../common.h"
+#include "common.h"
 /*FF40 - LCDC - LCD Control (R/W)
 Bit 7 - LCD Display Enable
 Bit 6 - Window Tile Map Display Select  (0=9800-9BFF, 1=9C00-9FFF)Bit 5 - Window Display Enable           (0=Off, 1=On) (0=Off,1=On)

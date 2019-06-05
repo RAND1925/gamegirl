@@ -9,7 +9,7 @@
 #include "Rom.h"
 #include "WRam.h"
 #include "ZRam.h"
-#include"gui/gpu.h"
+#include"gpu.h"
 #include "Timer.h"
 const Word ROM_VOL = 16_kb;
 #define FILE_PATH "D:\\Tetris.gb"
