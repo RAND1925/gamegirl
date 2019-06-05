@@ -2,14 +2,14 @@
 #include <SDL2/SDL.h>
 #include <string>
 #include <vector>
+#include "MMU.h"
 #include "const.h"
 #include "common.h"
-#include "MMU.h"
 #include "AddressSpace.h"
+#include "InterruptManager.h"
 //todo :
 // change the var name
 // complete the merge  from gpu
-
 class GPU : public AddressSpace
 {
 
@@ -48,9 +48,9 @@ public:
             case 0xFF41:
                 return regLcdStatus;
             case 0xFF42:
-                return regScanX;
+                return regScrollX;
             case 0xFF43:
-                return regScanY;
+                return regScrollY;
             case 0xFF44:
                 return regLineY;
             case 0xFF45:
@@ -83,11 +83,11 @@ public:
             case 0xFF41:
                 regLcdStatus = value;
             case 0xFF42:
-                regScanX = value;
+                regScrollX = value;
             case 0xFF43:
-                regScanY = value;
+                regScrollY = value;
             case 0xFF44:
-                regLineY = 0;
+                regLineY; //warn
             case 0xFF45:
                 regLineYC = value;
             case 0xFF4A:
@@ -150,10 +150,10 @@ public:
         byte ^= (-value ^ byte) & (1 << pos);
     }
     //request the IF
-    void setInterruptFlag(int bit, bool _bool);
+    //void setInterruptFlag(int bit, bool _bool);
     /***********************************************/
 
-    //some var used to scan
+    //some var used to Scroll
     int currentLine = 0, currentMode = 0, counter = 0;
     //two byte to store joypad information
     Byte joypadC0 = 0x0F, joypadC1 = 0x0F;
@@ -192,8 +192,8 @@ private:
 
     Byte regLcdControl;
     Byte regLcdStatus;
-    Byte regScanX;
-    Byte regScanY;
+    Byte regScrollX;
+    Byte regScrollY;
     Byte regLineY;
     Byte regLineYC;
     Byte regWindowX;

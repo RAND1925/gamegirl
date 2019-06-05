@@ -5,10 +5,10 @@
 void GPU::addTime(int clock)
 {
     //reset the flag
-    setInterruptFlag(0, false);
-    setInterruptFlag(1, false);
+    //setInterruptFlag(0, false);
+    //setInterruptFlag(1, false);
     // check isLCDenabled if() acoordig to the oxff40
-    Byte statusLCD = MMU::readByte(LCDC_ADDRESS);
+    Byte statusLCD =regLcdControl;
     if (!getBit(statusLCD,7 ))
         return;
     //increase the gpu clock
@@ -48,10 +48,10 @@ void GPU::addTime(int clock)
         {
             inerClock -= 205; //back to 0;
             //get the current line to draw
-            Byte yLine = MMU::readByte(LY_ADDRESS);
+            Byte yLine = regLineY;
             draw(yLine);
             yLine++;
-            MMU::writeByte(LY_ADDRESS, yLine);
+            regLineY=yLine;
             if (yLine >= 144) //call for the interrrput
             {
                 setMode(MODE_VBLANK);
@@ -72,10 +72,11 @@ void GPU::addTime(int clock)
             //back to the oam,reset the stat
             setMode(MODE_OAM);
             inerClock -= 456 * 10;
-            MMU::writeByte(LY_ADDRESS, 0);
+            regLineY=0;
+            
         }
         else
-            MMU::writeByte(LY_ADDRESS, yLine);
+            regLineY=yLine;
         break;
     }
     setLCYInterrupt();
@@ -85,7 +86,7 @@ void GPU::setMode(int mode)
     if (currentMode == mode)
         return;
     currentMode = mode;
-    Byte statusLCDC = MMU::readByte(STAT_ADDRESS);
+    Byte statusLCDC = regLcdStatus;
 
     //rese the 0bit and 1bit of the status
     //and 1111|1100
@@ -111,18 +112,18 @@ void GPU::setMode(int mode)
         break;
     }
     if (interruptFlag)
-        setInterruptFlag(1, true);
+        interruptManager.requestInterrupt(1);
     if (mode == MODE_VBLANK)
-        setInterruptFlag(0, true);
+        interruptManager.requestInterrupt(1);
 }
 void GPU::draw(int yLine)
 {
     //check if it's in the real line
     if (yLine >= 144)
         return;
-    Byte lcdc = MMU::readByte(LCDC_ADDRESS);
-    Byte xScroll = MMU::readByte(SCX_ADDRESS);
-    Byte yScroll = MMU::readByte(SCY_ADDRESS);
+    Byte lcdc =regLcdControl;
+    Byte xScroll =regScrollX;
+    Byte yScroll = regScrollY;
 
     //to decide which mao tile to use
     bool flagTile = getBit(lcdc,4);
@@ -240,23 +241,25 @@ void GPU::interruptJoypad()
         isRequestIF == true;
     //set the IF
     if (isRequestIF)
-        setInterruptFlag(4, true);
+        interruptManager.requestInterrupt(4);
 }
-void GPU::setInterruptFlag(int pos, bool _bool)
+
+void GPU::setLCYInterrupt()
+{
+    Byte yLine = regLineY;
+    Byte yLine_cp = regLineYC;
+    Byte statusLCDC = regLcdStatus;
+    //write to the stat bit 2
+    setBiT(statusLCDC, 2, yLine == yLine_cp);
+    regLcdStatus=statusLCDC;
+    
+}
+/*void GPU::setInterruptFlag(int pos, bool _bool)
 {
     Byte requestFlag = MMU::readByte(IF_ADDRESS);
     setBiT(requestFlag, pos, _bool);
     MMU::writeByte(IF_ADDRESS, requestFlag);
-}
-void GPU::setLCYInterrupt()
-{
-    Byte yLine = MMU::readByte(LY_ADDRESS);
-    Byte yLine_cp = MMU::readByte(LYC_ADDRESS);
-    Byte statusLCDC = MMU::readByte(STAT_ADDRESS);
-    //write to the stat bit 2
-    setBiT(statusLCDC, 2, yLine == yLine_cp);
-    MMU::writeByte(STAT_ADDRESS, statusLCDC);
-}
+}*/
 void GPU::setPixelColor(int pos_x, int pos_y, int color)
 {
     SDL_UnlockSurface(surface);
