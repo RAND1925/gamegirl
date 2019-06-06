@@ -9,8 +9,9 @@
 #include "AddressSpace.h"
 #include <array>
 
-template <Word offset, Word length>
 class WRam: public AddressSpace {
+    const static Word offset = 0xC000;
+    const static Word length = 0x3E00 ;
     std::array<Byte, length> bytes;
 public:
     bool accepts(Word address) override{
@@ -22,7 +23,10 @@ public:
     void setByte(Word address, Byte value) override {
         bytes[address & 0x1FFF] = value;
     }
+    WRam(){};
 };
+
+extern WRam wRam;
 
 
 #endif //GAMEGIRL_WRAM_H

@@ -5,36 +5,31 @@
 
 #include "common.h"
 #include "MMU.h"
-#include "CPU.h"
 #include "WRam.h"
 #include "ZRam.h"
 #include "Timer.h"
 #include "Cartridge.h"
-#define FILE_PATH "D:\\bgtest.gb"
+#include "InterruptManager.h"
+#include "CPU.h"
+#include "CycleCounter.h"
 
-int main() {
+int main(int argc,char** argv) {
 
-    std::ifstream gameFile;
-    gameFile.open("D:\\bgbtest.gb", std::ios::binary);
-    CartridgeDriver cartridgeDriver(gameFile);
-    std::cout << "loading game:" << cartridgeDriver.getTitle() << std::endl;
-    gameFile.close();
+    std::cin.sync_with_stdio(0);
+    std::cout.sync_with_stdio(0);
 
-    MMU mmu;
+    const std::string FILE_PATH("E:\\C++project\\cpu_instrs\\individual\\03-op sp,hl.gb");
+    cartridgeDriver.openFile(FILE_PATH);
 
-    WRam<0xC000, 8_kByte + 0x1E00> wRam;
-    ZRam<0xFF40, 0xC0> zRam;
-    Timer timer(mmu);
+    cpu.initMap();
+
     mmu.addAddressSpace(&timer);
     mmu.addAddressSpace(&cartridgeDriver);
-    CPU cpu(mmu);
     mmu.addAddressSpace(&wRam);
-    mmu.addAddressSpace(&timer);
-    mmu.addAddressSpace(&cpu);
-    mmu.addAddressSpace(&cartridgeDriver);
+    mmu.addAddressSpace(&interruptManager);
     mmu.addAddressSpace(&zRam);
-    while(true) {
-        Byte timing=cpu.cycle();
-        timer.increase(timing);
-    }
+
+    mmu.writeByte(0xFF44,0x90);
+    cycleCounter.cycle();
+
 }

@@ -9,16 +9,18 @@
 #include <iostream>
 #include <iomanip>
 #include "common.h"
+#include "Exceptions.h"
 #include "MMU.h"
+#include "InterruptManager.h"
 
-class CPU: public AddressSpace {
+class CPU{
 private:
         using FlagSetter = std::function<void(void)>;
         using FlagGetter = std::function<Byte(void)>;
         FlagSetter setZ = [this]() {setBit(registers.f, 7); };
         FlagSetter setN = [this]() {setBit(registers.f, 6); };
         FlagSetter setH = [this]() {setBit(registers.f, 5); };
-        FlagSetter setC = [this]() {setBit(registers.f, 5); };
+        FlagSetter setC = [this]() {setBit(registers.f, 4); };
         FlagSetter resetZ = [this]() { resetBit(registers.f, 7); };
         FlagSetter resetN = [this]() { resetBit(registers.f, 6); };
         FlagSetter resetH = [this]() { resetBit(registers.f, 5); };
@@ -32,16 +34,6 @@ private:
         Byte a, f, b, c, d, e, h, l;
         Word sp, pc;
     }registers, backup;
-    struct States{
-        bool interruptMasterEnabled = true;
-        Byte interruptEnabled = 0;
-        Byte interruptFlag = 0;
-        bool halt = false;
-        bool stop = false;
-    }states;
-
-
-    MMU & mmu;
 	Byte add(Byte a, Byte b) {
         (((a & 0xF) + (b & 0xF)) > 0xF) ?setH():resetH();
         (UINT8_MAX - a < b) ?setC():resetC();
@@ -128,15 +120,14 @@ private:
 	}
 
 	void push16(Word val) {
-		mmu.writeByte(registers.sp-2, (Byte)val);
-		mmu.writeByte(registers.sp-1, (Byte)(val>>8));
-		registers.sp -= 2;
+        registers.sp -= 2;
+		mmu.writeWord(registers.sp, val);
+
 		//according to gb instructions25, I thought it should be +=2
 	}
 	Word pop16() {
-		registers.sp += 2;
-		Word val = mmu.readByte(registers.sp - 2);
-		val |= (mmu.readByte(registers.sp - 1)<<8);//according to gb instructions25, idk why
+		Word val = mmu.readWord(registers.sp);
+        registers.sp += 2;
 		return val;
 	}
 	Byte swap(Byte a) {
@@ -169,7 +160,7 @@ private:
         (ra&0xFF)==0?setZ():resetZ();
 	    resetH();
 	    if(ra&0x100) setC();
-	    registers.a=ra;
+	    registers.a=(Byte)(ra & 0xFF);
 	}
 
 	Byte cpl(Byte a) {
@@ -245,7 +236,7 @@ private:
 	}
     //maybe some promblems
 	Byte sra(Byte a) {
-		Byte bit_7 = a & (1 << 7);
+		Byte bit_7 = a & (Byte)(1 << 7);
 		Byte bit_0 = a << 7;
 		Byte res = (a >> 1) + bit_7;
         (res == 0) ?setZ():resetZ();
@@ -270,16 +261,18 @@ private:
 	void bit(Byte b,Byte a) {
 		resetN();
 		setH();
-		Byte res = a & (1 << b);
+		Byte res = a & (Byte)(1 << b);
         (res == 0) ?setZ():resetZ();
 	}
 
 	Byte set(Byte b, Byte a) {
-		return a | (1 << b);
+	    setBit(a, b);
+        return a;
 	}
 
 	Byte res(Byte b, Byte a) {
-        return a & ~(1 << b);
+	    resetBit(a, b);
+        return a;
 	}
 
 	void jump(Word addr){
@@ -306,92 +299,77 @@ private:
         call(addr);
 	}
 
-    void initMap();
     std::function<Byte(void)> opMap[0x100];
 	std::function<Byte(void)> opCBMap[0x100];
   public:
+    void display()const{
+        std::cout << "a:" << std::hex << (int)registers.a << ' '
+                  << "f:" << std::hex << (int)registers.f << ' '
+                  << "b:" << std::hex << (int)registers.b << ' '
+                  << "c:" << std::hex << (int)registers.c << ' '
+                  << "d:" << std::hex << (int)registers.d << ' '
+                  << "e:" << std::hex << (int)registers.e << ' '
+                  << "h:" << std::hex << (int)registers.h << ' '
+                  << "l:" << std::hex << (int)registers.l << ' '
+                  << "ie:" << std::hex << (int)mmu.readByte(0xFFFF) << ' '
+                  << "if:" << std::hex << (int)mmu.readByte(0xFF0F) << ' '
+                  << "sp:" << std::hex << (int)registers.sp << ' '
+                  << "pc:" << std::hex << (int)registers.pc << ' '
+                  << "stack:" << (int)mmu.readWord(registers.sp)<<std::endl;
+    }
+
+
+	void initMap();
     Byte step(){
+            display();
+//c246  c7e3
+        Word breakPoint[6] = {0x3DA, 0x3DB, 0x3DC, 0x3DD, 0x3DE, 0x3DF};
+        for (int j = 0; j < 6; ++j) {
+            if (registers.pc == breakPoint[j]){
+
+            }
+        }
 
     	Byte timing = 4;
-    	std::cout << "a:" << std::hex << (int)registers.a << ' '
-				  << "f:" << std::hex << (int)registers.f << ' '
-				  << "d:" << std::hex << (int)registers.d << ' '
-				  << "e:" << std::hex << (int)registers.e << ' '
-				  << "h:" << std::hex << (int)registers.h << ' '
-				  << "l:" << std::hex << (int)registers.l << ' '
-				  << "sp:" << std::hex << (int)registers.sp << ' '
-				  << "pc:" << std::hex << (int)registers.pc << std::endl;
+        if (interruptManager.hasInterrupt()){
+            Byte interruptCode = interruptManager.handleInterrupt();
+            restart((Byte)0x40 + (interruptCode << (Byte)0x3));
+            return 32;
+        } else {
+           if (interruptManager.handleHalt()) {
 
-		bool hasInterrupt = states.interruptEnabled & states.interruptFlag;
-        if (hasInterrupt && states.interruptMasterEnabled){
-            states.halt = false;
-            states.interruptMasterEnabled = false;
-			std::cout << "interrupt: " << (int)states.interruptFlag << std::endl;
-			for(Byte i = 0; i < 8; ++i){
-				if (getBit(states.interruptFlag, i)){
-					restart(0x40 + (i<<3));
-					return 32;
-				}
-			}
-        }
-        else {
-            if (!states.interruptMasterEnabled && states.interruptFlag && states.halt){
-				std::cout << "halt" << std::endl;
-				states.halt = false;
-            }
-            else {
-				Byte opNum = mmu.readByte(registers.pc);
+               Byte opNum = mmu.readByte(registers.pc);
 
-				registers.pc++;
-				timing = opMap[opNum]();
-				std::cout << " opNum: " << std::hex << (int)opNum << std::endl;
-            }
+               registers.pc++;
+               timing = opMap[opNum]();
+               //std::cout << " opNum: " << std::hex << (int) opNum << std::endl;
+           }
         }
         return timing;
     }
 
-    CPU(MMU & m):mmu(m){
-        initRegisters();
-        initMap();
-    };
-    Byte cycle(){
-    		Byte timing = step();
-			return timing;
-    }
+
 
     void initRegisters(){
-        registers.a = 0x01;
-        registers.f = 0xB0;
+        registers.a = 0x11;
+        registers.f = 0x80;
         registers.b = 0x00;
-        registers.c = 0x13;
-        registers.d = 0x00;
-        registers.e = 0xD8;
-        registers.h = 0x01;
-        registers.l = 0x4D;
+        registers.c = 0x00;
+        registers.d = 0xFF;
+        registers.e = 0x56;
+        registers.h = 0x00;
+        registers.l = 0x0D;
         registers.sp = 0xFFFE;
         registers.pc = 0x0100;
 
         //todo: init registers in zram;
     };
-    bool accepts(Word address) override{
-		return address == 0xFF0F || address == 0xFFFF;
+    CPU(){
+        initRegisters();
+        initMap();
     }
-    Byte getByte(Word address) override{
-		if (address == 0xFF0F){
-			return states.interruptEnabled;
-		} else {
-			return states.interruptFlag;
-    	}
-    }
-
-	void setByte(Word address, Byte value) override{
-		if (address == 0xFF0F){
-			states.interruptEnabled  = value;
-		} else {
-			states.interruptFlag = value;
-		}
-	}
 };
 
+extern CPU cpu;
 
 #endif //GAMEGIRL_CPU_H

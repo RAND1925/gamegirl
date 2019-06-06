@@ -4,6 +4,7 @@
 
 #include "Timer.h"
 
+Timer timer;
 Byte Timer::increase(Byte cycle) {
     subClock+=cycle;
     if(subClock>=4) {

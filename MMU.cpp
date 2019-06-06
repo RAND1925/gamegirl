@@ -2,21 +2,22 @@
 // Created by dell on 2019/4/17.
 //
 
-#include "MMU.h"
 #include <iostream>
+#include "MMU.h"
 
+MMU mmu;
 Byte MMU::readByte(Word address){
     for (AddressSpace *s : spaces){
         if (s->accepts(address)){
             return s->getByte(address);
         }
     }
-    std::cout << address << ":unused[read]" << std::endl;
+    //std::cout << address << ":unused[read]" << std::endl;
     return unusedSpaces[address];
 }
 
 Word MMU::readWord(Word address){
-    return readByte(address) | (readByte(address + 1) << 8);
+    return readByte(address) | readByte((Word)(address + 1)) << 8;
 }
 
 void MMU::writeByte(Word address, Byte value){
@@ -26,7 +27,7 @@ void MMU::writeByte(Word address, Byte value){
             return;
         }
     }
-    std::cout << address << ":unused[write]" << std::endl;
+    //std::cout << address << ":unused[write]" << std::endl;
     unusedSpaces[address] = value;
 }
 
