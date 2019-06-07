@@ -165,7 +165,9 @@ void CPU::initMap() {
 	opMap[0xF9] = [this, &ld16, &getHL]() {ld16(registers.sp, getHL()); return 8; };
 
 	//ldhl sp
-	opMap[0xF8] = [this, &setHL, &getImmediateValue16]() {setHL(add(registers.sp, getImmediateValue16())); return 12; };
+	opMap[0xF8] = [this, &setHL, &getImmediateValue8]() {
+	    Word ea=addSp(registers.sp,(SByte)getImmediateValue8());
+	    setHL(ea); return 12; };
 
 	//ld(nn) sp
 	opMap[0x08] = [this, &getImmediateValue16]() {mmu.writeWord(getImmediateValue16(), registers.sp); return 20; };
