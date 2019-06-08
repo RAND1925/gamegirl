@@ -87,7 +87,7 @@ public:
             case 0xFF43:
                 regScrollY = value;
             case 0xFF44:
-                regLineY = value; //warn
+                regLineY = 0; //warn
             case 0xFF45:
                 regLineYC = value;
             case 0xFF4A:
@@ -200,6 +200,6 @@ private:
     Byte regWindowY;
     //tooo about interrupt:
 
-    std::array<Byte, lengthVram> bytesVram;
-    std::array<Byte, lengthOam> bytesOam;
+    static std::array<Byte, lengthVram> bytesVram;
+    static std::array<Byte, lengthOam> bytesOam;
 };

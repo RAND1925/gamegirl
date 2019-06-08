@@ -162,11 +162,11 @@ void GPU::draw(int yLine)
             {
                 int numTile;
                 if (flagTile)
-                    numTile = mmu.readByte(mapTile + (yTile * 32) + xTile);
+                    numTile = bytesVram[mapTile + (yTile * 32) + xTile-offsetVram];
                 else if (!flagTile)
-                    numTile = (SByte)(mmu.readByte(mapTile + (yTile * 32) + xTile));
-                colorA = mmu.readByte(dataTile + (numTile * 16) + (yPixel * 2));
-                colorB = mmu.readByte(dataTile + (numTile * 16) + (yPixel * 2) + 1);
+                    numTile = (SByte)(bytesVram[mapTile + (yTile * 32) + xTile-offsetVram]);
+                colorA = bytesVram[dataTile + (numTile * 16) + (yPixel * 2)-offsetVram];
+                colorB = bytesVram[dataTile + (numTile * 16) + (yPixel * 2) + 1-offsetVram];
                 lastPixel = xTile;
             }
             int color = (((colorA >> xPixel) & 1) << 1) | ((colorB >> xPixel) & 1);
@@ -190,8 +190,8 @@ void GPU::draw(int yLine)
         yPixel -= 8;
         if (yReserve)
             yPixel = 7 - yPixel;
-        Byte colorA = mmu.readByte(0x8000 + tileSprite * 16 + yPixel * 2);
-        Byte colorB = mmu.readByte(0x8000 + tileSprite * 16 + yPixel * 2 + 1);
+        Byte colorA = bytesOam[0x8000 + tileSprite * 16 + yPixel * 2-offsetOam];
+        Byte colorB = bytesOam[0x8000 + tileSprite * 16 + yPixel * 2 + 1-offsetOam];
         for (int x = 0; x < 8; ++x)
         {
             if (tempSprite.x + x - 8 < 0)
@@ -289,11 +289,11 @@ std::vector<GPU::SpriteInfo> GPU::getSprites(int yLine)
     return sprites;
 }
 
-GPU::SpriteInfo::SpriteInfo(int id)
-    : y(mmu.readByte(0xFE00 + id * 4 + 0)),
-      x(mmu.readByte(0xFE00 + id * 4 + 1)),
-      tile(mmu.readByte(0xFE00 + id * 4 + 2)),
-      flags(mmu.readByte(0xFE00 + id * 4 + 3)) {}
+GPU::SpriteInfo::SpriteInfo(int id) 
+    : y(bytesOam[0xFE00 + id * 4 + 0-offsetOam]),
+      x(bytesOam[0xFE00 + id * 4 + 1-offsetOam]),
+      tile(bytesOam[0xFE00 + id * 4 + 2-offsetOam]),
+      flags(bytesOam[0xFE00 + id * 4 + 3-offsetOam]) {}
 
 bool GPU::getJoypad()
 {
