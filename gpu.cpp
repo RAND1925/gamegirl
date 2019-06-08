@@ -162,11 +162,11 @@ void GPU::draw(int yLine)
             {
                 int numTile;
                 if (flagTile)
-                    numTile = MMU::readByte(mapTile + (yTile * 32) + xTile);
+                    numTile = mmu.readByte(mapTile + (yTile * 32) + xTile);
                 else if (!flagTile)
-                    numTile = (SByte)(MMU::readByte(mapTile + (yTile * 32) + xTile));
-                colorA = MMU::readByte(dataTile + (numTile * 16) + (yPixel * 2));
-                colorB = MMU::readByte(dataTile + (numTile * 16) + (yPixel * 2) + 1);
+                    numTile = (SByte)(mmu.readByte(mapTile + (yTile * 32) + xTile));
+                colorA = mmu.readByte(dataTile + (numTile * 16) + (yPixel * 2));
+                colorB = mmu.readByte(dataTile + (numTile * 16) + (yPixel * 2) + 1);
                 lastPixel = xTile;
             }
             int color = (((colorA >> xPixel) & 1) << 1) | ((colorB >> xPixel) & 1);
@@ -190,8 +190,8 @@ void GPU::draw(int yLine)
         yPixel -= 8;
         if (yReserve)
             yPixel = 7 - yPixel;
-        Byte colorA = MMU::readByte(0x8000 + tileSprite * 16 + yPixel * 2);
-        Byte colorB = MMU::readByte(0x8000 + tileSprite * 16 + yPixel * 2 + 1);
+        Byte colorA = mmu.readByte(0x8000 + tileSprite * 16 + yPixel * 2);
+        Byte colorB = mmu.readByte(0x8000 + tileSprite * 16 + yPixel * 2 + 1);
         for (int x = 0; x < 8; ++x)
         {
             if (tempSprite.x + x - 8 < 0)
@@ -290,10 +290,10 @@ std::vector<GPU::SpriteInfo> GPU::getSprites(int yLine)
 }
 
 GPU::SpriteInfo::SpriteInfo(int id)
-    : y(MMU::readByte(0xFE00 + id * 4 + 0)),
-      x(MMU::readByte(0xFE00 + id * 4 + 1)),
-      tile(MMU::readByte(0xFE00 + id * 4 + 2)),
-      flags(MMU::readByte(0xFE00 + id * 4 + 3)) {}
+    : y(mmu.readByte(0xFE00 + id * 4 + 0)),
+      x(mmu.readByte(0xFE00 + id * 4 + 1)),
+      tile(mmu.readByte(0xFE00 + id * 4 + 2)),
+      flags(mmu.readByte(0xFE00 + id * 4 + 3)) {}
 
 bool GPU::getJoypad()
 {

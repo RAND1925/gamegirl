@@ -87,7 +87,7 @@ public:
             case 0xFF43:
                 regScrollY = value;
             case 0xFF44:
-                regLineY; //warn
+                regLineY = value; //warn
             case 0xFF45:
                 regLineYC = value;
             case 0xFF4A:
@@ -103,7 +103,7 @@ public:
     class SpriteInfo
     {
     public:
-        Byte y{0};
+        Byte y;
 
         Byte x{0};
 
