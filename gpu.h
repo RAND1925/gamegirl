@@ -200,6 +200,7 @@ private:
     Byte regWindowY;
     //tooo about interrupt:
 
-    static std::array<Byte, lengthVram> bytesVram;
-    static std::array<Byte, lengthOam> bytesOam;
+    std::array<Byte, lengthVram> bytesVram;
+    std::array<Byte, lengthOam> bytesOam;
 };
+extern GPU gpu;

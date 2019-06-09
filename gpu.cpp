@@ -2,6 +2,7 @@
 #include <iostream>
 #include <algorithm>
 #include "gpu.h"
+GPU gpu;
 void GPU::addTime(int clock)
 {
     //reset the flag
@@ -290,10 +291,10 @@ std::vector<GPU::SpriteInfo> GPU::getSprites(int yLine)
 }
 
 GPU::SpriteInfo::SpriteInfo(int id) 
-    : y(bytesOam[0xFE00 + id * 4 + 0-offsetOam]),
-      x(bytesOam[0xFE00 + id * 4 + 1-offsetOam]),
-      tile(bytesOam[0xFE00 + id * 4 + 2-offsetOam]),
-      flags(bytesOam[0xFE00 + id * 4 + 3-offsetOam]) {}
+    : y(mmu.readByte(0xFE00 + id * 4 + 0-offsetOam)),
+      x(mmu.readByte(0xFE00 + id * 4 + 1-offsetOam)),
+      tile(mmu.readByte(0xFE00 + id * 4 + 2-offsetOam)),
+      flags(mmu.readByte(0xFE00 + id * 4 + 3-offsetOam)) {}
 
 bool GPU::getJoypad()
 {
