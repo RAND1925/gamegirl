@@ -12,6 +12,7 @@
 #include "Exceptions.h"
 #include "MMU.h"
 #include "InterruptManager.h"
+#include <fstream>
 
 class CPU{
 private:
@@ -301,9 +302,10 @@ private:
 
     std::function<Byte(void)> opMap[0x100];
 	std::function<Byte(void)> opCBMap[0x100];
+	std::ofstream log{"a.txt"};
   public:
-    void display()const{
-        std::cout << "a:" << std::hex << (int)registers.a << ' '
+    void display(){
+       log << "a:" << std::hex << (int)registers.a << ' '
                   << "f:" << std::hex << (int)registers.f << ' '
                   << "b:" << std::hex << (int)registers.b << ' '
                   << "c:" << std::hex << (int)registers.c << ' '

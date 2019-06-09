@@ -21,7 +21,7 @@ int main(int argc,char** argv) {
 
     const std::string FILE_PATH("E:/cpu_instrs/individual/07-jr,jp,call,ret,rst.gb");
     cartridgeDriver.openFile(FILE_PATH);
-
+    gpu.initWindow(480, 320, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, "");
     cpu.initMap();
     mmu.addAddressSpace(&timer);
     mmu.addAddressSpace(&cartridgeDriver);

@@ -8,7 +8,7 @@
 #include "MMU.h"
 #include "CPU.h"
 #include "Timer.h"
-
+#include "gpu.h"
 
 /*
  *
@@ -36,6 +36,8 @@ public:
         Byte cpuCycle = cpu.step();
         allCycle += cpuCycle;
         timer.increase(cpuCycle);
+        gpu.addTime(cpuCycle);
+
     }
     void cycle(){
         while(true){
