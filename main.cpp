@@ -18,7 +18,7 @@ int main(int argc,char** argv) {
     std::cin.sync_with_stdio(0);
     std::cout.sync_with_stdio(0);
 
-    const std::string FILE_PATH("E:\\C++project\\cpu_instrs\\individual\\03-op sp,hl.gb");
+    const std::string FILE_PATH("E:\\C++project\\cpu_instrs\\individual\\07-jr,jp,call,ret,rst.gb");
     cartridgeDriver.openFile(FILE_PATH);
 
     cpu.initMap();

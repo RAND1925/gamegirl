@@ -54,8 +54,8 @@ private:
         return sum & 0xFFFF;
     };
 
-	Word addSp(Word a, Word b) {
-        Word sum = a + (int_fast8_t)b;
+	Word addSp(Word a, SByte b) {
+        Word sum = a + b;
         (sum & 0xF) < (a & 0xF) ? setH() : resetH();
         (sum & 0xFF) < (a & 0xFF) ? setC() : resetC();
         resetZ();
