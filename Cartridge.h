@@ -128,8 +128,8 @@ private:
     size_t ramSize;
     std::string title;
     Cartridge * cartridgePointer;
-    constexpr static size_t ramSizeMap[5] = {0, 2, 8, 32, 128};
-    constexpr static size_t romSizeMap[3] = {72, 80,96};
+    int ramSizeMap[5] = {0, 2, 8, 32, 128};
+    int romSizeMap[3] = {72, 80,96};
 
     void genCartridge(std::ifstream & stream,size_t romSize,size_t ramSize){
         switch (cartridgeType){
