@@ -20,7 +20,7 @@ private:
         FlagSetter setZ = [this]() {setBit(registers.f, 7); };
         FlagSetter setN = [this]() {setBit(registers.f, 6); };
         FlagSetter setH = [this]() {setBit(registers.f, 5); };
-        FlagSetter setC = [this]() {setBit(registers.f, 5); };
+        FlagSetter setC = [this]() {setBit(registers.f, 4); };
         FlagSetter resetZ = [this]() { resetBit(registers.f, 7); };
         FlagSetter resetN = [this]() { resetBit(registers.f, 6); };
         FlagSetter resetH = [this]() { resetBit(registers.f, 5); };
@@ -54,8 +54,8 @@ private:
         return sum & 0xFFFF;
     };
 
-	Word addSp(Word a, Word b) {
-        Word sum = a + (int_fast8_t)b;
+	Word addSp(Word a, SByte b) {
+        Word sum = a + b;
         (sum & 0xF) < (a & 0xF) ? setH() : resetH();
         (sum & 0xFF) < (a & 0xFF) ? setC() : resetC();
         resetZ();
@@ -120,15 +120,14 @@ private:
 	}
 
 	void push16(Word val) {
-		mmu.writeByte(registers.sp-2, (Byte)val);
-		mmu.writeByte(registers.sp-1, (Byte)(val>>8));
-		registers.sp -= 2;
+        registers.sp -= 2;
+		mmu.writeWord(registers.sp, val);
+
 		//according to gb instructions25, I thought it should be +=2
 	}
 	Word pop16() {
-		registers.sp += 2;
-		Word val = mmu.readByte(registers.sp - 2);
-		val |= (mmu.readByte(registers.sp - 1)<<8);//according to gb instructions25, idk why
+		Word val = mmu.readWord(registers.sp);
+        registers.sp += 2;
 		return val;
 	}
 	Byte swap(Byte a) {
@@ -303,54 +302,72 @@ private:
     std::function<Byte(void)> opMap[0x100];
 	std::function<Byte(void)> opCBMap[0x100];
   public:
+    void display()const{
+        std::cout << "a:" << std::hex << (int)registers.a << ' '
+                  << "f:" << std::hex << (int)registers.f << ' '
+                  << "b:" << std::hex << (int)registers.b << ' '
+                  << "c:" << std::hex << (int)registers.c << ' '
+                  << "d:" << std::hex << (int)registers.d << ' '
+                  << "e:" << std::hex << (int)registers.e << ' '
+                  << "h:" << std::hex << (int)registers.h << ' '
+                  << "l:" << std::hex << (int)registers.l << ' '
+                  << "ie:" << std::hex << (int)mmu.readByte(0xFFFF) << ' '
+                  << "if:" << std::hex << (int)mmu.readByte(0xFF0F) << ' '
+                  << "sp:" << std::hex << (int)registers.sp << ' '
+                  << "pc:" << std::hex << (int)registers.pc << ' '
+                  << "stack:" << (int)mmu.readWord(registers.sp)<<std::endl;
+    }
+
+
 	void initMap();
     Byte step(){
+            display();
+//c246  c7e3
+        Word breakPoint[6] = {0x3DA, 0x3DB, 0x3DC, 0x3DD, 0x3DE, 0x3DF};
+        for (int j = 0; j < 6; ++j) {
+            if (registers.pc == breakPoint[j]){
+
+            }
+        }
+
     	Byte timing = 4;
-    	std::cout << "a:" << std::hex << (int)registers.a << ' '
-				  << "f:" << std::hex << (int)registers.f << ' '
-				  << "d:" << std::hex << (int)registers.d << ' '
-				  << "e:" << std::hex << (int)registers.e << ' '
-				  << "h:" << std::hex << (int)registers.h << ' '
-				  << "l:" << std::hex << (int)registers.l << ' '
-				  << "sp:" << std::hex << (int)registers.sp << ' '
-				  << "pc:" << std::hex << (int)registers.pc << std::endl;
-		//todo :reset
         if (interruptManager.hasInterrupt()){
             Byte interruptCode = interruptManager.handleInterrupt();
             restart((Byte)0x40 + (interruptCode << (Byte)0x3));
             return 32;
         } else {
-            if (interruptManager.handleHalt())
-            {
-				Byte opNum = mmu.readByte(registers.pc);
-				registers.pc++;
-				timing = opMap[opNum]();
-				std::cout << " opNum: " << std::hex << (int)opNum << std::endl;
-            }
+           if (interruptManager.handleHalt()) {
+
+               Byte opNum = mmu.readByte(registers.pc);
+
+               registers.pc++;
+               timing = opMap[opNum]();
+               //std::cout << " opNum: " << std::hex << (int) opNum << std::endl;
+           }
         }
         return timing;
     }
 
-    CPU(){
-        initRegisters();
-        initMap();
-    };
+
 
     void initRegisters(){
-        registers.a = 0x01;
-        registers.f = 0xB0;
+        registers.a = 0x11;
+        registers.f = 0x80;
         registers.b = 0x00;
-        registers.c = 0x13;
-        registers.d = 0x00;
-        registers.e = 0xD8;
-        registers.h = 0x01;
-        registers.l = 0x4D;
+        registers.c = 0x00;
+        registers.d = 0xFF;
+        registers.e = 0x56;
+        registers.h = 0x00;
+        registers.l = 0x0D;
         registers.sp = 0xFFFE;
         registers.pc = 0x0100;
 
         //todo: init registers in zram;
     };
-
+    CPU(){
+        initRegisters();
+        initMap();
+    }
 };
 
 extern CPU cpu;

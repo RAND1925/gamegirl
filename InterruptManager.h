@@ -12,7 +12,7 @@
 class InterruptManager:  public AddressSpace{
     bool iME = false;
     Byte iE = 0;//FFFF
-    Byte iF = 0;//FF0F
+    Byte iF = 0xE1;//FF0F
 
     bool stop = false;
     bool halt = false;
@@ -43,7 +43,7 @@ public:
     Byte handleInterrupt(){
         iME = false;
         halt = false;
-        Byte maskCode = iE & iF;
+        Byte maskCode = (iE & iF) & 0x1F;
         for(Byte i = 0; i < 5; ++i){
             if (getBit(maskCode, i)){
                 std::cout << "interrupt: " << i << std::endl;

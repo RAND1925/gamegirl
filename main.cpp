@@ -13,18 +13,23 @@
 #include "CPU.h"
 #include "CycleCounter.h"
 
-int main() {
+int main(int argc,char** argv) {
 
-    const std::string FILE_PATH("D:\\bgbtest.gb");
+    std::cin.sync_with_stdio(0);
+    std::cout.sync_with_stdio(0);
+
+    const std::string FILE_PATH("E:\\C++project\\cpu_instrs\\individual\\07-jr,jp,call,ret,rst.gb");
     cartridgeDriver.openFile(FILE_PATH);
 
     cpu.initMap();
+
     mmu.addAddressSpace(&timer);
     mmu.addAddressSpace(&cartridgeDriver);
     mmu.addAddressSpace(&wRam);
     mmu.addAddressSpace(&interruptManager);
     mmu.addAddressSpace(&zRam);
 
+    mmu.writeByte(0xFF44,0x90);
     cycleCounter.cycle();
 
 }

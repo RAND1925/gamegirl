@@ -12,7 +12,7 @@ Byte MMU::readByte(Word address){
             return s->getByte(address);
         }
     }
-    std::cout << address << ":unused[read]" << std::endl;
+    //std::cout << address << ":unused[read]" << std::endl;
     return unusedSpaces[address];
 }
 
@@ -27,7 +27,7 @@ void MMU::writeByte(Word address, Byte value){
             return;
         }
     }
-    std::cout << address << ":unused[write]" << std::endl;
+    //std::cout << address << ":unused[write]" << std::endl;
     unusedSpaces[address] = value;
 }
 

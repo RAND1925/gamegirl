@@ -35,7 +35,6 @@ public:
     void step(){
         Byte cpuCycle = cpu.step();
         allCycle += cpuCycle;
-        std::cout << allCycle << std::endl;
         timer.increase(cpuCycle);
     }
     void cycle(){
