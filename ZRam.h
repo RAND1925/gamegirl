@@ -5,12 +5,13 @@
 #ifndef GAMEGIRL_ZRAM_H
 #define GAMEGIRL_ZRAM_H
 
+#include <array>
 #include "common.h"
 #include "AddressSpace.h"
-#include <array>
 
-template <Word offset, Word length>
 class ZRam: public AddressSpace {
+    const static Word offset = 0xFF40;
+    const static Word length = 0x00C0;
     std::array<Byte, length> bytes;
 public:
     bool accepts(Word address) override{
@@ -22,9 +23,6 @@ public:
     void setByte(Word address, Byte value) override {
         bytes[address - offset] = value;
     }
-
-    Byte & bindRegister(Word address){
-        return bytes[address];
-    }
 };
+extern ZRam zRam;
 #endif //GAMEGIRL_ZRAM_H

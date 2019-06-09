@@ -5,12 +5,14 @@
 #include "CPU.h"
 #include "common.h"
 #include <iostream>
+
+CPU cpu;
 void CPU::initMap() {
 	auto ld8 = [](Byte &lhs, Byte rhs) { lhs = rhs; };
 	auto ld16 = [](Word &lhs, Word rhs) { lhs = rhs; };
 
 	auto getR16 = [](Byte high, Byte low)->Word { return (high << 8) | low; };
-	auto setR16 = [](Byte & high, Byte & low, Word t) { high = t >> 8; low = t & 0xFF; };
+	auto setR16 = [](Byte & high, Byte & low, Word t) { high = (Byte)(t >> (Byte)8); low = (Byte)(t & (Byte)0xFF); };
  	auto getHL = [this, getR16]()->Word { return getR16(registers.h, registers.l); };
 	auto getBC = [this, getR16]()->Word { return getR16(registers.b, registers.c); };
 	auto getDE = [this, getR16]()->Word { return getR16(registers.d, registers.e); };
@@ -38,7 +40,7 @@ void CPU::initMap() {
 	opMap[0x0A] = [this, &ld8, &getBC]() {ld8(registers.a, mmu.readByte(getBC())); return 8; };
 	opMap[0x1A] = [this, &ld8, &getDE]() {ld8(registers.a, mmu.readByte(getDE())); return 8; };
 	opMap[0xFA] = [this, &ld8, &getImmediateValue16]() {
-		ld8(registers.a, mmu.readWord(getImmediateValue16()));
+		ld8(registers.a, mmu.readByte(getImmediateValue16()));
 		return 16;
 	};
 
@@ -158,10 +160,7 @@ void CPU::initMap() {
 		ld16(registers.sp, tmp); return 12; };
 
 	//sp
-	opMap[0xF9] = [this, &ld16, &getHL]() {ld16(registers.sp, getHL()); return 8; };
-
-	//ldhl sp
-	opMap[0xF8] = [this, &setHL, &getImmediateValue16]() {setHL(add(registers.sp, getImmediateValue16())); return 12; };
+	// gisters.sp, getImmediateValue16())); return 12; };
 
 	//ld(nn) sp
 	opMap[0x08] = [this, &getImmediateValue16]() {mmu.writeWord(getImmediateValue16(), registers.sp); return 20; };
@@ -312,7 +311,7 @@ void CPU::initMap() {
 
 	opMap[0xCB] = [this, &getImmediateValue8]() {return opCBMap[getImmediateValue8()](); };
 
-	//
+	//daa
 	opMap[0x27] = [this](){daa();return 4;};
 
 	//cpl
@@ -457,7 +456,7 @@ void CPU::initMap() {
 	opMap[0xD4] = [this, &ld16, &getImmediateValue16]() {if (!getC()) { call(getImmediateValue16()); } return 12; };
 	opMap[0xDC] = [this, &ld16, &getImmediateValue16]() {if (getC()) { call(getImmediateValue16()); } return 12; };
 
-	//ret
+	//restart
 	opMap[0xC7] = [this]() {restart(0x00); return 32; };
 	opMap[0xCF] = [this]() {restart(0x08); return 32; };
 	opMap[0xD7] = [this]() {restart(0x10); return 32; };
@@ -474,14 +473,13 @@ void CPU::initMap() {
 	opMap[0xD0] = [this, &ld16]() {if (!getC()) { ld16(registers.pc, pop16()); }return 8; };
 	opMap[0xD8] = [this, &ld16]() {if (getC()) { ld16(registers.pc, pop16()); }return 8; };
 	//reti
-	opMap[0xD9] = [this, &ld16]() { ld16(registers.pc, pop16());states.interruptMasterEnabled = true; return 8; };
-    //interrupt
+	opMap[0xD9] = [this, &ld16]() { ld16(registers.pc, pop16());interruptManager.setIME(true); return 8; };
 
     //stop
-    opMap[0x10] = [this, &getImmediateValue8](){states.stop = true; getImmediateValue8(); return 4; };
-
-    opMap[0x76] = [this](){states.halt = true; return 4; };
+    opMap[0x10] = [this, &getImmediateValue8](){interruptManager.setStop(true); getImmediateValue8(); return 4; };
+    //halt
+    opMap[0x76] = [this](){interruptManager.setHalt(true); return 4; };
     //DI & EI
-    opMap[0xF3] = [this](){states.interruptMasterEnabled = false; return 4; };
-    opMap[0xFB] = [this](){states.interruptMasterEnabled = true; return 4; };
+    opMap[0xF3] = [this](){interruptManager.setIME(false); return 4; };
+    opMap[0xFB] = [this](){interruptManager.setIME(true); return 4; };
 };

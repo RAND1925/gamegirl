@@ -9,9 +9,11 @@
 #include <iostream>
 #include <iomanip>
 #include "common.h"
+#include "Exceptions.h"
 #include "MMU.h"
+#include "InterruptManager.h"
 
-class CPU: public AddressSpace {
+class CPU{
 private:
         using FlagSetter = std::function<void(void)>;
         using FlagGetter = std::function<Byte(void)>;
@@ -32,16 +34,6 @@ private:
         Byte a, f, b, c, d, e, h, l;
         Word sp, pc;
     }registers, backup;
-    struct States{
-        bool interruptMasterEnabled = true;
-        Byte interruptEnabled = 0;
-        Byte interruptFlag = 0;
-        bool halt = false;
-        bool stop = false;
-    }states;
-
-
-    MMU & mmu;
 	Byte add(Byte a, Byte b) {
         (((a & 0xF) + (b & 0xF)) > 0xF) ?setH():resetH();
         (UINT8_MAX - a < b) ?setC():resetC();
@@ -169,7 +161,7 @@ private:
         (ra&0xFF)==0?setZ():resetZ();
 	    resetH();
 	    if(ra&0x100) setC();
-	    registers.a=ra;
+	    registers.a=(Byte)(ra & 0xFF);
 	}
 
 	Byte cpl(Byte a) {
@@ -245,7 +237,7 @@ private:
 	}
     //maybe some promblems
 	Byte sra(Byte a) {
-		Byte bit_7 = a & (1 << 7);
+		Byte bit_7 = a & (Byte)(1 << 7);
 		Byte bit_0 = a << 7;
 		Byte res = (a >> 1) + bit_7;
         (res == 0) ?setZ():resetZ();
@@ -270,16 +262,18 @@ private:
 	void bit(Byte b,Byte a) {
 		resetN();
 		setH();
-		Byte res = a & (1 << b);
+		Byte res = a & (Byte)(1 << b);
         (res == 0) ?setZ():resetZ();
 	}
 
 	Byte set(Byte b, Byte a) {
-		return a | (1 << b);
+	    setBit(a, b);
+        return a;
 	}
 
 	Byte res(Byte b, Byte a) {
-        return a & ~(1 << b);
+	    resetBit(a, b);
+        return a;
 	}
 
 	void jump(Word addr){
@@ -306,12 +300,11 @@ private:
         call(addr);
 	}
 
-    void initMap();
     std::function<Byte(void)> opMap[0x100];
 	std::function<Byte(void)> opCBMap[0x100];
   public:
+	void initMap();
     Byte step(){
-
     	Byte timing = 4;
     	std::cout << "a:" << std::hex << (int)registers.a << ' '
 				  << "f:" << std::hex << (int)registers.f << ' '
@@ -321,27 +314,15 @@ private:
 				  << "l:" << std::hex << (int)registers.l << ' '
 				  << "sp:" << std::hex << (int)registers.sp << ' '
 				  << "pc:" << std::hex << (int)registers.pc << std::endl;
-
-		bool hasInterrupt = states.interruptEnabled & states.interruptFlag;
-        if (hasInterrupt && states.interruptMasterEnabled){
-            states.halt = false;
-            states.interruptMasterEnabled = false;
-			std::cout << "interrupt: " << (int)states.interruptFlag << std::endl;
-			for(Byte i = 0; i < 8; ++i){
-				if (getBit(states.interruptFlag, i)){
-					restart(0x40 + (i<<3));
-					return 32;
-				}
-			}
-        }
-        else {
-            if (!states.interruptMasterEnabled && states.interruptFlag && states.halt){
-				std::cout << "halt" << std::endl;
-				states.halt = false;
-            }
-            else {
+		//todo :reset
+        if (interruptManager.hasInterrupt()){
+            Byte interruptCode = interruptManager.handleInterrupt();
+            restart((Byte)0x40 + (interruptCode << (Byte)0x3));
+            return 32;
+        } else {
+            if (interruptManager.handleHalt())
+            {
 				Byte opNum = mmu.readByte(registers.pc);
-
 				registers.pc++;
 				timing = opMap[opNum]();
 				std::cout << " opNum: " << std::hex << (int)opNum << std::endl;
@@ -350,14 +331,10 @@ private:
         return timing;
     }
 
-    CPU(MMU & m):mmu(m){
+    CPU(){
         initRegisters();
         initMap();
     };
-    Byte cycle(){
-    		Byte timing = step();
-			return timing;
-    }
 
     void initRegisters(){
         registers.a = 0x01;
@@ -373,25 +350,9 @@ private:
 
         //todo: init registers in zram;
     };
-    bool accepts(Word address) override{
-		return address == 0xFF0F || address == 0xFFFF;
-    }
-    Byte getByte(Word address) override{
-		if (address == 0xFF0F){
-			return states.interruptEnabled;
-		} else {
-			return states.interruptFlag;
-    	}
-    }
 
-	void setByte(Word address, Byte value) override{
-		if (address == 0xFF0F){
-			states.interruptEnabled  = value;
-		} else {
-			states.interruptFlag = value;
-		}
-	}
 };
 
+extern CPU cpu;
 
 #endif //GAMEGIRL_CPU_H
