@@ -351,14 +351,14 @@ private:
 
 
     void initRegisters(){
-        registers.a = 0x11;
-        registers.f = 0x80;
+        registers.a = 0x01;
+        registers.f = 0xB0;
         registers.b = 0x00;
-        registers.c = 0x00;
-        registers.d = 0xFF;
-        registers.e = 0x56;
-        registers.h = 0x00;
-        registers.l = 0x0D;
+        registers.c = 0x13;
+        registers.d = 0x00;
+        registers.e = 0xD8;
+        registers.h = 0x01;
+        registers.l = 0x4D;
         registers.sp = 0xFFFE;
         registers.pc = 0x0100;
 
