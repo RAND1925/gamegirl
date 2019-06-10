@@ -8,6 +8,7 @@
 #include <functional>
 #include <iostream>
 #include <iomanip>
+#include <fstream>
 #include "common.h"
 #include "Exceptions.h"
 #include "MMU.h"
@@ -302,8 +303,10 @@ private:
     std::function<Byte(void)> opMap[0x100];
 	std::function<Byte(void)> opCBMap[0x100];
   public:
-    void display()const{
-        std::cout << "a:" << std::hex << (int)registers.a << ' '
+    std::ofstream fout{"C:\\Users\\jjf09\\Desktop\\text.txt"};
+
+    void display(){
+        fout << "a:" << std::hex << (int)registers.a << ' '
                   << "f:" << std::hex << (int)registers.f << ' '
                   << "b:" << std::hex << (int)registers.b << ' '
                   << "c:" << std::hex << (int)registers.c << ' '
@@ -351,14 +354,14 @@ private:
 
 
     void initRegisters(){
-        registers.a = 0x11;
-        registers.f = 0x80;
+        registers.a = 0x01;
+        registers.f = 0xB0;
         registers.b = 0x00;
-        registers.c = 0x00;
-        registers.d = 0xFF;
-        registers.e = 0x56;
-        registers.h = 0x00;
-        registers.l = 0x0D;
+        registers.c = 0x13;
+        registers.d = 0x00;
+        registers.e = 0xD8;
+        registers.h = 0x01;
+        registers.l = 0x4D;
         registers.sp = 0xFFFE;
         registers.pc = 0x0100;
 
