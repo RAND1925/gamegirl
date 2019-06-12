@@ -303,7 +303,7 @@ private:
     std::function<Byte(void)> opMap[0x100];
 	std::function<Byte(void)> opCBMap[0x100];
   public:
-    std::ofstream fout{"C:\\Users\\jjf09\\Desktop\\text.txt"};
+    std::ofstream fout{"text.txt"};
 
     void display(){
         fout << "a:" << std::hex << (int)registers.a << ' '

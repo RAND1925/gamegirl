@@ -1,10 +1,10 @@
 #pragma once
-#include "SDL.h"
 #include <string>
 #include <vector>
 #include "MMU.h"
 #include "const.h"
 #include "common.h"
+#include "D:\SDL2-2.0.9\include\SDL2\SDL.h"
 #include "AddressSpace.h"
 #include "InterruptManager.h"
 //todo :
