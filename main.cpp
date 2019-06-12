@@ -13,6 +13,8 @@
 #include "InterruptManager.h"
 #include "CPU.h"
 #include "CycleCounter.h"
+#include "Logger.h"
+#include "SDLManager.h"
 
 int main(int argc,char** argv) {
 
@@ -20,8 +22,9 @@ int main(int argc,char** argv) {
 
     const std::string FILE_PATH("../testRom/Tetris.gb");
     cartridgeDriver.openFile(FILE_PATH);
-    sdlManager.init();
+    sdlManager.init("Tetris");
     cpu.initMap();
+    logger.open("a.txt");
     mmu.addAddressSpace(&timer);
     mmu.addAddressSpace(&cartridgeDriver);
     mmu.addAddressSpace(&wRam);

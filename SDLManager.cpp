@@ -3,6 +3,7 @@
 //
 
 #include "SDLManager.h"
+#include "Logger.h"
 
 const Color realColorMap[4]{
         {0xFF, 0xFF, 0xFF},
@@ -11,16 +12,40 @@ const Color realColorMap[4]{
         {0x00, 0x00, 0x00}
 };
 
+
 SDLManager sdlManager;
+void SDLManager::refreshWindow(){
+    logger << "REFRESH!" << std::endl;
+    SDL_UpdateWindowSurface(win);
+    SDL_Delay(100);
+}
 
+SDLManager::~SDLManager(){
+    SDL_FreeFormat(fmt);
+    SDL_FreeSurface(surface);
+    SDL_DestroyWindow(win);
+    SDL_Quit();
+}
 
-void SDLManager::init(){
+Uint32 SDLManager::mapColor(const Color &color) {
+    return SDL_MapRGB(fmt, color.r, color.g, color.b);
+}
 
+void SDLManager::setLine(Byte lineNum, Uint32 *line) {
+    SDL_LockSurface(surface);
+    //the pixel matrix
+    //note: nut for 1 level array
+    auto pixels = static_cast<Uint32 *>(surface->pixels);
+    std::copy(line, line+160, pixels + lineNum * 160);
+    SDL_UnlockSurface(surface);
+}
+
+void SDLManager::init(std::string title_window) {
     int initRes = SDL_Init(SDL_INIT_EVERYTHING);
     if (initRes < 0){
         throw SDLException("init");
     }
-    win = SDL_CreateWindow("test", WINDOW_POSITION_X, WINDOW_POSITION_Y, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+    win = SDL_CreateWindow(title_window.c_str(), WINDOW_POSITION_X, WINDOW_POSITION_Y, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
 
     if (win == nullptr){
         throw SDLException("window");
@@ -38,13 +63,3 @@ void SDLManager::init(){
     refreshWindow();
 };
 
-void SDLManager::refreshWindow(){
-    SDL_UpdateWindowSurface(win);
-}
-
-SDLManager::~SDLManager(){
-    SDL_FreeFormat(fmt);
-    SDL_FreeSurface(surface);
-    SDL_DestroyWindow(win);
-    SDL_Quit();
-}

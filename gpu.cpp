@@ -2,6 +2,9 @@
 #include <iostream>
 #include <algorithm>
 #include "gpu.h"
+#include "SDLManager.h"
+#include "InterruptManager.h"
+
 GPU gpu;
 void GPU::addTime(int clock)
 {
@@ -117,8 +120,15 @@ void GPU::setMode(int mode)
     if (mode == MODE_VBLANK)
         interruptManager.requestInterrupt(0);
 }
+
+
+
 void GPU::draw(int yLine) {
 
+
+#ifndef NDEBUG
+    display();
+#endif
     //lcdc :
     //OBJ 1-switch 2-size
     //WINDOW 5-switch 6=selection
@@ -130,8 +140,7 @@ void GPU::draw(int yLine) {
 
     Byte lcdc = regLcdControl;
 
-    Byte xScroll = regScrollX;
-    Byte yScroll = regScrollY;
+
 
     if (!getBit(lcdc, 7)) {
         //todo: turn off screen
@@ -156,7 +165,8 @@ void GPU::draw(int yLine) {
             mapTile = 0x000;
 
         Uint32 colorLine[160];
-
+        Byte xScroll = regScrollX;
+        Byte yScroll = regScrollY;
         int yDraw = (yLine + yScroll) % 256;
         int yTile = yDraw / 8;
         int yPixel = yDraw % 8;
@@ -192,8 +202,128 @@ void GPU::setLCYInterrupt()
     Byte yLine_cp = regLineYC;
     Byte statusLCDC = regLcdStatus;
     //write to the stat bit 2
-    setBiT(statusLCDC, 2, yLine == yLine_cp);
+    if (yLine == yLine_cp){
+        setBit(statusLCDC, 2);
+    } else {
+        resetBit(statusLCDC, 2);
+    }
     regLcdStatus=statusLCDC;
+}
+
+Byte GPU::getByte(Word address) {
+    if (address == 0xFF00)
+    {
+        if (keyColumn == 0x10)
+            return joypadC0;
+        else if (keyColumn == 0x20)
+            return joypadC1;
+    }
+    else if (address >= offsetVram && address < offsetVram + lengthVram)
+        return bytesVram[address - offsetVram];
+    else if (address >= offsetChr && address < offsetChr + lengthChr)
+        return bytesChr[address - offsetChr];
+    else if (address >= offsetOam && address < offsetOam + lengthOam)
+        return bytesOam[address - offsetOam];
+    else
+    {
+        switch (address)
+        {
+            case 0xFF40:
+                return regLcdControl;
+            case 0xFF41:
+                return regLcdStatus;
+            case 0xFF42:
+                return regScrollY;
+            case 0xFF43:
+                return regScrollX;
+            case 0xFF44:
+                return regLineY;
+            case 0xFF45:
+                return regLineYC;
+            case 0xFF4A:
+                return regWindowX;
+            case 0xFF4B:
+                return regWindowY;
+            default:
+                break;
+        }
+    }
+}
+
+bool GPU::accepts(Word address) {
+    if (address >= offsetVram && address < offsetVram + lengthVram)
+        return true;
+    else if (address >= offsetChr && address < offsetChr + lengthChr)
+        return true;
+    else if (address >= offsetOam && address < offsetOam + lengthOam)
+        return true;
+    else if (address >= 0xFF40 && address <= 0xFF45)
+        return true;
+    else if (address == 0xFF00 || address == 0xFF4A || address == 0xFF4B)
+        return true;
+    return false;
+}
+
+void GPU::setByte(Word address, Byte value) {
+
+    if (address == 0xFF00) {
+        keyColumn = value & 0x30;
+        return;//get the high 4 bit of the value
+    } else if (address >= offsetVram && address < offsetVram + lengthVram) {
+        bytesVram[address - offsetVram] = value;
+        return;
+    } else if (address >= offsetChr && address < offsetChr + lengthChr){
+        bytesChr[address - offsetChr] = value;
+        return;
+    }
+    else if (address >= offsetOam && address < offsetOam + lengthOam) {
+        bytesOam[address - offsetOam] = value;
+        return;
+    }
+    else
+    {
+        switch (address)
+        {
+            case 0xFF40:
+                regLcdControl = value;
+                return;
+            case 0xFF41:
+                regLcdStatus = value;
+                return;
+            case 0xFF42:
+                regScrollY = value;
+                return;
+            case 0xFF43:
+                regScrollX = value;
+                return;
+            case 0xFF44:
+                regLineY = 0; //warn
+                return;
+            case 0xFF45:
+                regLineYC = value;
+                return;
+            case 0xFF4A:
+                regWindowX = value;
+                return;
+            case 0xFF4B:
+                regWindowY = value;
+                return;
+            default:
+                break;
+        }
+    }
+    throw WrongAddressException("GPU[write]", address);
+}
+
+void GPU::display() {
+#ifndef NDEBUG
+    logger << "LCDL:" << std::hex <<(int)regLcdControl << ' '
+           << "STAT:" << std::hex <<(int)regLcdStatus << ' '
+           << "SCX:" << std::hex <<(int)regScrollX << ' '
+           << "SCY:" << std::hex <<(int)regScrollY << ' '
+           << "LY:" << std::hex <<(int)regLineY << ' '
+           << "LYC:" << std::hex <<(int)regLineYC << std::endl;
+#endif
 }
 
 

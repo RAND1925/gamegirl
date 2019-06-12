@@ -7,7 +7,10 @@
 
 #include <string>
 #include "Exceptions.h"
-#include "SDL.h"
+extern "C" {
+    #include "SDL.h"
+};
+
 
 struct Color{
     Byte r,g,b;
@@ -28,26 +31,10 @@ class SDLManager {
 
 public:
     ~SDLManager();
-    void init();
-    void loadGame( std::string title_window)
-    {
-
-
-    }
-
+    void init(std::string title_window);
     void refreshWindow();
-    Uint32 mapColor(const Color& color){
-        return SDL_MapRGB(fmt, color.r, color.g, color.b);
-    };
-    void setLine(Byte lineNum, Uint32 * line)
-    {
-        SDL_LockSurface(surface);
-        //the pixel matrix
-        //note: nut for 1 level array
-        auto pixels = static_cast<Uint32 *>(surface->pixels);
-        std::copy(line, line+160, pixels + lineNum * 160);
-        SDL_UnlockSurface(surface);
-    }
+    Uint32 mapColor(const Color& color);;
+    void setLine(Byte lineNum, Uint32 * line);
     /*
     Byte joypadC1;
     Byte joypadC0;

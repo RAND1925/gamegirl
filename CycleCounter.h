@@ -9,7 +9,7 @@
 #include "CPU.h"
 #include "Timer.h"
 #include "gpu.h"
-
+#include "Logger.h"
 /*
  *
  *unit
@@ -37,7 +37,9 @@ public:
         allCycle += cpuCycle;
         timer.increase(cpuCycle);
         gpu.addTime(cpuCycle);
-
+#ifndef NDEBUG
+        logger << "clk:" << allCycle << std::endl;
+#endif
     }
     void cycle(){
         while(true){

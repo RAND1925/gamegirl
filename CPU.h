@@ -35,6 +35,7 @@ private:
         Byte a, f, b, c, d, e, h, l;
         Word sp, pc;
     }registers, backup;
+
 	Byte add(Byte a, Byte b) {
         (((a & 0xF) + (b & 0xF)) > 0xF) ?setH():resetH();
         (UINT8_MAX - a < b) ?setC():resetC();
@@ -288,6 +289,9 @@ private:
 		jump(addr);
 	}
 
+	void ret(Word addr){
+	    jump(pop16());
+	}
 	void rsv(){
 	    backup = registers;
 	}
@@ -302,61 +306,13 @@ private:
 
     std::function<Byte(void)> opMap[0x100];
 	std::function<Byte(void)> opCBMap[0x100];
-	std::ofstream log{"a.txt"};
   public:
-    void display(){
-       log << "a:" << std::hex << (int)registers.a << ' '
-                  << "f:" << std::hex << (int)registers.f << ' '
-                  << "b:" << std::hex << (int)registers.b << ' '
-                  << "c:" << std::hex << (int)registers.c << ' '
-                  << "d:" << std::hex << (int)registers.d << ' '
-                  << "e:" << std::hex << (int)registers.e << ' '
-                  << "h:" << std::hex << (int)registers.h << ' '
-                  << "l:" << std::hex << (int)registers.l << ' '
-                  << "ie:" << std::hex << (int)mmu.readByte(0xFFFF) << ' '
-                  << "if:" << std::hex << (int)mmu.readByte(0xFF0F) << ' '
-                  << "sp:" << std::hex << (int)registers.sp << ' '
-                  << "pc:" << std::hex << (int)registers.pc << ' '
-                  << "stack:" << (int)mmu.readWord(registers.sp) << ' '
-                  << "opNum" << (int)mmu.readByte(registers.pc) << ' '
-
-                             <<std::endl;
-    }
+    void display();
 
 	void initMap();
-    Byte step(){
-        display();
-    	Byte timing = 4;
-        if (interruptManager.hasInterrupt()){
-            Byte interruptCode = interruptManager.handleInterrupt();
-            restart((Byte)0x40 + (interruptCode << (Byte)0x3));
-            return 32;
-        } else {
-           if (interruptManager.handleHalt()) {
-               Byte opNum = mmu.readByte(registers.pc);
-               registers.pc++;
-               timing = opMap[opNum]();
-          }
-        }
-        return timing;
-    }
+    Byte step();
 
-
-
-    void initRegisters(){
-        registers.a = 0x11;
-        registers.f = 0x80;
-        registers.b = 0x00;
-        registers.c = 0x00;
-        registers.d = 0xFF;
-        registers.e = 0x56;
-        registers.h = 0x00;
-        registers.l = 0x0D;
-        registers.sp = 0xFFFE;
-        registers.pc = 0x0000;
-
-        //todo: init registers in zram;
-    };
+    void initRegisters();;
     CPU(){
         initRegisters();
         initMap();
