@@ -1,7 +1,7 @@
 //
 // Created by dell on 2019/6/12.
 //
-
+#define NDEBUG
 #ifndef NDEBUG
     #ifndef GAMEGIRL_LOGGER_H
     #define GAMEGIRL_LOGGER_H

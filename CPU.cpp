@@ -711,6 +711,7 @@ Byte CPU::step() {
 
 
 void CPU::display() {
+#ifndef NDEBUG
 	logger << "a:" << std::hex << (int)registers.a << ' '
 		<< "f:" << std::hex << (int)registers.f << ' '
 		<< "b:" << std::hex << (int)registers.b << ' '
@@ -726,6 +727,7 @@ void CPU::display() {
 		<< "stack:" << (int)mmu.readWord(registers.sp) << ' '
 		<< "opNum" << (int)mmu.readByte(registers.pc) << ' '
 		<<std::endl;
+#endif
 }
 
 void CPU::initRegisters() {

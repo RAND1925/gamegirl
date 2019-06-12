@@ -15,9 +15,13 @@ const Color realColorMap[4]{
 
 SDLManager sdlManager;
 void SDLManager::refreshWindow(){
+#ifndef NDEBUG
     logger << "REFRESH!" << std::endl;
+#else
+    SDL_Delay(1);
+#endif
     SDL_UpdateWindowSurface(win);
-    SDL_Delay(100);
+
 }
 
 SDLManager::~SDLManager(){

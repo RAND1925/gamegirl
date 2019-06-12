@@ -317,7 +317,7 @@ void GPU::setByte(Word address, Byte value) {
 
 void GPU::display() {
 #ifndef NDEBUG
-    logger << "LCDL:" << std::hex <<(int)regLcdControl << ' '
+    logger << "LCDC:" << std::hex <<(int)regLcdControl << ' '
            << "STAT:" << std::hex <<(int)regLcdStatus << ' '
            << "SCX:" << std::hex <<(int)regScrollX << ' '
            << "SCY:" << std::hex <<(int)regScrollY << ' '

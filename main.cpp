@@ -24,13 +24,16 @@ int main(int argc,char** argv) {
     cartridgeDriver.openFile(FILE_PATH);
     sdlManager.init("Tetris");
     cpu.initMap();
+#ifndef NDEBUG
     logger.open("a.txt");
+#endif
     mmu.addAddressSpace(&timer);
     mmu.addAddressSpace(&cartridgeDriver);
     mmu.addAddressSpace(&wRam);
     mmu.addAddressSpace(&interruptManager);
-    mmu.addAddressSpace(&zRam);
     mmu.addAddressSpace(&gpu);
+    mmu.addAddressSpace(&zRam);
+
     cycleCounter.cycle();
 
 }
