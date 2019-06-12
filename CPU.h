@@ -317,21 +317,15 @@ private:
                   << "if:" << std::hex << (int)mmu.readByte(0xFF0F) << ' '
                   << "sp:" << std::hex << (int)registers.sp << ' '
                   << "pc:" << std::hex << (int)registers.pc << ' '
-                  << "stack:" << (int)mmu.readWord(registers.sp)<<std::endl;
-    }
+                  << "stack:" << (int)mmu.readWord(registers.sp) << ' '
+                  << "opNum" << (int)mmu.readByte(registers.pc) << ' '
 
+                             <<std::endl;
+    }
 
 	void initMap();
     Byte step(){
-            display();
-//c246  c7e3
-        Word breakPoint[6] = {0x3DA, 0x3DB, 0x3DC, 0x3DD, 0x3DE, 0x3DF};
-        for (int j = 0; j < 6; ++j) {
-            if (registers.pc == breakPoint[j]){
-
-            }
-        }
-
+        display();
     	Byte timing = 4;
         if (interruptManager.hasInterrupt()){
             Byte interruptCode = interruptManager.handleInterrupt();
@@ -339,13 +333,10 @@ private:
             return 32;
         } else {
            if (interruptManager.handleHalt()) {
-
                Byte opNum = mmu.readByte(registers.pc);
-
                registers.pc++;
                timing = opMap[opNum]();
-               //std::cout << " opNum: " << std::hex << (int) opNum << std::endl;
-           }
+          }
         }
         return timing;
     }
@@ -362,7 +353,7 @@ private:
         registers.h = 0x00;
         registers.l = 0x0D;
         registers.sp = 0xFFFE;
-        registers.pc = 0x0100;
+        registers.pc = 0x0000;
 
         //todo: init registers in zram;
     };

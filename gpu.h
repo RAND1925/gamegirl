@@ -7,6 +7,7 @@
 #include "common.h"
 #include "AddressSpace.h"
 #include "InterruptManager.h"
+#include "SDLManager.h"
 //todo :
 // change the var name
 // complete the merge  from gpu
@@ -20,10 +21,15 @@ public:
     {
         if (address >= offsetVram && address < offsetVram + lengthVram)
             return true;
+        else if (address >= offsetChr && address < offsetChr + lengthChr)
+            return true;
         else if (address >= offsetOam && address < offsetOam + lengthOam)
             return true;
-        else if (address >= 0xFF40 && address <= 0xFF4B)
+        else if (address >= 0xFF40 && address <= 0xFF45)
             return true;
+        else if (address == 0xFF00 || address == 0xFF4A || address == 0xFF4B)
+            return true;
+        return false;
     }
 
     Byte getByte(Word address) override
@@ -37,95 +43,89 @@ public:
         }
         else if (address >= offsetVram && address < offsetVram + lengthVram)
             return bytesVram[address - offsetVram];
+        else if (address >= offsetChr && address < offsetChr + lengthChr)
+            return bytesChr[address - offsetChr];
         else if (address >= offsetOam && address < offsetOam + lengthOam)
             return bytesOam[address - offsetOam];
         else
         {
             switch (address)
             {
-            case 0xFF40:
-                return regLcdControl;
-            case 0xFF41:
-                return regLcdStatus;
-            case 0xFF42:
-                return regScrollX;
-            case 0xFF43:
-                return regScrollY;
-            case 0xFF44:
-                return regLineY;
-            case 0xFF45:
-                return regLineYC;
-            case 0xFF4A:
-                return regWindowX;
-            case 0xFF4B:
-                return regWindowY;
-            default:
-                break;
+                case 0xFF40:
+                    return regLcdControl;
+                case 0xFF41:
+                    return regLcdStatus;
+                case 0xFF42:
+                    return regScrollY;
+                case 0xFF43:
+                    return regScrollX;
+                case 0xFF44:
+                    return regLineY;
+                case 0xFF45:
+                    return regLineYC;
+                case 0xFF4A:
+                    return regWindowX;
+                case 0xFF4B:
+                    return regWindowY;
+                default:
+                    break;
             }
         }
     }
-    void setByte(Word address, Byte value) override
-    {
-        if (address == 0xFF00)
-            keyColumn = value & 0x30; //get the high 4 bit of the value
-        else if (address >= offsetVram && address < offsetVram + lengthVram)
-        {
+    void setByte(Word address, Byte value) override {
+
+        if (address == 0xFF00) {
+            keyColumn = value & 0x30;
+            return;//get the high 4 bit of the value
+        } else if (address >= offsetVram && address < offsetVram + lengthVram) {
             bytesVram[address - offsetVram] = value;
+            return;
+        } else if (address >= offsetChr && address < offsetChr + lengthChr){
+            bytesChr[address - offsetChr] = value;
+            return;
         }
-        else if (address >= offsetOam && address < offsetOam + lengthOam)
+        else if (address >= offsetOam && address < offsetOam + lengthOam) {
             bytesOam[address - offsetOam] = value;
+            return;
+        }
         else
         {
             switch (address)
             {
-            case 0xFF40:
-                regLcdControl = value;
-            case 0xFF41:
-                regLcdStatus = value;
-            case 0xFF42:
-                regScrollX = value;
-            case 0xFF43:
-                regScrollY = value;
-            case 0xFF44:
-                regLineY = 0; //warn
-            case 0xFF45:
-                regLineYC = value;
-            case 0xFF4A:
-                regWindowX = value;
-            case 0xFF4B:
-                regWindowY = value;
-            default:
-                break;
+                case 0xFF40:
+                    regLcdControl = value;
+                    return;
+                case 0xFF41:
+                    regLcdStatus = value;
+                    return;
+                case 0xFF42:
+                    regScrollX = value;
+                    return;
+                case 0xFF43:
+                    regScrollY = value;
+                    return;
+                case 0xFF44:
+                    regLineY = 0; //warn
+                    return;
+                case 0xFF45:
+                    regLineYC = value;
+                    return;
+                case 0xFF4A:
+                    regWindowX = value;
+                    return;
+                case 0xFF4B:
+                    regWindowY = value;
+                    return;
+                default:
+                    break;
             }
         }
+        throw WrongAddressException("GPU[write]", address);
     }
-    //OAM  FE00-FE9F
-    class SpriteInfo
-    {
-    public:
-        Byte y;
 
-        Byte x{0};
-
-        Byte tile{0};
-
-        Byte flags{0};
-
-        SpriteInfo(int id);
-    };
     /***********************************************/
     //these is the func used in software windows
 
-    //create the window and init the private var
-    void initWindow(int height, int width,
-                    int pos_x, int pos_Y,
-                    std::string title_window);
-    //set the certain pixel's color
-    void setPixelColor(int pos_x, int pos_y, int color);
-    //fersh the windows
-    void fresh() { SDL_UpdateWindowSurface(win); }
-    //destory the surface
-    void end();
 
     /***********************************************/
 
@@ -133,13 +133,8 @@ public:
     void addTime(int clock);
     //choose the mode and the status matched with the mode
     void setMode(int mode);
-    //get the input and judge if it's quit or not
-    bool getJoypad();
-    std::vector<SpriteInfo> getSprites(int yline);
-    //draw the video ram and set it tohe surface windows
-    void draw(int yLine);
-    //set the joypad interrupt
-    void interruptJoypad();
+
+    void draw(int);
     //to compare the 0xff44 0xff45 to judge if it's a interrupt
     void setLCYInterrupt();
     /***********************************************/
@@ -163,18 +158,12 @@ public:
 private:
     //some sdl var and pointer:
 
-    SDL_Window *win;
-    SDL_Surface *surface;
-    SDL_Event e;
+
     //the window info:
 
-    int windowWidth, windowHeight;
-    //clock counter:
-
-    int inerClock = 0;
+    int innerClock = 0;
     //color map:
 
-    const int colorMap[4] = {255, 200, 100, 0};
     //some const mode number:
 
     const static int MODE_OAM = 2;
@@ -184,23 +173,28 @@ private:
     //about the ram of the video and sprite:
 
     const static Word offsetVram = 0x8000;
-    const static Word lengthVram = 0x9FFF - 0x8000;
+    const static Word lengthVram = 0x9800 - 0x8000;
+
+    const static Word offsetChr = 0x9800;
+    const static Word lengthChr = 0xA000 - 0x9800;
 
     const static Word offsetOam = 0xFE00;
-    const static Word lengthOam = 0xFE9F - 0xFE00;
+    const static Word lengthOam = 0xFEA0 - 0xFE00;
     //the reg in the gpu:
 
-    Byte regLcdControl;
+    Byte regLcdControl = 0x91;
     Byte regLcdStatus;
-    Byte regScrollX;
-    Byte regScrollY;
-    Byte regLineY;
-    Byte regLineYC;
-    Byte regWindowX;
-    Byte regWindowY;
+    Byte regScrollX = 0;
+    Byte regScrollY = 0;
+    Byte regLineY = 0;
+    Byte regLineYC = 0;
+    Byte regWindowX = 0;
+    Byte regWindowY = 0;
     //tooo about interrupt:
 
-    std::array<Byte, lengthVram> bytesVram;
-    std::array<Byte, lengthOam> bytesOam;
+
+    std::array<Byte, lengthVram> bytesVram{};
+    std::array<Byte, lengthChr> bytesChr{};
+    std::array<Byte, lengthOam> bytesOam{};
 };
 extern GPU gpu;

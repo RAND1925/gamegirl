@@ -31,7 +31,7 @@ public:
         return  rom[address];
     };
     void setByte(Word address, Byte value) override {
-        throw AddressWrongException("Rom0[write]", address);
+        throw WrongAddressException("Rom0[write]", address);
     };
     Cartridge_Rom(std::ifstream & s){
         char buffer[0x8000];
@@ -84,7 +84,7 @@ public:
                 }
             }
         }
-        throw AddressWrongException("mbc1[read]", address);
+        throw WrongAddressException("mbc1[read]", address);
     };
     void setByte(Word address, Byte value) override {
         Byte page = address >> 13;
@@ -106,7 +106,7 @@ public:
         else if(page == 0x3){
             mode = value & 0x1;
         }
-        throw AddressWrongException("mbc1[read]", address);
+        throw WrongAddressException("mbc1[read]", address);
     };
 };
 

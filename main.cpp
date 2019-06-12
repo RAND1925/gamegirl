@@ -16,12 +16,11 @@
 
 int main(int argc,char** argv) {
 
-    std::cin.sync_with_stdio(0);
-    std::cout.sync_with_stdio(0);
+    std::ios::sync_with_stdio(false);
 
-    const std::string FILE_PATH("E:/cpu_instrs/individual/07-jr,jp,call,ret,rst.gb");
+    const std::string FILE_PATH("../testRom/Tetris.gb");
     cartridgeDriver.openFile(FILE_PATH);
-    gpu.initWindow(480, 320, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, "");
+    sdlManager.init();
     cpu.initMap();
     mmu.addAddressSpace(&timer);
     mmu.addAddressSpace(&cartridgeDriver);

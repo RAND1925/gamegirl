@@ -74,7 +74,7 @@ public:
         } else if (address == 0xFFFF) {
             return iE;
         } else {
-            throw AddressWrongException("Interrupt[read]", address);
+            throw WrongAddressException("Interrupt[read]", address);
         }
     }
 
@@ -84,7 +84,7 @@ public:
         } else if (address == 0xFFFF) {
             iE = value;
         } else {
-            throw AddressWrongException("Interrupt[write]", address);
+            throw WrongAddressException("Interrupt[write]", address);
         }
     }
 };

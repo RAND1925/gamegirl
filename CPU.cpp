@@ -12,12 +12,12 @@ void CPU::initMap() {
 	auto ld16 = [](Word &lhs, Word rhs) { lhs = rhs; };
 
 	auto getR16 = [](Byte high, Byte low)->Word { return (high << 8) | low; };
-    auto setR16 = [](Byte & high, Byte & low, Word t) { high = (Byte)(t >> (Byte)8); low = (Byte)(t & (Byte)0xFF); };
-    auto getAF = [this, getR16]()->Word { return getR16(registers.a, registers.f); };
+	auto setR16 = [](Byte & high, Byte & low, Word t) { high = (Byte)(t >> (Byte)8); low = (Byte)(t & (Byte)0xFF); };
+	auto getAF = [this, getR16]()->Word { return getR16(registers.a, registers.f); };
 	auto getHL = [this, getR16]()->Word { return getR16(registers.h, registers.l); };
 	auto getBC = [this, getR16]()->Word { return getR16(registers.b, registers.c); };
 	auto getDE = [this, getR16]()->Word { return getR16(registers.d, registers.e); };
-    auto setAF = [this, setR16](Word t) { setR16(registers.a, registers.f, t); };
+	auto setAF = [this, setR16](Word t) { setR16(registers.a, registers.f, t); };
 	auto setHL = [this, setR16](Word t) { setR16(registers.h, registers.l, t); };
 	auto setBC = [this, setR16](Word t) { setR16(registers.b, registers.c, t); };
 	auto setDE = [this, setR16](Word t) { setR16(registers.d, registers.e, t); };
@@ -166,8 +166,8 @@ void CPU::initMap() {
 
 	//ldhl sp
 	opMap[0xF8] = [this, &setHL, &getSignedImmediateValue8]() {
-	    Word ea=addSp(registers.sp,getSignedImmediateValue8());
-	    setHL(ea); return 12; };
+		Word ea=addSp(registers.sp,getSignedImmediateValue8());
+		setHL(ea); return 12; };
 
 	//ld(nn) sp
 	opMap[0x08] = [this, &getImmediateValue16]() {mmu.writeWord(getImmediateValue16(), registers.sp); return 20; };
@@ -228,6 +228,7 @@ void CPU::initMap() {
 	opMap[0x9C] = [this, &ld8]() {ld8(registers.a, sbc(registers.a, registers.h)); return 4; };
 	opMap[0x9D] = [this, &ld8]() {ld8(registers.a, sbc(registers.a, registers.l)); return 4; };
 	opMap[0x9E] = [this, &ld8, &getHL]() {ld8(registers.a, sbc(registers.a, mmu.readByte(getHL()))); return 8; };
+	opMap[0xDE] = [this, &ld8, &getImmediateValue8]() {ld8(registers.a, sbc(registers.a, getImmediateValue8())); return 8; };
 	//GB CPU P83
 
 	//and
@@ -422,34 +423,221 @@ void CPU::initMap() {
 	opCBMap[0x3E] = [this, &getHL, &setHL]() { mmu.writeByte(getHL(),srl(mmu.readByte(getHL()))); return 16; };
 
 	//bit opcodes
-	opCBMap[0x47] = [this, &getImmediateValue8]() { bit(getImmediateValue8(), registers.a); return 8; };
-	opCBMap[0x40] = [this, &getImmediateValue8]() { bit(getImmediateValue8(), registers.b); return 8; };
-	opCBMap[0x41] = [this, &getImmediateValue8]() { bit(getImmediateValue8(), registers.c); return 8; };
-	opCBMap[0x42] = [this, &getImmediateValue8]() { bit(getImmediateValue8(), registers.d); return 8; };
-	opCBMap[0x43] = [this, &getImmediateValue8]() { bit(getImmediateValue8(), registers.e); return 8; };
-	opCBMap[0x44] = [this, &getImmediateValue8]() { bit(getImmediateValue8(), registers.h); return 8; };
-	opCBMap[0x45] = [this, &getImmediateValue8]() { bit(getImmediateValue8(), registers.l); return 8; };
-	opCBMap[0x46] = [this, &getHL, &getImmediateValue8]() {bit(getImmediateValue8(), mmu.readByte(getHL())); return 16; };
+	opCBMap[0x47] = [this]() { bit(0, registers.a); return 8; };
+	opCBMap[0x40] = [this]() { bit(0, registers.b); return 8; };
+	opCBMap[0x41] = [this]() { bit(0, registers.c); return 8; };
+	opCBMap[0x42] = [this]() { bit(0, registers.d); return 8; };
+	opCBMap[0x43] = [this]() { bit(0, registers.e); return 8; };
+	opCBMap[0x44] = [this]() { bit(0, registers.h); return 8; };
+	opCBMap[0x45] = [this]() { bit(0, registers.l); return 8; };
+	opCBMap[0x46] = [this, &getHL]() {bit(0, mmu.readByte(getHL())); return 16; };
 
+	opCBMap[0x4F] = [this]() { bit(1, registers.a); return 8; };
+	opCBMap[0x48] = [this]() { bit(1, registers.b); return 8; };
+	opCBMap[0x49] = [this]() { bit(1, registers.c); return 8; };
+	opCBMap[0x4A] = [this]() { bit(1, registers.d); return 8; };
+	opCBMap[0x4B] = [this]() { bit(1, registers.e); return 8; };
+	opCBMap[0x4C] = [this]() { bit(1, registers.h); return 8; };
+	opCBMap[0x4D] = [this]() { bit(1, registers.l); return 8; };
+	opCBMap[0x4E] = [this, &getHL]() {bit(1, mmu.readByte(getHL())); return 16; };
+
+	opCBMap[0x57] = [this]() { bit(2, registers.a); return 8; };
+	opCBMap[0x50] = [this]() { bit(2, registers.b); return 8; };
+	opCBMap[0x51] = [this]() { bit(2, registers.c); return 8; };
+	opCBMap[0x52] = [this]() { bit(2, registers.d); return 8; };
+	opCBMap[0x53] = [this]() { bit(2, registers.e); return 8; };
+	opCBMap[0x54] = [this]() { bit(2, registers.h); return 8; };
+	opCBMap[0x55] = [this]() { bit(2, registers.l); return 8; };
+	opCBMap[0x56] = [this, &getHL]() {bit(2, mmu.readByte(getHL())); return 16; };
+
+	opCBMap[0x5F] = [this]() { bit(3, registers.a); return 8; };
+	opCBMap[0x58] = [this]() { bit(3, registers.b); return 8; };
+	opCBMap[0x59] = [this]() { bit(3, registers.c); return 8; };
+	opCBMap[0x5A] = [this]() { bit(3, registers.d); return 8; };
+	opCBMap[0x5B] = [this]() { bit(3, registers.e); return 8; };
+	opCBMap[0x5C] = [this]() { bit(3, registers.h); return 8; };
+	opCBMap[0x5D] = [this]() { bit(3, registers.l); return 8; };
+	opCBMap[0x5E] = [this, &getHL]() {bit(3, mmu.readByte(getHL())); return 16; };
+
+	opCBMap[0x67] = [this]() { bit(4, registers.a); return 8; };
+	opCBMap[0x60] = [this]() { bit(4, registers.b); return 8; };
+	opCBMap[0x61] = [this]() { bit(4, registers.c); return 8; };
+	opCBMap[0x62] = [this]() { bit(4, registers.d); return 8; };
+	opCBMap[0x63] = [this]() { bit(4, registers.e); return 8; };
+	opCBMap[0x64] = [this]() { bit(4, registers.h); return 8; };
+	opCBMap[0x65] = [this]() { bit(4, registers.l); return 8; };
+	opCBMap[0x66] = [this, &getHL]() {bit(4, mmu.readByte(getHL())); return 16; };
+
+	opCBMap[0x6F] = [this]() { bit(5, registers.a); return 8; };
+	opCBMap[0x68] = [this]() { bit(5, registers.b); return 8; };
+	opCBMap[0x69] = [this]() { bit(5, registers.c); return 8; };
+	opCBMap[0x6A] = [this]() { bit(5, registers.d); return 8; };
+	opCBMap[0x6B] = [this]() { bit(5, registers.e); return 8; };
+	opCBMap[0x6C] = [this]() { bit(5, registers.h); return 8; };
+	opCBMap[0x6D] = [this]() { bit(5, registers.l); return 8; };
+	opCBMap[0x6E] = [this, &getHL]() {bit(5, mmu.readByte(getHL())); return 16; };
+
+	opCBMap[0x77] = [this]() { bit(6, registers.a); return 8; };
+	opCBMap[0x70] = [this]() { bit(6, registers.b); return 8; };
+	opCBMap[0x71] = [this]() { bit(6, registers.c); return 8; };
+	opCBMap[0x72] = [this]() { bit(6, registers.d); return 8; };
+	opCBMap[0x73] = [this]() { bit(6, registers.e); return 8; };
+	opCBMap[0x74] = [this]() { bit(6, registers.h); return 8; };
+	opCBMap[0x75] = [this]() { bit(6, registers.l); return 8; };
+	opCBMap[0x76] = [this, &getHL]() {bit(6, mmu.readByte(getHL())); return 16; };
+
+	opCBMap[0x7F] = [this]() { bit(7, registers.a); return 8; };
+	opCBMap[0x78] = [this]() { bit(7, registers.b); return 8; };
+	opCBMap[0x79] = [this]() { bit(7, registers.c); return 8; };
+	opCBMap[0x7A] = [this]() { bit(7, registers.d); return 8; };
+	opCBMap[0x7B] = [this]() { bit(7, registers.e); return 8; };
+	opCBMap[0x7C] = [this]() { bit(7, registers.h); return 8; };
+	opCBMap[0x7D] = [this]() { bit(7, registers.l); return 8; };
+	opCBMap[0x7E] = [this, &getHL]() {bit(7, mmu.readByte(getHL())); return 16; };
 	//set
-	opCBMap[0xC7] = [this, &getImmediateValue8]() { set(getImmediateValue8(), registers.a); return 8; };
-	opCBMap[0xC0] = [this, &getImmediateValue8]() { set(getImmediateValue8(), registers.b); return 8; };
-	opCBMap[0xC1] = [this, &getImmediateValue8]() { set(getImmediateValue8(), registers.c); return 8; };
-	opCBMap[0xC2] = [this, &getImmediateValue8]() { set(getImmediateValue8(), registers.d); return 8; };
-	opCBMap[0xC3] = [this, &getImmediateValue8]() { set(getImmediateValue8(), registers.e); return 8; };
-	opCBMap[0xC4] = [this, &getImmediateValue8]() { set(getImmediateValue8(), registers.h); return 8; };
-	opCBMap[0xC5] = [this, &getImmediateValue8]() { set(getImmediateValue8(), registers.l); return 8; };
-	opCBMap[0xC6] = [this, &getHL, &getImmediateValue8]() {set(getImmediateValue8(), mmu.readByte(getHL())); return 16; };
+	opCBMap[0xC7] = [this, &ld8]() { ld8(registers.a,set(0, registers.a)); return 8; };
+	opCBMap[0xC0] = [this, &ld8]() { ld8(registers.b,set(0, registers.b)); return 8; };
+	opCBMap[0xC1] = [this, &ld8]() { ld8(registers.c,set(0, registers.c)); return 8; };
+	opCBMap[0xC2] = [this, &ld8]() { ld8(registers.d,set(0, registers.d)); return 8; };
+	opCBMap[0xC3] = [this, &ld8]() { ld8(registers.e,set(0, registers.e)); return 8; };
+	opCBMap[0xC4] = [this, &ld8]() { ld8(registers.h,set(0, registers.h)); return 8; };
+	opCBMap[0xC5] = [this, &ld8]() { ld8(registers.l,set(0, registers.l)); return 8; };
+	opCBMap[0xC6] = [this, &getHL, &ld8]() { mmu.writeByte(getHL(),set(0, mmu.readByte(getHL()))); return 16; };
 
+	opCBMap[0xCF] = [this, &ld8]() { ld8(registers.a,set(1, registers.a)); return 8; };
+	opCBMap[0xC8] = [this, &ld8]() { ld8(registers.b,set(1, registers.b)); return 8; };
+	opCBMap[0xC9] = [this, &ld8]() { ld8(registers.c,set(1, registers.c)); return 8; };
+	opCBMap[0xCA] = [this, &ld8]() { ld8(registers.d,set(1, registers.d)); return 8; };
+	opCBMap[0xCB] = [this, &ld8]() { ld8(registers.e,set(1, registers.e)); return 8; };
+	opCBMap[0xCC] = [this, &ld8]() { ld8(registers.h,set(1, registers.h)); return 8; };
+	opCBMap[0xCD] = [this, &ld8]() { ld8(registers.l,set(1, registers.l)); return 8; };
+	opCBMap[0xCE] = [this, &getHL, &ld8]() { mmu.writeByte(getHL(),set(1, mmu.readByte(getHL()))); return 16; };
+
+	opCBMap[0xD7] = [this, &ld8]() { ld8(registers.a,set(2, registers.a)); return 8; };
+	opCBMap[0xD0] = [this, &ld8]() { ld8(registers.b,set(2, registers.b)); return 8; };
+	opCBMap[0xD1] = [this, &ld8]() { ld8(registers.c,set(2, registers.c)); return 8; };
+	opCBMap[0xD2] = [this, &ld8]() { ld8(registers.d,set(2, registers.d)); return 8; };
+	opCBMap[0xD3] = [this, &ld8]() { ld8(registers.e,set(2, registers.e)); return 8; };
+	opCBMap[0xD4] = [this, &ld8]() { ld8(registers.h,set(2, registers.h)); return 8; };
+	opCBMap[0xD5] = [this, &ld8]() { ld8(registers.l,set(2, registers.l)); return 8; };
+	opCBMap[0xD6] = [this, &getHL, &ld8]() { mmu.writeByte(getHL(),set(2, mmu.readByte(getHL()))); return 16; };
+
+	opCBMap[0xDF] = [this, &ld8]() { ld8(registers.a,set(3, registers.a)); return 8; };
+	opCBMap[0xD8] = [this, &ld8]() { ld8(registers.b,set(3, registers.b)); return 8; };
+	opCBMap[0xD9] = [this, &ld8]() { ld8(registers.c,set(3, registers.c)); return 8; };
+	opCBMap[0xDA] = [this, &ld8]() { ld8(registers.d,set(3, registers.d)); return 8; };
+	opCBMap[0xDB] = [this, &ld8]() { ld8(registers.e,set(3, registers.e)); return 8; };
+	opCBMap[0xDC] = [this, &ld8]() { ld8(registers.h,set(3, registers.h)); return 8; };
+	opCBMap[0xDD] = [this, &ld8]() { ld8(registers.l,set(3, registers.l)); return 8; };
+	opCBMap[0xDE] = [this, &getHL, &ld8]() { mmu.writeByte(getHL(),set(3, mmu.readByte(getHL()))); return 16; };
+
+	opCBMap[0xE7] = [this, &ld8]() { ld8(registers.a,set(4, registers.a)); return 8; };
+	opCBMap[0xE0] = [this, &ld8]() { ld8(registers.b,set(4, registers.b)); return 8; };
+	opCBMap[0xE1] = [this, &ld8]() { ld8(registers.c,set(4, registers.c)); return 8; };
+	opCBMap[0xE2] = [this, &ld8]() { ld8(registers.d,set(4, registers.d)); return 8; };
+	opCBMap[0xE3] = [this, &ld8]() { ld8(registers.e,set(4, registers.e)); return 8; };
+	opCBMap[0xE4] = [this, &ld8]() { ld8(registers.h,set(4, registers.h)); return 8; };
+	opCBMap[0xE5] = [this, &ld8]() { ld8(registers.l,set(4, registers.l)); return 8; };
+	opCBMap[0xE6] = [this, &getHL, &ld8]() { mmu.writeByte(getHL(),set(4, mmu.readByte(getHL()))); return 16; };
+
+	opCBMap[0xEF] = [this, &ld8]() { ld8(registers.a,set(5, registers.a)); return 8; };
+	opCBMap[0xE8] = [this, &ld8]() { ld8(registers.b,set(5, registers.b)); return 8; };
+	opCBMap[0xE9] = [this, &ld8]() { ld8(registers.c,set(5, registers.c)); return 8; };
+	opCBMap[0xEA] = [this, &ld8]() { ld8(registers.d,set(5, registers.d)); return 8; };
+	opCBMap[0xEB] = [this, &ld8]() { ld8(registers.e,set(5, registers.e)); return 8; };
+	opCBMap[0xEC] = [this, &ld8]() { ld8(registers.h,set(5, registers.h)); return 8; };
+	opCBMap[0xED] = [this, &ld8]() { ld8(registers.l,set(5, registers.l)); return 8; };
+	opCBMap[0xEE] = [this, &getHL, &ld8]() { mmu.writeByte(getHL(),set(5, mmu.readByte(getHL()))); return 16; };
+
+	opCBMap[0xF7] = [this, &ld8]() { ld8(registers.a,set(6, registers.a)); return 8; };
+	opCBMap[0xF0] = [this, &ld8]() { ld8(registers.b,set(6, registers.b)); return 8; };
+	opCBMap[0xF1] = [this, &ld8]() { ld8(registers.c,set(6, registers.c)); return 8; };
+	opCBMap[0xF2] = [this, &ld8]() { ld8(registers.d,set(6, registers.d)); return 8; };
+	opCBMap[0xF3] = [this, &ld8]() { ld8(registers.e,set(6, registers.e)); return 8; };
+	opCBMap[0xF4] = [this, &ld8]() { ld8(registers.h,set(6, registers.h)); return 8; };
+	opCBMap[0xF5] = [this, &ld8]() { ld8(registers.l,set(6, registers.l)); return 8; };
+	opCBMap[0xF6] = [this, &getHL, &ld8]() { mmu.writeByte(getHL(),set(6, mmu.readByte(getHL()))); return 16; };
+
+	opCBMap[0xFF] = [this, &ld8]() { ld8(registers.a,set(7, registers.a)); return 8; };
+	opCBMap[0xF8] = [this, &ld8]() { ld8(registers.b,set(7, registers.b)); return 8; };
+	opCBMap[0xF9] = [this, &ld8]() { ld8(registers.c,set(7, registers.c)); return 8; };
+	opCBMap[0xFA] = [this, &ld8]() { ld8(registers.d,set(7, registers.d)); return 8; };
+	opCBMap[0xFB] = [this, &ld8]() { ld8(registers.e,set(7, registers.e)); return 8; };
+	opCBMap[0xFC] = [this, &ld8]() { ld8(registers.h,set(7, registers.h)); return 8; };
+	opCBMap[0xFD] = [this, &ld8]() { ld8(registers.l,set(7, registers.l)); return 8; };
+	opCBMap[0xFE] = [this, &getHL, &ld8]() { mmu.writeByte(getHL(),set(7, mmu.readByte(getHL()))); return 16; };
 	//res
-    opCBMap[0x87] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.a); return 8; };
-    opCBMap[0x80] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.b); return 8; };
-    opCBMap[0x81] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.c); return 8; };
-    opCBMap[0x82] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.d); return 8; };
-    opCBMap[0x83] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.e); return 8; };
-    opCBMap[0x84] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.h); return 8; };
-    opCBMap[0x85] = [this, &getImmediateValue8]() { res(getImmediateValue8(), registers.l); return 8; };
-    opCBMap[0x86] = [this, &getHL, &getImmediateValue8]() {res(getImmediateValue8(), mmu.readByte(getHL())); return 16; };
+	opCBMap[0x87] = [this, &ld8]() { ld8(registers.a,res(0, registers.a)); return 8; };
+	opCBMap[0x80] = [this, &ld8]() { ld8(registers.b,res(0, registers.b)); return 8; };
+	opCBMap[0x81] = [this, &ld8]() { ld8(registers.c,res(0, registers.c)); return 8; };
+	opCBMap[0x82] = [this, &ld8]() { ld8(registers.d,res(0, registers.d)); return 8; };
+	opCBMap[0x83] = [this, &ld8]() { ld8(registers.e,res(0, registers.e)); return 8; };
+	opCBMap[0x84] = [this, &ld8]() { ld8(registers.h,res(0, registers.h)); return 8; };
+	opCBMap[0x85] = [this, &ld8]() { ld8(registers.l,res(0, registers.l)); return 8; };
+	opCBMap[0x86] = [this, &getHL, &ld8]() { mmu.writeByte(getHL(),res(0, mmu.readByte(getHL()))); return 16; };
+
+	opCBMap[0x8F] = [this, &ld8]() { ld8(registers.a,res(1, registers.a)); return 8; };
+	opCBMap[0x88] = [this, &ld8]() { ld8(registers.b,res(1, registers.b)); return 8; };
+	opCBMap[0x89] = [this, &ld8]() { ld8(registers.c,res(1, registers.c)); return 8; };
+	opCBMap[0x8A] = [this, &ld8]() { ld8(registers.d,res(1, registers.d)); return 8; };
+	opCBMap[0x8B] = [this, &ld8]() { ld8(registers.e,res(1, registers.e)); return 8; };
+	opCBMap[0x8C] = [this, &ld8]() { ld8(registers.h,res(1, registers.h)); return 8; };
+	opCBMap[0x8D] = [this, &ld8]() { ld8(registers.l,res(1, registers.l)); return 8; };
+	opCBMap[0x8E] = [this, &getHL, &ld8]() { mmu.writeByte(getHL(),res(1, mmu.readByte(getHL()))); return 16; };
+
+	opCBMap[0x97] = [this, &ld8]() { ld8(registers.a,res(2, registers.a)); return 8; };
+	opCBMap[0x90] = [this, &ld8]() { ld8(registers.b,res(2, registers.b)); return 8; };
+	opCBMap[0x91] = [this, &ld8]() { ld8(registers.c,res(2, registers.c)); return 8; };
+	opCBMap[0x92] = [this, &ld8]() { ld8(registers.d,res(2, registers.d)); return 8; };
+	opCBMap[0x93] = [this, &ld8]() { ld8(registers.e,res(2, registers.e)); return 8; };
+	opCBMap[0x94] = [this, &ld8]() { ld8(registers.h,res(2, registers.h)); return 8; };
+	opCBMap[0x95] = [this, &ld8]() { ld8(registers.l,res(2, registers.l)); return 8; };
+	opCBMap[0x96] = [this, &getHL, &ld8]() { mmu.writeByte(getHL(),res(2, mmu.readByte(getHL()))); return 16; };
+
+	opCBMap[0x9F] = [this, &ld8]() { ld8(registers.a,res(3, registers.a)); return 8; };
+	opCBMap[0x98] = [this, &ld8]() { ld8(registers.b,res(3, registers.b)); return 8; };
+	opCBMap[0x99] = [this, &ld8]() { ld8(registers.c,res(3, registers.c)); return 8; };
+	opCBMap[0x9A] = [this, &ld8]() { ld8(registers.d,res(3, registers.d)); return 8; };
+	opCBMap[0x9B] = [this, &ld8]() { ld8(registers.e,res(3, registers.e)); return 8; };
+	opCBMap[0x9C] = [this, &ld8]() { ld8(registers.h,res(3, registers.h)); return 8; };
+	opCBMap[0x9D] = [this, &ld8]() { ld8(registers.l,res(3, registers.l)); return 8; };
+	opCBMap[0x9E] = [this, &getHL, &ld8]() { mmu.writeByte(getHL(),res(3, mmu.readByte(getHL()))); return 16; };
+
+	opCBMap[0xA7] = [this, &ld8]() { ld8(registers.a,res(4, registers.a)); return 8; };
+	opCBMap[0xA0] = [this, &ld8]() { ld8(registers.b,res(4, registers.b)); return 8; };
+	opCBMap[0xA1] = [this, &ld8]() { ld8(registers.c,res(4, registers.c)); return 8; };
+	opCBMap[0xA2] = [this, &ld8]() { ld8(registers.d,res(4, registers.d)); return 8; };
+	opCBMap[0xA3] = [this, &ld8]() { ld8(registers.e,res(4, registers.e)); return 8; };
+	opCBMap[0xA4] = [this, &ld8]() { ld8(registers.h,res(4, registers.h)); return 8; };
+	opCBMap[0xA5] = [this, &ld8]() { ld8(registers.l,res(4, registers.l)); return 8; };
+	opCBMap[0xA6] = [this, &getHL, &ld8]() { mmu.writeByte(getHL(),res(4, mmu.readByte(getHL()))); return 16; };
+
+	opCBMap[0xAF] = [this, &ld8]() { ld8(registers.a,res(5, registers.a)); return 8; };
+	opCBMap[0xA8] = [this, &ld8]() { ld8(registers.b,res(5, registers.b)); return 8; };
+	opCBMap[0xA9] = [this, &ld8]() { ld8(registers.c,res(5, registers.c)); return 8; };
+	opCBMap[0xAA] = [this, &ld8]() { ld8(registers.d,res(5, registers.d)); return 8; };
+	opCBMap[0xAB] = [this, &ld8]() { ld8(registers.e,res(5, registers.e)); return 8; };
+	opCBMap[0xAC] = [this, &ld8]() { ld8(registers.h,res(5, registers.h)); return 8; };
+	opCBMap[0xAD] = [this, &ld8]() { ld8(registers.l,res(5, registers.l)); return 8; };
+	opCBMap[0xAE] = [this, &getHL, &ld8]() { mmu.writeByte(getHL(),res(5, mmu.readByte(getHL()))); return 16; };
+
+	opCBMap[0xB7] = [this, &ld8]() { ld8(registers.a,res(6, registers.a)); return 8; };
+	opCBMap[0xB0] = [this, &ld8]() { ld8(registers.b,res(6, registers.b)); return 8; };
+	opCBMap[0xB1] = [this, &ld8]() { ld8(registers.c,res(6, registers.c)); return 8; };
+	opCBMap[0xB2] = [this, &ld8]() { ld8(registers.d,res(6, registers.d)); return 8; };
+	opCBMap[0xB3] = [this, &ld8]() { ld8(registers.e,res(6, registers.e)); return 8; };
+	opCBMap[0xB4] = [this, &ld8]() { ld8(registers.h,res(6, registers.h)); return 8; };
+	opCBMap[0xB5] = [this, &ld8]() { ld8(registers.l,res(6, registers.l)); return 8; };
+	opCBMap[0xB6] = [this, &getHL, &ld8]() { mmu.writeByte(getHL(),res(6, mmu.readByte(getHL()))); return 16; };
+
+	opCBMap[0xBF] = [this, &ld8]() { ld8(registers.a,res(7, registers.a)); return 8; };
+	opCBMap[0xB8] = [this, &ld8]() { ld8(registers.b,res(7, registers.b)); return 8; };
+	opCBMap[0xB9] = [this, &ld8]() { ld8(registers.c,res(7, registers.c)); return 8; };
+	opCBMap[0xBA] = [this, &ld8]() { ld8(registers.d,res(7, registers.d)); return 8; };
+	opCBMap[0xBB] = [this, &ld8]() { ld8(registers.e,res(7, registers.e)); return 8; };
+	opCBMap[0xBC] = [this, &ld8]() { ld8(registers.h,res(7, registers.h)); return 8; };
+	opCBMap[0xBD] = [this, &ld8]() { ld8(registers.l,res(7, registers.l)); return 8; };
+	opCBMap[0xBE] = [this, &getHL, &ld8]() { mmu.writeByte(getHL(),res(7, mmu.readByte(getHL()))); return 16; };
 	//jp
 	opMap[0xC3] = [this, &ld16, &getImmediateValue16]() {jump(getImmediateValue16()); return 12; };
 	//jp cc
@@ -493,11 +681,11 @@ void CPU::initMap() {
 	//reti
 	opMap[0xD9] = [this, &ld16]() { ld16(registers.pc, pop16());interruptManager.setIME(true); return 8; };
 
-    //stop
-    opMap[0x10] = [this, &getImmediateValue8](){interruptManager.setStop(true); getImmediateValue8(); return 4; };
-    //halt
-    opMap[0x76] = [this](){interruptManager.setHalt(true); return 4; };
-    //DI & EI
-    opMap[0xF3] = [this](){interruptManager.setIME(false); return 4; };
-    opMap[0xFB] = [this](){interruptManager.setIME(true); return 4; };
+	//stop
+	opMap[0x10] = [this, &getImmediateValue8](){interruptManager.setStop(true); getImmediateValue8(); return 4; };
+	//halt
+	opMap[0x76] = [this](){interruptManager.setHalt(true); return 4; };
+	//DI & EI
+	opMap[0xF3] = [this](){interruptManager.setIME(false); return 4; };
+	opMap[0xFB] = [this](){interruptManager.setIME(true); return 4; };
 };
