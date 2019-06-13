@@ -44,12 +44,18 @@ private:
         return a + b;
 	};
     Byte adc(Byte a, Byte b){
-        return add(a, b + getC());
+        uint32_t sum=a+b+getC();
+        uint32_t halfSum=(a&0xF)+(b&0xF)+getC();
+        ((sum&0xFF)==0)?setZ():resetZ();
+        resetN();
+        (halfSum>0xF)?setH():resetH();
+        (sum>0xFF)?setC():resetC();
+        return sum&0xFF;
     };
 
     Word add(Word a, Word b){
-        unsigned int sum = a + b;
-        unsigned int half = (a & 0xFFF) + (b & 0xFFF);
+        uint32_t sum = a + b;
+        uint32_t half = (a & 0xFFF) + (b & 0xFFF);
         half > 0xFFF ? setH() : resetH();
         sum > 0xFFFF ? setC() : resetC();
         resetN();
@@ -73,7 +79,13 @@ private:
 	}
 	
     Byte sbc(Byte a, Byte b){
-        return sub(a, b + getC());
+        uint32_t sum=a-b-getC();
+        uint32_t halfSum=(a&0xF)-(b&0xF)-getC();
+        ((sum&0xFF)==0)?setZ():resetZ();
+        setN();
+        (halfSum>0xF)?setH():resetH();
+        (sum>0xFF)?setC():resetC();
+        return sum;
     }
     Byte andAL(Byte a, Byte b){
         ((a & b) == 0)?setZ():resetZ();
@@ -148,7 +160,7 @@ private:
                 ra &= 0xFF;
             }
             if(getC()){
-                ra -= 0x06;
+                ra -= 0x60;
             }
         }
 	    else{

@@ -78,11 +78,13 @@ public:
             }
             return rom[trueAddress];
         } else if(page >= 0xA && page < 0xC){
+            /*
             if (mode == 1){
                 if (ramEnabled){
                     return ram[ramBank * 0x2000 | address];
                 }
-            }
+            }*/
+            return ram[ramBank * 0x2000 | address];
         }
         throw WrongAddressException("mbc1[read]", address);
     };
