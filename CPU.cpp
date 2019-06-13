@@ -298,10 +298,10 @@ void CPU::initMap() {
 	//16bit opcode
 
 	//add
-	opMap[0x09] = [this, &setHL, &getHL, &getBC]() {setHL(add(mmu.readWord(getHL()), mmu.readWord(getBC()))); return 8; };
-	opMap[0x19] = [this, &setHL, &getHL, &getDE]() {setHL(add(mmu.readWord(getHL()), mmu.readWord(getDE()))); return 8; };
-	opMap[0x29] = [this, &setHL, &getHL]() {setHL(add(mmu.readWord(getHL()), mmu.readWord(getHL()))); return 8; };
-	opMap[0x39] = [this, &setHL, &getHL]() {setHL(add(mmu.readWord(getHL()), registers.sp)); return 8; };
+	opMap[0x09] = [this, &setHL, &getHL, &getBC]() {setHL(add(getHL(), getBC())); return 8; };
+	opMap[0x19] = [this, &setHL, &getHL, &getDE]() {setHL(add(getHL(), getDE())); return 8; };
+	opMap[0x29] = [this, &setHL, &getHL]() {setHL(add(getHL(), getHL())); return 8; };
+	opMap[0x39] = [this, &setHL, &getHL]() {setHL(add(getHL(), registers.sp)); return 8; };
 
 	//add sp
 	opMap[0xE8] = [this, &ld16, &getSignedImmediateValue8]() {ld16(registers.sp,addSp(registers.sp,getSignedImmediateValue8())); return 16; };
