@@ -17,8 +17,9 @@ SDLManager sdlManager;
 void SDLManager::refreshWindow(){
 #ifndef NDEBUG
     logger << "REFRESH!" << std::endl;
-#else
     SDL_Delay(1);
+#else
+
 #endif
     SDL_UpdateWindowSurface(win);
 

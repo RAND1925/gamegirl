@@ -134,7 +134,7 @@ void CPU::initMap() {
 	opMap[0x7A] = [this, &ld8]() {ld8(registers.a, registers.d); return 4; };
 	opMap[0x7B] = [this, &ld8]() {ld8(registers.a, registers.e); return 4; };
 	opMap[0x7C] = [this, &ld8]() {ld8(registers.a, registers.h); return 4; };
-	opMap[0x7D] = [this, &ld8]() {ld8(registers.a, registers.h); return 4; };
+	opMap[0x7D] = [this, &ld8]() {ld8(registers.a, registers.l); return 4; };
 	opMap[0x7E] = [this, &ld8, &getHL]() {ld8(registers.a, mmu.readByte(getHL())); return 8; };
 	opMap[0x7F] = [this, &ld8]() {ld8(registers.a, registers.a); return 4; };
 
@@ -741,6 +741,18 @@ void CPU::initRegisters() {
 	registers.l = 0x0D;
 	registers.sp = 0xFFFE;
 	registers.pc = 0x0000;
-
 	//todo: init registers in zram;
+}
+
+void CPU::initRegistersAfterBoot() {
+    registers.a = 0x01;
+    registers.f = 0xB0;
+    registers.b = 0x00;
+    registers.c = 0x13;
+    registers.d = 0x00;
+    registers.e = 0xD8;
+    registers.h = 0x01;
+    registers.l = 0x4D;
+    registers.sp = 0xFFFE;
+    registers.pc = 0x0100;
 };

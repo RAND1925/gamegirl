@@ -7,9 +7,6 @@
 
 MMU mmu;
 Byte MMU::readByte(Word address){
-    if (address < 0x100){
-        return bios[address];
-    }
     for (AddressSpace *s : spaces){
         if (s->accepts(address)){
             return s->getByte(address);

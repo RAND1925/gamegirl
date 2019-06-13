@@ -11,8 +11,8 @@
 
 class InterruptManager:  public AddressSpace{
     bool iME = false;
-    Byte iE = 0;//FFFF
-    Byte iF = 0;//FF0F
+    Byte iE = 0x00;//FFFF
+    Byte iF = 0xE1;//FF0F
 
     bool stop = false;
     bool halt = false;

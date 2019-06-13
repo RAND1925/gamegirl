@@ -1,8 +1,3 @@
-#include <iostream>
-#include <bitset>
-#include <fstream>
-#include <memory>
-
 #include "common.h"
 #include "MMU.h"
 #include "WRam.h"
@@ -12,10 +7,15 @@
 #include "Cartridge.h"
 #include "InterruptManager.h"
 #include "CPU.h"
-#include "CycleCounter.h"
 #include "Logger.h"
 #include "SDLManager.h"
+#include "Boot.h"
 
+
+
+
+#define USE_BOOT
+uint64_t step();
 int main(int argc,char** argv) {
 
     std::ios::sync_with_stdio(false);
@@ -24,16 +24,41 @@ int main(int argc,char** argv) {
     cartridgeDriver.openFile(FILE_PATH);
     sdlManager.init("Tetris");
     cpu.initMap();
+    uint64_t allCycle = 0;
 #ifndef NDEBUG
     logger.open("a.txt");
 #endif
-    mmu.addAddressSpace(&timer);
+
+#ifdef USE_BOOT
+    cpu.initRegisters();
+    mmu.addAddressSpace(&boot);
+#endif
     mmu.addAddressSpace(&cartridgeDriver);
     mmu.addAddressSpace(&wRam);
-    mmu.addAddressSpace(&interruptManager);
     mmu.addAddressSpace(&gpu);
+    mmu.addAddressSpace(&timer);
+    mmu.addAddressSpace(&interruptManager);
     mmu.addAddressSpace(&zRam);
 
-    cycleCounter.cycle();
+#ifdef USE_BOOT
+    while (cpu.getPc() < 0x100){
+        allCycle += step();
+    }
+    mmu.removeAddressSpace(&boot);
+#else
+    cpu.initRegistersAfterBoot();
+#endif
+    while(true){
+        allCycle += step();
+#ifndef NDEBUG
+        logger << "clk:" << allCycle << std::endl;
+#endif
+    }
+}
 
+uint64_t step(){
+    Byte cpuCycle = cpu.step();
+    timer.increase(cpuCycle);
+    gpu.addTime(cpuCycle);
+    return cpuCycle;
 }

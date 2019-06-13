@@ -306,17 +306,21 @@ private:
 
     std::function<Byte(void)> opMap[0x100];
 	std::function<Byte(void)> opCBMap[0x100];
-  public:
+public:
     void display();
 
-	void initMap();
-    Byte step();
 
-    void initRegisters();;
-    CPU(){
+    Byte step();
+	inline void setPc(Word pc){registers.pc = pc;}
+	Word  getPc(){ return registers.pc; };
+    void initRegisters();
+    void initRegistersAfterBoot();
+    void init(){
         initRegisters();
         initMap();
     }
+
+    void initMap();
 };
 
 extern CPU cpu;

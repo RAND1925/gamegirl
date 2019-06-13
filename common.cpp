@@ -3,7 +3,7 @@
 //
 #include "common.h"
 Byte getBit(const Byte b, const Byte p){
-    return (b >> p) & 1;
+    return static_cast<Byte>((b >> p) & 1);
 }
 void setBit(Byte & b, const Byte p){
     b |= (1 << p);

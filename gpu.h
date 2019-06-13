@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
-#include <vector>
-#include "MMU.h"
+#include <array>
 #include "const.h"
 #include "common.h"
 #include "AddressSpace.h"

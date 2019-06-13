@@ -248,6 +248,7 @@ Byte GPU::getByte(Word address) {
                 break;
         }
     }
+    throw WrongAddressException("GPU[read]", address);
 }
 
 bool GPU::accepts(Word address) {
