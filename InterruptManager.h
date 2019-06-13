@@ -21,7 +21,8 @@ public:
         setBit(iF, bit);
     }
     void setIF(Byte newIF){
-        iF = newIF;
+        iF &= 0xE0;
+        iF |= (newIF & 0x1F);
     };
     void setIME(bool newIME){
         iME = newIME;
@@ -36,14 +37,14 @@ public:
         halt = newHalt;
     }
     bool hasInterrupt(){
-        Byte maskCode = iE & iF;
+        Byte maskCode = static_cast<Byte>((iE & iF) & 0x1F);
         return iME && maskCode;
     }
 
     Byte handleInterrupt(){
         iME = false;
         halt = false;
-        Byte maskCode = (iE & iF) & 0x1F;
+        Byte maskCode = static_cast<Byte>((iE & iF) & 0x1F);
         for(Byte i = 0; i < 5; ++i){
             if (getBit(maskCode, i)){
                 std::cout << "interrupt: " << i << std::endl;
@@ -80,7 +81,7 @@ public:
 
     void setByte(Word address, Byte value) override{
         if (address == 0xFF0F) {
-            iF  = value;
+            setIF(value);
         } else if (address == 0xFFFF) {
             iE = value;
         } else {

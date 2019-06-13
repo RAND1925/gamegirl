@@ -140,8 +140,6 @@ void GPU::draw(int yLine) {
 
     Byte lcdc = regLcdControl;
 
-
-
     if (!getBit(lcdc, 7)) {
         //todo: turn off screen
     }
@@ -240,6 +238,14 @@ Byte GPU::getByte(Word address) {
                 return regLineY;
             case 0xFF45:
                 return regLineYC;
+            case 0xFF46:
+                return regDMA;
+            case 0xFF47:
+                return regBGP;
+            case 0xFF48:
+                return regOBP0;
+            case 0xFF49:
+                return regOBP1;
             case 0xFF4A:
                 return regWindowX;
             case 0xFF4B:
@@ -258,9 +264,7 @@ bool GPU::accepts(Word address) {
         return true;
     else if (address >= offsetOam && address < offsetOam + lengthOam)
         return true;
-    else if (address >= 0xFF40 && address <= 0xFF45)
-        return true;
-    else if (address == 0xFF00 || address == 0xFF4A || address == 0xFF4B)
+    else if (address >= 0xFF40 && address <= 0xFF4B)
         return true;
     return false;
 }
@@ -302,6 +306,18 @@ void GPU::setByte(Word address, Byte value) {
                 return;
             case 0xFF45:
                 regLineYC = value;
+                return;
+            case 0xFF46:
+                regDMA = value;
+                return;
+            case 0xFF47:
+                regBGP = value;
+                return;
+            case 0xFF48:
+                regOBP0 = value;
+                return;
+            case 0xFF49:
+                regOBP1 = value;
                 return;
             case 0xFF4A:
                 regWindowX = value;
