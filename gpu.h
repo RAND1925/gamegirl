@@ -63,7 +63,12 @@ private:
     //the reg in the gpu:
 
     Byte regLcdControl = 0x91;
-    Byte regLcdStatus;
+    Byte regLcdStatus = 0;
+
+    Byte regDMA;
+    Byte regBGP;
+    Byte regOBP0;
+    Byte regOBP1;
     Byte regScrollX = 0;
     Byte regScrollY = 0;
     Byte regLineY = 0;
