@@ -6,19 +6,23 @@
 #define GAMEGIRL_MMU_H
 
 #include <vector>
-#include <array>
+#include <algorithm>
 #include "common.h"
 #include "AddressSpace.h"
 
 
 class MMU {
 private:
-    std::vector<AddressSpace *> spaces;
-    Byte* unusedSpaces;
+    std::vector<AddressSpace *> spaces{};
+    Byte* unusedSpaces{nullptr};
+
 public:
 	void addAddressSpace(AddressSpace * s){
 		spaces.push_back(s);
 	};
+	void removeAddressSpace(AddressSpace * s){
+	    spaces.erase(std::remove(spaces.begin(), spaces.end(), s), spaces.end());
+	}
     MMU(){
         unusedSpaces = new Byte[0x10000];
     }
