@@ -12,15 +12,13 @@
 #include "Boot.h"
 
 
-
-
-#define USE_BOOT
+//#define USE_BOOT
 uint64_t step();
 int main(int argc,char** argv) {
 
     std::ios::sync_with_stdio(false);
 
-    const std::string FILE_PATH("../testRom/Tetris.gb");
+    const std::string FILE_PATH("../testRom/bgbtest.gb");
     cartridgeDriver.openFile(FILE_PATH);
     sdlManager.init("Tetris");
     cpu.initMap();
