@@ -5,6 +5,7 @@
 #ifndef GAMEGIRL_COMMON_H
 #define GAMEGIRL_COMMON_H
 #include <cstdint>
+//#define NDEBUG
 
     using Byte = uint8_t;
     using Word = uint16_t;
@@ -27,6 +28,5 @@ inline constexpr unsigned long long operator "" _ramBanks(const unsigned long lo
     Byte getBit(const Byte b, Byte p);
     void setBit(Byte & b, Byte p);
     void resetBit(Byte & b, Byte p);
-
 
 #endif //GAMEGIRL_COMMON_H

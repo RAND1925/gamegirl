@@ -10,8 +10,8 @@
 #include "AddressSpace.h"
 
 class ZRam: public AddressSpace {
-    const static Word offset = 0xFF40;
-    const static Word length = 0x00C0;
+    const static Word offset = 0xFF79;
+    const static Word length = 0x0080;
     std::array<Byte, length> bytes;
 public:
     bool accepts(Word address) override{

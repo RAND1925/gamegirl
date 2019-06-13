@@ -1,8 +1,3 @@
-#include <iostream>
-#include <bitset>
-#include <fstream>
-#include <memory>
-
 #include "common.h"
 #include "MMU.h"
 #include "WRam.h"
@@ -12,24 +7,57 @@
 #include "Cartridge.h"
 #include "InterruptManager.h"
 #include "CPU.h"
-#include "CycleCounter.h"
+#include "Logger.h"
+#include "SDLManager.h"
+#include "Boot.h"
 
+
+
+
+#define USE_BOOT
+uint64_t step();
 int main(int argc,char** argv) {
 
-    std::cin.sync_with_stdio(0);
-    std::cout.sync_with_stdio(0);
-
-    //const std::string FILE_PATH("E:\\C++project\\cpu_instrs\\individual\\07-jr,jp,call,ret,rst.gb");
-    const std::string FILE_PATH("E:\\C++project\\bgb\\bgbtest.gb");
+    std::ios::sync_with_stdio(false);
+    const std::string FILE_PATH("../testRom/Tetris.gb");
     cartridgeDriver.openFile(FILE_PATH);
-    gpu.initWindow(480, 320, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, "");
+    sdlManager.init("Tetris");
     cpu.initMap();
-    mmu.addAddressSpace(&timer);
+    uint64_t allCycle = 0;
+#ifndef NDEBUG
+    logger.open("a.txt");
+#endif
+
+#ifdef USE_BOOT
+    cpu.initRegisters();
+    mmu.addAddressSpace(&boot);
+#endif
     mmu.addAddressSpace(&cartridgeDriver);
     mmu.addAddressSpace(&wRam);
+    mmu.addAddressSpace(&gpu);
+    mmu.addAddressSpace(&timer);
     mmu.addAddressSpace(&interruptManager);
     mmu.addAddressSpace(&zRam);
-    mmu.addAddressSpace(&gpu);
-    cycleCounter.cycle();
 
+#ifdef USE_BOOT
+    while (cpu.getPc() < 0x100){
+        allCycle += step();
+    }
+    mmu.removeAddressSpace(&boot);
+#else
+    cpu.initRegistersAfterBoot();
+#endif
+    while(true){
+        allCycle += step();
+#ifndef NDEBUG
+        logger << "clk:" << allCycle << std::endl;
+#endif
+    }
+}
+
+uint64_t step(){
+    Byte cpuCycle = cpu.step();
+    timer.increase(cpuCycle);
+    gpu.addTime(cpuCycle);
+    return cpuCycle;
 }
