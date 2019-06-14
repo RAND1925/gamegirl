@@ -26,6 +26,10 @@ public:
         if (newJoypad != regJoypad){
             interruptManager.requestInterrupt(4);
         }
+
+
+        regJoypad = newJoypad;
+
     }
 private:
     Byte regJoypad = 0x0F;

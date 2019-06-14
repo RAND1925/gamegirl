@@ -31,7 +31,7 @@ int main(int argc,char** argv) {
     // 02 -noboot init (tests)
     // 03 -noboot initAfterBoot (bgbtest)
 
-    int runMode = 3;
+    int runMode = 1;
     std::ios::sync_with_stdio(false);
 
     const std::string FILE_PATH("../testRom/bgbtest.gb");
@@ -39,7 +39,7 @@ int main(int argc,char** argv) {
     sdlManager.init(cartridgeDriver.getTitle());
     cpu.initMap();
     uint64_t allCycle = 0;
-#ifndef LOG
+#ifndef NLOG
     logger.open("a.txt");
 #endif
 
@@ -68,7 +68,7 @@ int main(int argc,char** argv) {
     while(!isQuit){
 
         allCycle += step();
-#ifndef LOG
+#ifndef NLOG
         logger << "clk:" << allCycle << std::endl;
 #endif
     }

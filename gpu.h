@@ -27,7 +27,6 @@ public:
     int currentLine = 0, currentMode = 0, counter = 0;
     //two byte to store joypad information
     //judge if it's direction or select
-    Byte keyColumn = 0x00;
 
 private:
     void setMode(int mode);
@@ -38,7 +37,9 @@ private:
 
     //some sdl var and pointer:
 
-
+    Byte getGrayCode(Byte colorCode, Byte reg){
+        return static_cast<Byte>((reg >> (colorCode << 1)) & 0x03);
+    }
     //the window info:
 
     int innerClock = 0;

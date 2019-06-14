@@ -15,7 +15,7 @@ const Color realColorMap[4]{
 
 SDLManager sdlManager;
 void SDLManager::refreshWindow(){
-#ifndef LOG
+#ifndef NLOG
     logger << "REFRESH!" << std::endl;
     //SDL_Delay(10);
 #else
@@ -31,7 +31,8 @@ SDLManager::~SDLManager(){
     SDL_Quit();
 }
 
-Uint32 SDLManager::mapColor(const Color &color) {
+Uint32 SDLManager::mapColor(Byte grayCode) {
+    Color color = realColorMap[grayCode];
     return SDL_MapRGB(fmt, color.r, color.g, color.b);
 }
 
@@ -64,5 +65,96 @@ void SDLManager::init(std::string title_window) {
     auto pixel_format = SDL_MapRGB(surface->format, 193, 0, 120);
     SDL_FillRect(surface, nullptr, pixel_format);
     refreshWindow();
+}
+
+bool SDLManager::handleInput() {
+    while (SDL_PollEvent(&e)) {
+        logger << "input:" << e.type<< std::endl;
+        if (e.type == SDL_QUIT)
+            isQuit = true;
+        if (e.type == SDL_KEYDOWN) {
+            logger << "KEY:" << e.key.keysym.sym << std::endl;
+            switch (e.key.keysym.sym) {
+                case SDLK_ESCAPE:
+                    isQuit = true;
+                    break;
+                    //for column 1
+                case SDLK_RIGHT:
+                    joypadC1 &= 0xE;
+                    break;
+                case SDLK_LEFT:
+                    joypadC1 &= 0xD;
+                    break;
+                case SDLK_UP:
+                    joypadC1 &= 0xB;
+                    break;
+                case SDLK_DOWN:
+                    joypadC1 &= 0x7;
+                    break;
+
+                    //for column 0
+                case SDLK_z:
+                    joypadC0 &= 0xE;
+                    break;
+                case SDLK_x:
+                    joypadC0 &= 0xD;
+                    break;
+                case SDLK_SPACE:
+                    joypadC0 &= 0xB;
+                    break;
+                case SDLK_RETURN:
+                    joypadC0 &= 0x7;
+                    break;
+            }
+        } else if (e.type == SDL_KEYUP) {
+            switch (e.key.keysym.sym) {
+                //for column 1
+                case SDLK_RIGHT:
+                    joypadC1 |= 0x1;
+                    break;
+                case SDLK_LEFT:
+                    joypadC1 |= 0x2;
+                    break;
+                case SDLK_UP:
+                    joypadC1 |= 0x4;
+                    break;
+                case SDLK_DOWN:
+                    joypadC1 |= 0x8;
+                    break;
+
+                    //for column 0
+                case SDLK_z:
+                    joypadC0 |= 0x1;
+                    break;
+                case SDLK_x:
+                    joypadC0 |= 0x2;
+                    break;
+                case SDLK_SPACE:
+                    joypadC0 |= 0x4;
+                    break;
+                case SDLK_RETURN:
+                    joypadC0 |= 0x8;
+                    break;
+                default:
+                    break;
+            }
+
+        } else {
+            break;
+        }
+    }
+    return isQuit;
+    //the return value is used to determine if it's end
+}
+
+Byte SDLManager::getJoypad(Byte in) {
+    in &= 0xF0;
+    if (!getBit(in, 4)){
+        in |= joypadC1;
+    }
+    if (!getBit(in, 5)){
+        in |= joypadC0;
+    }
+    return in;
 };
 

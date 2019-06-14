@@ -665,7 +665,7 @@ void CPU::initMap() {
 }
 
 Byte CPU::step() {
-#ifndef LOG
+#ifndef NLOG
 	display();
 #endif
 	Byte timing = 4;
@@ -685,7 +685,7 @@ Byte CPU::step() {
 
 
 void CPU::display() {
-#ifndef LOG
+#ifndef NLOG
 	logger << "a:" << std::hex << (int)registers.a << ' '
 		<< "f:" << std::hex << (int)registers.f << ' '
 		<< "b:" << std::hex << (int)registers.b << ' '

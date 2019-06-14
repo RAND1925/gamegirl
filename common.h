@@ -5,7 +5,6 @@
 #ifndef GAMEGIRL_COMMON_H
 #define GAMEGIRL_COMMON_H
 #include <cstdint>
-//#define LOG
 
     using Byte = uint8_t;
     using Word = uint16_t;

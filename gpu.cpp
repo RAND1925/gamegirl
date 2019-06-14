@@ -126,7 +126,7 @@ void GPU::setMode(int mode)
 void GPU::draw(int yLine) {
 
 
-#ifndef LOG
+#ifndef NLOG
     display();
 #endif
     //lcdc :
@@ -186,8 +186,9 @@ void GPU::draw(int yLine) {
                 colorHigh = bytesVram[dataTile + (numTile * 16) + (yPixel * 2) + 1];
                 //    lastPixel = xTile;
             }
-            int color = getBit(colorLow, xPixel) | (getBit(colorHigh, xPixel) << 1);
-            Uint32 rgbCode = sdlManager.mapColor(realColorMap[color]);
+            Byte colorCode = getBit(colorLow, xPixel) | (getBit(colorHigh, xPixel) << 1);
+            Byte grayCode = getGrayCode(colorCode, regBGP);
+            Uint32 rgbCode = sdlManager.mapColor(grayCode);
             colorLine[counter] = rgbCode;
         }
         sdlManager.setLine(yLine, colorLine);
@@ -323,7 +324,7 @@ void GPU::setByte(Word address, Byte value) {
 }
 
 void GPU::display() {
-#ifndef LOG
+#ifndef NLOG
     logger << "LCDC:" << std::hex <<(int)regLcdControl << ' '
            << "STAT:" << std::hex <<(int)regLcdStatus << ' '
            << "SCX:" << std::hex <<(int)regScrollX << ' '
