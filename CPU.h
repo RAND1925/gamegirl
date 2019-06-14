@@ -133,6 +133,60 @@ private:
 		return a - 1;
 	}
 
+	Byte getImmediateValue8 (){
+		return mmu.readByte(registers.pc++);
+	}
+	Word getImmediateValue16(){
+		Word v = mmu.readWord(registers.pc);
+		registers.pc += 2;
+		return v;
+	};
+	SByte getSignedImmediateValue8()
+	{
+		return (SByte)mmu.readByte(registers.pc++);
+	};
+
+	void ld8(Byte &lhs, Byte rhs) {
+		lhs = rhs;
+	};
+	void ld16(Word &lhs, Word rhs) {
+		lhs = rhs;
+	};
+
+	Word getR16(Byte high, Byte low) {
+		return ((Word)high << 8u) | low;
+	};
+	void setR16(Byte & high, Byte & low, Word t){
+		high = (Byte)(t >> 8u);
+		low = (Byte)(t & 0xFF);
+	};
+	Word getAF(){
+		return getR16(registers.a, registers.f);
+	};
+	Word getHL(){
+		return getR16(registers.h, registers.l);
+	};
+	Word getBC(){
+		return getR16(registers.b, registers.c);
+	};
+	Word getDE(){
+		return getR16(registers.d, registers.e);
+	};
+	void setAF(Word t) {
+		registers.a = (Byte)(t >> 8u);
+		registers.f &= 0x0Fu;
+		registers.f |= (Byte)(t & 0xF0);
+	};
+	void setHL(Word t) {
+		setR16(registers.h, registers.l, t);
+	};
+	void setBC(Word t){
+		setR16(registers.b, registers.c, t);
+	};
+	void setDE(Word t) {
+		setR16(registers.d, registers.e, t);
+	};
+
 	void push16(Word val) {
         registers.sp -= 2;
 		mmu.writeWord(registers.sp, val);
@@ -301,7 +355,7 @@ private:
 		jump(addr);
 	}
 
-	void ret(Word addr){
+	void ret(){
 	    jump(pop16());
 	}
 	void rsv(){
@@ -318,20 +372,49 @@ private:
 
     std::function<Byte(void)> opMap[0x100];
 	std::function<Byte(void)> opCBMap[0x100];
+	Byte normalTable[0x100]{
+            1,3,2,2,1,1,2,1,5,2,2,2,1,1,2,1,
+            0,3,2,2,1,1,2,1,3,2,2,2,1,1,2,1,
+            2,3,2,2,1,1,2,1,2,2,2,2,1,1,2,1,
+            2,3,2,2,3,3,3,1,2,2,2,2,1,1,2,1,
+            1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,
+            1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,
+            1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,
+            2,2,2,2,2,2,0,2,1,1,1,1,1,1,2,1,
+            1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,
+            1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,
+            1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,
+            1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,
+            2,3,3,4,3,4,2,4,2,4,3,0,3,6,2,4,
+            2,3,3,0,3,4,2,4,2,4,3,0,3,0,2,4,
+            3,3,2,0,0,4,2,4,4,1,4,0,0,0,2,4,
+            3,3,2,1,0,4,2,4,3,2,4,1,0,0,2,4
+	};
+	Byte CBTable[0x100]{
+            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
+            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
+            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
+            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
+            2,2,2,2,2,2,3,2,2,2,2,2,2,2,3,2,
+            2,2,2,2,2,2,3,2,2,2,2,2,2,2,3,2,
+            2,2,2,2,2,2,3,2,2,2,2,2,2,2,3,2,
+            2,2,2,2,2,2,3,2,2,2,2,2,2,2,3,2,
+            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
+            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
+            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
+            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
+            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
+            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
+            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
+            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2
+	};
 public:
     void display();
-
-
     Byte step();
 	inline void setPc(Word pc){registers.pc = pc;}
 	Word  getPc(){ return registers.pc; };
     void initRegisters();
     void initRegistersAfterBoot();
-    void init(){
-        initRegisters();
-        initMap();
-    }
-
     void initMap();
 };
 

@@ -10,53 +10,71 @@
 #include "Logger.h"
 #include "SDLManager.h"
 #include "Boot.h"
-
+#include "JoyPad.h"
 
 //#define USE_BOOT
-uint64_t step();
+bool isQuit = false;
+uint64_t step(){
+    isQuit = sdlManager.handleInput();
+    joypad.update();
+    Byte cpuCycle = cpu.step();
+    timer.addTime(cpuCycle);
+    gpu.addTime(cpuCycle);
+    return cpuCycle;
+};
+
 int main(int argc,char** argv) {
 
+    //MODE
+    // 00 -boot(run)
+    // 01 -boot(no run) initAfterBoot
+    // 02 -noboot init (tests)
+    // 03 -noboot initAfterBoot (bgbtest)
+
+    int runMode = 0;
     std::ios::sync_with_stdio(false);
 
-    const std::string FILE_PATH("../testRom/bgbtest.gb");
+    const std::string FILE_PATH("../testRom/Tetris.gb");
+   // const std::string FILE_PATH("E:\\C++project\\gb-test-roms-master\\mem_timing-2\\rom_singles\\01-read_timing.gb");
+    //cpu.initRegisters();
     cartridgeDriver.openFile(FILE_PATH);
-    sdlManager.init("Tetris");
+    sdlManager.init(cartridgeDriver.getTitle());
     cpu.initMap();
     uint64_t allCycle = 0;
-#ifndef NDEBUG
+#ifndef NLOG
     logger.open("a.txt");
 #endif
 
-#ifdef USE_BOOT
     cpu.initRegisters();
-    mmu.addAddressSpace(&boot);
-#endif
+
+    if (runMode == 0){
+        mmu.addAddressSpace(&boot);
+    }
     mmu.addAddressSpace(&cartridgeDriver);
     mmu.addAddressSpace(&wRam);
     mmu.addAddressSpace(&gpu);
     mmu.addAddressSpace(&timer);
+    mmu.addAddressSpace(&joypad);
     mmu.addAddressSpace(&interruptManager);
     mmu.addAddressSpace(&zRam);
 
-#ifdef USE_BOOT
-    while (cpu.getPc() < 0x100){
-        allCycle += step();
+    if (runMode == 0) {
+        while (cpu.getPc() < 0x100){
+            allCycle += step();
+        }
+        mmu.removeAddressSpace(&boot);
     }
-    mmu.removeAddressSpace(&boot);
-#else
-    cpu.initRegistersAfterBoot();
-#endif
-    while(true){
+    if (runMode != 2) {
+        cpu.initRegistersAfterBoot();
+    } else {
+        cpu.setPc(0x100);
+    }
+    while(!isQuit){
+
         allCycle += step();
-#ifndef NDEBUG
+#ifndef NLOG
         logger << "clk:" << allCycle << std::endl;
 #endif
     }
-}
-
-uint64_t step(){
-    Byte cpuCycle = cpu.step();
-    timer.increase(cpuCycle);
-    gpu.addTime(cpuCycle);
-    return cpuCycle;
+    return 0;
 }
