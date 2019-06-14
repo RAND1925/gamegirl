@@ -15,7 +15,7 @@ const Color realColorMap[4]{
 
 SDLManager sdlManager;
 void SDLManager::refreshWindow(){
-#ifndef NDEBUG
+#ifndef LOG
     logger << "REFRESH!" << std::endl;
     //SDL_Delay(10);
 #else
@@ -60,7 +60,6 @@ void SDLManager::init(std::string title_window) {
     surface = SDL_GetWindowSurface(win);
     //todo: set a flag pf Uint32 in surface
     //???
-    //todo : fill the surface with some color
     fmt = surface->format;
     auto pixel_format = SDL_MapRGB(surface->format, 193, 0, 120);
     SDL_FillRect(surface, nullptr, pixel_format);

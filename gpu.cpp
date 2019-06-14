@@ -126,7 +126,7 @@ void GPU::setMode(int mode)
 void GPU::draw(int yLine) {
 
 
-#ifndef NDEBUG
+#ifndef LOG
     display();
 #endif
     //lcdc :
@@ -209,14 +209,7 @@ void GPU::setLCYInterrupt()
 }
 
 Byte GPU::getByte(Word address) {
-    if (address == 0xFF00)
-    {
-        if (keyColumn == 0x10)
-            return joypadC0;
-        else if (keyColumn == 0x20)
-            return joypadC1;
-    }
-    else if (address >= offsetVram && address < offsetVram + lengthVram)
+    if (address >= offsetVram && address < offsetVram + lengthVram)
         return bytesVram[address - offsetVram];
     else if (address >= offsetChr && address < offsetChr + lengthChr)
         return bytesChr[address - offsetChr];
@@ -271,10 +264,7 @@ bool GPU::accepts(Word address) {
 
 void GPU::setByte(Word address, Byte value) {
 
-    if (address == 0xFF00) {
-        keyColumn = value & 0x30;
-        return;//get the high 4 bit of the value
-    } else if (address >= offsetVram && address < offsetVram + lengthVram) {
+    if (address >= offsetVram && address < offsetVram + lengthVram) {
         bytesVram[address - offsetVram] = value;
         return;
     } else if (address >= offsetChr && address < offsetChr + lengthChr){
@@ -333,7 +323,7 @@ void GPU::setByte(Word address, Byte value) {
 }
 
 void GPU::display() {
-#ifndef NDEBUG
+#ifndef LOG
     logger << "LCDC:" << std::hex <<(int)regLcdControl << ' '
            << "STAT:" << std::hex <<(int)regLcdStatus << ' '
            << "SCX:" << std::hex <<(int)regScrollX << ' '

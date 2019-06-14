@@ -28,6 +28,9 @@ class SDLManager {
     const static int BUFFER_WIDTH = 256;
     const static int WINDOW_POSITION_X = SDL_WINDOWPOS_UNDEFINED;
     const static int WINDOW_POSITION_Y = SDL_WINDOWPOS_UNDEFINED;
+    Byte joypadC1 = 0x0F;
+    Byte joypadC0 = 0x0F;
+    bool isQuit = false;
 
 public:
     ~SDLManager();
@@ -35,11 +38,19 @@ public:
     void refreshWindow();
     Uint32 mapColor(const Color& color);;
     void setLine(Byte lineNum, Uint32 * line);
-    /*
-    Byte joypadC1;
-    Byte joypadC0;
-    bool getJoypad() {
-        bool isQuit = false;
+
+    Byte getJoypad(Byte in){
+        in &= 0xF0;
+        if (!getBit(in, 4)){
+            in |= joypadC1;
+        }
+        if (!getBit(in, 5)){
+            in |= joypadC0;
+        }
+        return in;
+    }
+
+    bool handleInput () {
         while (SDL_PollEvent(&e)) {
             if (e.type == SDL_QUIT)
                 isQuit = true;
@@ -76,7 +87,6 @@ public:
                         joypadC0 &= 0x7;
                         break;
                 }
-                //  interruptJoypad();
             } else if (e.type == SDL_KEYUP) {
                 switch (e.key.keysym.sym) {
                     //for column 1
@@ -106,15 +116,17 @@ public:
                     case SDLK_RETURN:
                         joypadC0 |= 0x8;
                         break;
+                    default:
+                        break;
                 }
             }
         }
         return !isQuit;
         //the return value is used to determine if it's end
     }
-    */
 
 };
 extern SDLManager sdlManager;
 
 #endif //GAMEGIRL_SDLMANAGER_H
+

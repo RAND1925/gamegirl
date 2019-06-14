@@ -19,7 +19,7 @@ class AddressSpaceRemoveException: public std::exception{
     AddressSpace* _addressSpacePointer;
 public:
     AddressSpaceRemoveException(const std::string msg, AddressSpace* addressSpacePointer): _msg(msg), _addressSpacePointer(addressSpacePointer){
-#ifndef NDEBUG
+#ifndef LOG
         logger << "ERROR: " << _msg <<  std::endl;
 #endif
     }
@@ -31,7 +31,7 @@ class WrongAddressException: public std::exception{
 public:
 
     WrongAddressException(const std::string msg, Word address): _msg(msg), _address(address){
-#ifndef NDEBUG
+#ifndef LOG
         logger << "ERROR: " << _msg << "in" << address << std::endl;
 #endif
     }
@@ -41,7 +41,7 @@ class SDLException: public std::exception{
     std::string _msg{""};
 public:
     SDLException(const std::string & msg): _msg(msg){
-#ifndef NDEBUG
+#ifndef LOG
        logger << _msg<< " " << SDL_GetError() << std::endl;
 #endif
     }
@@ -54,7 +54,7 @@ class InterruptException: public std::exception{
     Byte _iE = 0;
 public:
     InterruptException(const std::string & msg, Byte iE, Byte iF):_msg(msg), _iE(iE), _iF(iF){
-#ifndef NDEBUG
+#ifndef LOG
         logger << "ERROR: " << _msg << "iE" << std::hex << (int)iE << "iF"<< std::hex <<(int)iF << std::endl;
 #endif
     }

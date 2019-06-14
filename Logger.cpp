@@ -3,7 +3,7 @@
 //
 
 #include "Logger.h"
-#ifndef NDEBUG
+#ifndef LOG
     std::ofstream logger;
 
 #endif
