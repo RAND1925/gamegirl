@@ -5,50 +5,32 @@
 #include "Timer.h"
 
 Timer timer;
-Byte Timer::increase(Byte cycle) {
-    subClock+=cycle;
-    if(subClock>=4) {
-        mainClock++;
-        subClock -= 4;
-        divider++;
-        if (divider == 16) {
-            regDiv++;
-            divider = 0;
-        }
+void Timer::addTime(Byte cycle) {
+    divider+=cycle;
+    if(divider >= 256){
+        divider -=256;
+        regDiv++;
     }
-    if(check()){
 
-        return regTma;
+    if(getBit(regTac,2)==0){//enabled
+        return;
     }
-    else{
-        return 0;
+    counter+=cycle;
+    uint64_t currClock;
+    switch(regTac & 0x3){
+        case 0: currClock=1024;break;
+        case 1: currClock=16;break;
+        case 2: currClock=64;break;
+        case 3: currClock=256;
     }
-}
-bool Timer::check() {
-    if(regTac%4){
-        switch (regTac%3){
-            case 0:threshold=64;break;
-            case 1:threshold=4;break;
-            case 2:threshold=4;break;
-            case 3:threshold=16;break;
+    while (counter >= currClock){
+        counter-=currClock;
+       // counter=0;
+        if(regTima==0xFF){
+            interruptManager.requestInterrupt(2);
+            regTima=regTma;
+        } else {
+            regTima++;
         }
-        if(mainClock>threshold){
-            if(step())
-                return true;
-        }
     }
-    return false;
-}
-
-bool Timer::step() {
-    mainClock=0;
-    regTima++;
-    if(regTima==0){//should be >255 here but it is Byte
-        regTima=regTma;
-        Byte oldIF=mmu.readByte(0xFF0F);
-        setBit(oldIF, 2);
-        mmu.writeByte(0xFF0F,oldIF);
-        return true;
-    }
-    return false;
 }

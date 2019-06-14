@@ -13,19 +13,15 @@
 
 class Timer: public AddressSpace {
 private:
-    Byte mainClock=0;
-    Byte subClock=0;
-    Byte divider=0;
-    Byte threshold=0;
-    Byte regDiv;//reg means register divider ff04
-    Byte regTima;//counter ff05
-    Byte regTma;//modulator ff06
-    Byte regTac;//control ff07
-    bool check();
-    bool step();
+    uint64_t counter=0;
+    uint64_t divider=0;
+    Byte regDiv=0;//reg means register divider ff04
+    Byte regTima=0;//counter ff05
+    Byte regTma=0;//modulator ff06
+    Byte regTac=0;//control ff07
 public:
     Timer (){};
-    Byte increase(Byte cycle);
+    void addTime(Byte cycle);
     bool accepts(Word address) override{
         return address>=0xFF04 && address<=0xFF07;
     }

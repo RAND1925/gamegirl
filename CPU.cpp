@@ -661,14 +661,14 @@ void CPU::initMap() {
 	opMap[0xDC] = [this, &ld16, &getImmediateValue16]() {if (getC()) { call(getImmediateValue16()); } else registers.pc+=2; return 12; };
 
 	//restart
-	opMap[0xC7] = [this]() {restart(0x00); return 32; };
-	opMap[0xCF] = [this]() {restart(0x08); return 32; };
-	opMap[0xD7] = [this]() {restart(0x10); return 32; };
-	opMap[0xDF] = [this]() {restart(0x18); return 32; };
-	opMap[0xE7] = [this]() {restart(0x20); return 32; };
-	opMap[0xEF] = [this]() {restart(0x28); return 32; };
-	opMap[0xF7] = [this]() {restart(0x30); return 32; };
-	opMap[0xFF] = [this]() {restart(0x38); return 32; };
+	opMap[0xC7] = [this]() {restart(0x00); return 16; };
+	opMap[0xCF] = [this]() {restart(0x08); return 16; };
+	opMap[0xD7] = [this]() {restart(0x10); return 16; };
+	opMap[0xDF] = [this]() {restart(0x18); return 16; };
+	opMap[0xE7] = [this]() {restart(0x20); return 16; };
+	opMap[0xEF] = [this]() {restart(0x28); return 16; };
+	opMap[0xF7] = [this]() {restart(0x30); return 16; };
+	opMap[0xFF] = [this]() {restart(0x38); return 16; };
 	//ret
 	opMap[0xC9] = [this, &ld16]() { jump(pop16()); return 8; };
 	//ret cc
@@ -695,7 +695,7 @@ Byte CPU::step() {
 	Byte timing = 4;
 	if (interruptManager.hasInterrupt()){
 		Byte interruptCode = interruptManager.handleInterrupt();
-		restart((Byte)0x40 + (interruptCode << (Byte)0x3));
+		restart(0x40 + (interruptCode << 3));
 		return 32;
 	} else {
 		if (interruptManager.handleHalt()) {

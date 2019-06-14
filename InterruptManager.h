@@ -48,7 +48,7 @@ public:
         for(Byte i = 0; i < 5; ++i){
             if (getBit(maskCode, i)){
                 std::cout << "interrupt: " << i << std::endl;
-                iF = 0x0;
+                resetBit(iF, i);
                 return i;
             }
         }
@@ -56,13 +56,12 @@ public:
     }
 
     bool handleHalt(){
-       if(halt){
-            if (!iME){
-                std::cout << "halt" << std::endl;
-                halt = false;
-            }
-        } else {
-           return true;
+        Byte iFUsed = iF & 0x1F;
+        if (!iME && halt && iFUsed){
+            halt = false;
+            return false;
+        }else if (!halt){
+            return true;
         }
         return false;
     }

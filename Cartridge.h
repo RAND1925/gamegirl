@@ -108,7 +108,7 @@ public:
         else if(page == 0x3){
             mode = value & 0x1;
         }
-        throw WrongAddressException("mbc1[write]", address);
+        //throw WrongAddressException("mbc1[write]", address);
     };
 };
 
