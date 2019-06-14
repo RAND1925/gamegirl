@@ -18,7 +18,9 @@ int main(int argc,char** argv) {
 
     std::ios::sync_with_stdio(false);
 
-    const std::string FILE_PATH("../testRom/bgbtest.gb");
+    //const std::string FILE_PATH("../testRom/Tetris.gb");
+    const std::string FILE_PATH("E:\\C++project\\gb-test-roms-master\\interrupt_time\\interrupt_time.gb");
+    //cpu.initRegisters();
     cartridgeDriver.openFile(FILE_PATH);
     sdlManager.init("Tetris");
     cpu.initMap();
@@ -44,7 +46,8 @@ int main(int argc,char** argv) {
     }
     mmu.removeAddressSpace(&boot);
 #else
-    cpu.initRegistersAfterBoot();
+    cpu.initRegisters();
+    cpu.setPc(0x100);
 #endif
     while(true){
         allCycle += step();
@@ -56,7 +59,7 @@ int main(int argc,char** argv) {
 
 uint64_t step(){
     Byte cpuCycle = cpu.step();
-    timer.increase(cpuCycle);
+    timer.addTime(cpuCycle);
     gpu.addTime(cpuCycle);
     return cpuCycle;
 }
