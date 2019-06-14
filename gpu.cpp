@@ -126,7 +126,7 @@ void GPU::setMode(int mode)
 void GPU::draw(int yLine) {
 
 
-#ifndef NDEBUG
+#ifndef NLOG
     display();
 #endif
     //lcdc :
@@ -186,8 +186,9 @@ void GPU::draw(int yLine) {
                 colorHigh = bytesVram[dataTile + (numTile * 16) + (yPixel * 2) + 1];
                 //    lastPixel = xTile;
             }
-            int color = getBit(colorLow, xPixel) | (getBit(colorHigh, xPixel) << 1);
-            Uint32 rgbCode = sdlManager.mapColor(realColorMap[color]);
+            Byte colorCode = getBit(colorLow, xPixel) | (getBit(colorHigh, xPixel) << 1);
+            Byte grayCode = getGrayCode(colorCode, regBGP);
+            Uint32 rgbCode = sdlManager.mapColor(grayCode);
             colorLine[counter] = rgbCode;
         }
         sdlManager.setLine(yLine, colorLine);
@@ -209,14 +210,7 @@ void GPU::setLCYInterrupt()
 }
 
 Byte GPU::getByte(Word address) {
-    if (address == 0xFF00)
-    {
-        if (keyColumn == 0x10)
-            return joypadC0;
-        else if (keyColumn == 0x20)
-            return joypadC1;
-    }
-    else if (address >= offsetVram && address < offsetVram + lengthVram)
+    if (address >= offsetVram && address < offsetVram + lengthVram)
         return bytesVram[address - offsetVram];
     else if (address >= offsetChr && address < offsetChr + lengthChr)
         return bytesChr[address - offsetChr];
@@ -271,10 +265,7 @@ bool GPU::accepts(Word address) {
 
 void GPU::setByte(Word address, Byte value) {
 
-    if (address == 0xFF00) {
-        keyColumn = value & 0x30;
-        return;//get the high 4 bit of the value
-    } else if (address >= offsetVram && address < offsetVram + lengthVram) {
+    if (address >= offsetVram && address < offsetVram + lengthVram) {
         bytesVram[address - offsetVram] = value;
         return;
     } else if (address >= offsetChr && address < offsetChr + lengthChr){
@@ -333,7 +324,7 @@ void GPU::setByte(Word address, Byte value) {
 }
 
 void GPU::display() {
-#ifndef NDEBUG
+#ifndef NLOG
     logger << "LCDC:" << std::hex <<(int)regLcdControl << ' '
            << "STAT:" << std::hex <<(int)regLcdStatus << ' '
            << "SCX:" << std::hex <<(int)regScrollX << ' '

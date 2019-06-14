@@ -3,7 +3,7 @@
 #include <array>
 #include "const.h"
 #include "common.h"
-#include "D:\SDL2-2.0.9\include\SDL2\SDL.h"
+#include "SDL.h"
 #include "AddressSpace.h"
 #include "Logger.h"
 //todo :
@@ -26,9 +26,7 @@ public:
     //some var used to Scroll
     int currentLine = 0, currentMode = 0, counter = 0;
     //two byte to store joypad information
-    Byte joypadC0 = 0x0F, joypadC1 = 0x0F;
     //judge if it's direction or select
-    Byte keyColumn = 0x00;
 
 private:
     void setMode(int mode);
@@ -39,7 +37,9 @@ private:
 
     //some sdl var and pointer:
 
-
+    Byte getGrayCode(Byte colorCode, Byte reg){
+        return static_cast<Byte>((reg >> (colorCode << 1)) & 0x03);
+    }
     //the window info:
 
     int innerClock = 0;
@@ -78,6 +78,9 @@ private:
     Byte regWindowY = 0;
     //tooo about interrupt:
 
+    void doDMA(){
+        //0xA0Bytes
+    }
 
     std::array<Byte, lengthVram> bytesVram{};
     std::array<Byte, lengthChr> bytesChr{};
