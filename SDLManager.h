@@ -13,7 +13,7 @@ extern "C" {
 
 
 struct Color{
-    Byte r,g,b;
+    Byte r, g, b, a;
 };
 extern const Color realColorMap[4];
 

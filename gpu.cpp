@@ -91,13 +91,13 @@ void GPU::setMode(int mode)
         return;
     currentMode = mode;
     Byte statusLCDC = regLcdStatus;
-
     //rese the 0bit and 1bit of the status
     //and 1111|1100
     statusLCDC &= 0xFC;
     //set the current mode into bit0 bit1
     statusLCDC |= currentMode & 0x03;
-    bool interruptFlag;
+    regLcdStatus = statusLCDC;
+    bool interruptFlag = false ;
     switch (mode)
     {
     case MODE_VBLANK:

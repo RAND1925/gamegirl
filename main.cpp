@@ -12,7 +12,6 @@
 #include "Boot.h"
 #include "JoyPad.h"
 
-//#define USE_BOOT
 bool isQuit = false;
 uint64_t step(){
     isQuit = sdlManager.handleInput();
