@@ -14,15 +14,9 @@ class WRam: public AddressSpace {
     const static Word length = 0x3E00 ;
     std::array<Byte, length> bytes;
 public:
-    bool accepts(Word address) override{
-        return address >= offset && address < offset + length;
-    }
-    Byte getByte(Word address) override {
-        return  bytes[address & 0x1FFF];
-    }
-    void setByte(Word address, Byte value) override {
-        bytes[address & 0x1FFF] = value;
-    }
+    bool accepts(Word address) override;
+    Byte getByte(Word address) override;
+    void setByte(Word address, Byte value) override;
     WRam(){};
 };
 

@@ -14,405 +14,132 @@
 #include "InterruptManager.h"
 #include <fstream>
 
-class CPU{
+class CPU {
 private:
-        using FlagSetter = std::function<void(void)>;
-        using FlagGetter = std::function<Byte(void)>;
-        FlagSetter setZ = [this]() {setBit(registers.f, 7); };
-        FlagSetter setN = [this]() {setBit(registers.f, 6); };
-        FlagSetter setH = [this]() {setBit(registers.f, 5); };
-        FlagSetter setC = [this]() {setBit(registers.f, 4); };
-        FlagSetter resetZ = [this]() { resetBit(registers.f, 7); };
-        FlagSetter resetN = [this]() { resetBit(registers.f, 6); };
-        FlagSetter resetH = [this]() { resetBit(registers.f, 5); };
-        FlagSetter resetC = [this]() { resetBit(registers.f, 4); };
-        FlagGetter getZ = [this]() -> Byte { return getBit(registers.f, 7); };
-        FlagGetter getN = [this]() -> Byte { return getBit(registers.f, 6); };
-        FlagGetter getH = [this]() -> Byte { return getBit(registers.f, 5); };
-        FlagGetter getC = [this]() -> Byte { return getBit(registers.f, 4); };
 
     struct Registers {
         Byte a, f, b, c, d, e, h, l;
         Word sp, pc;
-    }registers, backup;
+    } registers, backup;
 
-	Byte add(Byte a, Byte b) {
-        (((a & 0xF) + (b & 0xF)) > 0xF) ?setH():resetH();
-        (UINT8_MAX - a < b) ?setC():resetC();
-        ((a + b == 0)||(a + b == 256)) ?setZ():resetZ();
-        resetN();
-        return a + b;
-	};
-    Byte adc(Byte a, Byte b){
-        uint32_t sum=a+b+getC();
-        uint32_t halfSum=(a&0xF)+(b&0xF)+getC();
-        ((sum&0xFF)==0)?setZ():resetZ();
-        resetN();
-        (halfSum>0xF)?setH():resetH();
-        (sum>0xFF)?setC():resetC();
-        return sum&0xFF;
-    };
+    using FlagSetter = std::function<void(void)>;
+    using FlagGetter = std::function<Byte(void)>;
+    FlagSetter setZ = [this]() { setBit(registers.f, 7); };
+    FlagSetter setN = [this]() { setBit(registers.f, 6); };
+    FlagSetter setH = [this]() { setBit(registers.f, 5); };
+    FlagSetter setC = [this]() { setBit(registers.f, 4); };
+    FlagSetter resetZ = [this]() { resetBit(registers.f, 7); };
+    FlagSetter resetN = [this]() { resetBit(registers.f, 6); };
+    FlagSetter resetH = [this]() { resetBit(registers.f, 5); };
+    FlagSetter resetC = [this]() { resetBit(registers.f, 4); };
+    FlagGetter getZ = [this]() -> Byte { return getBit(registers.f, 7); };
+    FlagGetter getN = [this]() -> Byte { return getBit(registers.f, 6); };
+    FlagGetter getH = [this]() -> Byte { return getBit(registers.f, 5); };
+    FlagGetter getC = [this]() -> Byte { return getBit(registers.f, 4); };
+    //tool functions to run opcodes
+    Byte getImmediateValue8();
+    Word getImmediateValue16();;
+    SByte getSignedImmediateValue8();;
+    void ld8(Byte &lhs, Byte rhs);
+    void ld16(Word &lhs, Word rhs);
+    Word getR16(Byte high, Byte low);
+    void setR16(Byte &high, Byte &low, Word t);
+    Word getAF();
+    Word getHL();;
+    Word getBC();;
+    Word getDE();;
+    void setAF(Word t);;
+    void setHL(Word t);;
+    void setBC(Word t);;
+    void setDE(Word t);;
+    void push16(Word val);
+    Word pop16();
+    Byte add(Byte a, Byte b);
+    Byte adc(Byte a, Byte b);
+    Word add(Word a, Word b);
+    Word addSp(Word a, SByte b);
+    Byte sub(Byte a, Byte b);
+    Byte sbc(Byte a, Byte b);
+    Byte andAL(Byte a, Byte b);
+    Byte orAL(Byte a, Byte b);
+    Byte xorAL(Byte a, Byte b);
+    void cp(Byte a, Byte b);
+    Byte inc(Byte a);
+    Word inc(Word a);
+    Byte dec(Byte a);
+    Word dec(Word a);
+    Byte swap(Byte a);
+    void daa();
+    Byte cpl(Byte a);
+    void ccf();
+    void scf();
+    Byte rlc(Byte a);
+    Byte rl(Byte a);
+    Byte rrc(Byte a);
+    Byte rr(Byte a);
+    Byte sla(Byte a);
+    Byte sra(Byte a);
+    Byte srl(Byte a);
+    void bit(Byte b, Byte a);
+    Byte set(Byte b, Byte a);
+    Byte res(Byte b, Byte a);
+    void jump(Word addr);
+    void jr(Byte r);
+    void call(Word addr);
 
-    Word add(Word a, Word b){
-        uint32_t sum = a + b;
-        uint32_t half = (a & 0xFFF) + (b & 0xFFF);
-        half > 0xFFF ? setH() : resetH();
-        sum > 0xFFFF ? setC() : resetC();
-        resetN();
-        return sum & 0xFFFF;
-    };
+    void ret();
 
-	Word addSp(Word a, SByte b) {
-        Word sum = a + b;
-        (sum & 0xF) < (a & 0xF) ? setH() : resetH();
-        (sum & 0xFF) < (a & 0xFF) ? setC() : resetC();
-        resetZ();
-        resetN();
-        return sum;
-	}
-	Byte sub(Byte a, Byte b) {
-        setN();
-        (a==b)?setZ():resetZ();
-        (((a - b) & 0xF)>(a&0xF))?setH():resetH();
-        (a<b)?setC():resetC();
-        return  a - b;
-	}
-	
-    Byte sbc(Byte a, Byte b){
-        uint32_t sum=a-b-getC();
-        uint32_t halfSum=(a&0xF)-(b&0xF)-getC();
-        ((sum&0xFF)==0)?setZ():resetZ();
-        setN();
-        (halfSum>0xF)?setH():resetH();
-        (sum>0xFF)?setC():resetC();
-        return sum;
-    }
-    Byte andAL(Byte a, Byte b){
-        ((a & b) == 0)?setZ():resetZ();
-        resetN();
-        setH();
-        resetC();
-        return a & b;
-    }
-    Byte orAL(Byte a, Byte b){
-        ((a | b) == 0)?setZ():resetZ();
-        resetN();
-        resetH();
-        resetC();
-        return a | b;
-    }
-    Byte xorAL(Byte a, Byte b){
-        ((a ^ b) == 0)?setZ():resetZ();
-        resetN();
-        resetH();
-        resetC();
-        return a ^ b;
-    }
-    void cp(Byte a, Byte b){
-        sub(a, b);
-    }
-	Byte inc(Byte a) {
-		(a == 255) ?setZ():resetZ();
-		((a & 0xF) == 0xF) ?setH():resetH();
-		resetN();
-		return a + 1;
-	}
+    void rsv();
 
-	Word inc(Word a) {
-		return a + 1;
-	}
+    void rls();
 
-	Byte dec(Byte a) {
-	    (a == 1) ?setZ():resetZ();
-        ((a & 0xF) == 0x0) ?setH():resetH();
-        setN();
-        return a - 1;
-	}
-
-	Word dec(Word a) {
-		return a - 1;
-	}
-
-	Byte getImmediateValue8 (){
-		return mmu.readByte(registers.pc++);
-	}
-	Word getImmediateValue16(){
-		Word v = mmu.readWord(registers.pc);
-		registers.pc += 2;
-		return v;
-	};
-	SByte getSignedImmediateValue8()
-	{
-		return (SByte)mmu.readByte(registers.pc++);
-	};
-
-	void ld8(Byte &lhs, Byte rhs) {
-		lhs = rhs;
-	};
-	void ld16(Word &lhs, Word rhs) {
-		lhs = rhs;
-	};
-
-	Word getR16(Byte high, Byte low) {
-		return ((Word)high << 8u) | low;
-	};
-	void setR16(Byte & high, Byte & low, Word t){
-		high = (Byte)(t >> 8u);
-		low = (Byte)(t & 0xFF);
-	};
-	Word getAF(){
-		return getR16(registers.a, registers.f);
-	};
-	Word getHL(){
-		return getR16(registers.h, registers.l);
-	};
-	Word getBC(){
-		return getR16(registers.b, registers.c);
-	};
-	Word getDE(){
-		return getR16(registers.d, registers.e);
-	};
-	void setAF(Word t) {
-		registers.a = (Byte)(t >> 8u);
-		registers.f &= 0x0Fu;
-		registers.f |= (Byte)(t & 0xF0);
-	};
-	void setHL(Word t) {
-		setR16(registers.h, registers.l, t);
-	};
-	void setBC(Word t){
-		setR16(registers.b, registers.c, t);
-	};
-	void setDE(Word t) {
-		setR16(registers.d, registers.e, t);
-	};
-
-	void push16(Word val) {
-        registers.sp -= 2;
-		mmu.writeWord(registers.sp, val);
-
-		//according to gb instructions25, I thought it should be +=2
-	}
-	Word pop16() {
-		Word val = mmu.readWord(registers.sp);
-        registers.sp += 2;
-		return val;
-	}
-	Byte swap(Byte a) {
-        (a == 0) ?setZ():resetZ();
-		resetN();
-		resetC();
-		resetH();
-		return Byte(a << 4) + Byte(a >> 4);
-	}
-
-	void daa(){
-	    Word ra=registers.a;
-	    if(getN()) {
-            if (getH()) {
-                ra -= 0x06;
-                ra &= 0xFF;
-            }
-            if(getC()){
-                ra -= 0x60;
-            }
-        }
-	    else{
-	        if((ra & 0x0F)>0x09||getH()){
-	            ra+=0x06;
-	        }
-	        if(ra > 0x9F||getC()){
-	            ra+=0x60;
-	        }
-	    }
-        (ra&0xFF)==0?setZ():resetZ();
-	    resetH();
-	    if(ra&0x100) setC();
-	    registers.a=(Byte)(ra & 0xFF);
-	}
-
-	Byte cpl(Byte a) {
-		setN();
-		setH();
-		return (a ^ 0xFF);
-	}
-
-	void ccf() {
-		resetH();
-		resetN();
-		if (getC())
-			resetC();
-		else
-			setC();
-	}
-
-	void scf() {
-		resetH();
-		resetN();
-		setC();
-	}
-
-	Byte rlc(Byte a) {
-        Byte bit_7 = a >> 7;
-        Byte res = (a << 1) | bit_7;
-        (res == 0) ?setZ():resetZ();
-        resetN();
-        resetH();
-        (bit_7)?setC():resetC();
-        return res;
-	}
-
-	Byte rl(Byte a) {
-        Byte bit_7 = a >> 7;
-        Byte res = (a << 1) | getC();
-        (res == 0) ?setZ():resetZ();
-        resetN();
-        resetH();
-        (bit_7)?setC():resetC();
-        return res;
-	}
-
-	Byte rrc(Byte a) {
-        Byte bit_0 = a << 7;
-        Byte res = (a >> 1) + bit_0;
-        (res == 0) ?setZ():resetZ();
-        resetN();
-        resetH();
-        (bit_0)?setC():resetC();
-        return res;
-	}
-
-	Byte rr(Byte a) {
-        Byte bit_0 = a << 7;
-        Byte res = (a >> 1) + (getC() << 7);
-        (res == 0) ?setZ():resetZ();
-        resetN();
-        resetH();
-        (bit_0)?setC():resetC();
-        return res;
-	}
-
-	Byte sla(Byte a) {
-		Byte bit_7 = a >> 7;
-		Byte res = a << 1;
-        (res == 0) ?setZ():resetZ();
-		resetN();
-		resetH();
-        (bit_7)?setC():resetC();
-		return res;
-		// LSB of n set to 0(LSB is the last bit)
-	}
-    //maybe some promblems
-	Byte sra(Byte a) {
-		Byte bit_7 = a & (Byte)(1 << 7);
-		Byte bit_0 = a << 7;
-		Byte res = (a >> 1) + bit_7;
-        (res == 0) ?setZ():resetZ();
-		resetN();
-		resetH();
-        (bit_0)?setC():resetC();
-		return res;
-		//MSB dosen't change
-	}
-
-	Byte srl(Byte a) {
-		Byte bit_0 = a << 7;
-		Byte res = a >> 1;
-        (res == 0) ?setZ():resetZ();
-		resetN();
-		resetH();
-        (bit_0)?setC():resetC();
-		return res;
-		//MSB set to 0   MSB is the first bit
-	}
-
-	void bit(Byte b,Byte a) {
-		resetN();
-		setH();
-		Byte res = a & (Byte)(1 << b);
-        (res == 0) ?setZ():resetZ();
-	}
-
-	Byte set(Byte b, Byte a) {
-	    setBit(a, b);
-        return a;
-	}
-
-	Byte res(Byte b, Byte a) {
-	    resetBit(a, b);
-        return a;
-	}
-
-	void jump(Word addr){
-		registers.pc = addr;
-	}
-	void jr(Byte r){
-		registers.pc += (SByte)r;
-	}
-
-	void call(Word addr) {
-		push16(registers.pc);
-		jump(addr);
-	}
-
-	void ret(){
-	    jump(pop16());
-	}
-	void rsv(){
-	    backup = registers;
-	}
-	void rls(){
-	    registers = backup;
-	}
-
-	void restart(Word addr){
-        rsv();
-        call(addr);
-	}
+    void restart(Word addr);
 
     std::function<Byte(void)> opMap[0x100];
-	std::function<Byte(void)> opCBMap[0x100];
-	Byte normalTable[0x100]{
-            1,3,2,2,1,1,2,1,5,2,2,2,1,1,2,1,
-            0,3,2,2,1,1,2,1,3,2,2,2,1,1,2,1,
-            2,3,2,2,1,1,2,1,2,2,2,2,1,1,2,1,
-            2,3,2,2,3,3,3,1,2,2,2,2,1,1,2,1,
-            1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,
-            1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,
-            1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,
-            2,2,2,2,2,2,0,2,1,1,1,1,1,1,2,1,
-            1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,
-            1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,
-            1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,
-            1,1,1,1,1,1,2,1,1,1,1,1,1,1,2,1,
-            2,3,3,4,3,4,2,4,2,4,3,0,3,6,2,4,
-            2,3,3,0,3,4,2,4,2,4,3,0,3,0,2,4,
-            3,3,2,0,0,4,2,4,4,1,4,0,0,0,2,4,
-            3,3,2,1,0,4,2,4,3,2,4,1,0,0,2,4
-	};
-	Byte CBTable[0x100]{
-            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
-            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
-            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
-            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
-            2,2,2,2,2,2,3,2,2,2,2,2,2,2,3,2,
-            2,2,2,2,2,2,3,2,2,2,2,2,2,2,3,2,
-            2,2,2,2,2,2,3,2,2,2,2,2,2,2,3,2,
-            2,2,2,2,2,2,3,2,2,2,2,2,2,2,3,2,
-            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
-            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
-            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
-            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
-            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
-            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
-            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2,
-            2,2,2,2,2,2,4,2,2,2,2,2,2,2,4,2
-	};
-public:
+    std::function<Byte(void)> opCBMap[0x100];
+    Byte normalTable[0x100]{
+            1, 3, 2, 2, 1, 1, 2, 1, 5, 2, 2, 2, 1, 1, 2, 1,
+            0, 3, 2, 2, 1, 1, 2, 1, 3, 2, 2, 2, 1, 1, 2, 1,
+            2, 3, 2, 2, 1, 1, 2, 1, 2, 2, 2, 2, 1, 1, 2, 1,
+            2, 3, 2, 2, 3, 3, 3, 1, 2, 2, 2, 2, 1, 1, 2, 1,
+            1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+            1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+            1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+            2, 2, 2, 2, 2, 2, 0, 2, 1, 1, 1, 1, 1, 1, 2, 1,
+            1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+            1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+            1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+            1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1,
+            2, 3, 3, 4, 3, 4, 2, 4, 2, 4, 3, 0, 3, 6, 2, 4,
+            2, 3, 3, 0, 3, 4, 2, 4, 2, 4, 3, 0, 3, 0, 2, 4,
+            3, 3, 2, 0, 0, 4, 2, 4, 4, 1, 4, 0, 0, 0, 2, 4,
+            3, 3, 2, 1, 0, 4, 2, 4, 3, 2, 4, 1, 0, 0, 2, 4
+    };
+    Byte CBTable[0x100]{
+            2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2,
+            2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2,
+            2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2,
+            2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2,
+            2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 3, 2,
+            2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 3, 2,
+            2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 3, 2,
+            2, 2, 2, 2, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 3, 2,
+            2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2,
+            2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2,
+            2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2,
+            2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2,
+            2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2,
+            2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2,
+            2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2,
+            2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2
+    };
     void display();
+public:
+
     Byte step();
-	inline void setPc(Word pc){registers.pc = pc;}
-	Word  getPc(){ return registers.pc; };
+
+    inline void setPc(Word pc);
+    inline Word getPc();
     void initRegisters();
     void initRegistersAfterBoot();
     void initMap();

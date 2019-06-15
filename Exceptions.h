@@ -13,17 +13,6 @@
 #include "Logger.h"
 #include "AddressSpace.h"
 
-class AddressSpaceRemoveException: public std::exception{
-
-    std::string _msg{""};
-    AddressSpace* _addressSpacePointer;
-public:
-    AddressSpaceRemoveException(const std::string msg, AddressSpace* addressSpacePointer): _msg(msg), _addressSpacePointer(addressSpacePointer){
-#ifndef NLOG
-        logger << "ERROR: " << _msg <<  std::endl;
-#endif
-    }
-};
 class WrongAddressException: public std::exception{
 
     std::string _msg{""};

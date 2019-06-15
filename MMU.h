@@ -15,12 +15,11 @@ class MMU {
 private:
     std::vector<AddressSpace *> spaces{};
     Byte* unusedSpaces{nullptr};
-
 public:
-	void addAddressSpace(AddressSpace * s);;
-	void removeAddressSpace(AddressSpace * s);
     void init();
-    AddressSpace * findAddressSpace(Word address);
+    void addAddressSpace(AddressSpace * s);;
+	void removeAddressSpace(AddressSpace * s);
+	AddressSpace * findAddressSpace(Word address);
     Byte readByte(Word address);
     Word readWord(Word address);
     void writeByte(Word address, Byte value);

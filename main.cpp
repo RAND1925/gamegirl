@@ -2,7 +2,7 @@
 #include "MMU.h"
 #include "WRam.h"
 #include "ZRam.h"
-#include "gpu.h"
+#include "GPU.h"
 #include "Timer.h"
 #include "Cartridge.h"
 #include "InterruptManager.h"
@@ -10,7 +10,7 @@
 #include "Logger.h"
 #include "SDLManager.h"
 #include "Boot.h"
-#include "JoyPad.h"
+#include "Joypad.h"
 
 bool isQuit = false;
 uint64_t step(){

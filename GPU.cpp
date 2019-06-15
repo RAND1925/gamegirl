@@ -1,7 +1,7 @@
 
 #include <algorithm>
 #include <tuple>
-#include "gpu.h"
+#include "GPU.h"
 #include "SDLManager.h"
 #include "InterruptManager.h"
 #include "MMU.h"
@@ -140,7 +140,6 @@ void GPU::draw(int yLine) {
     //check if it's in the real line
     if (yLine >= 144)
         return;
-
     Byte lcdc = regLcdControl;
     bool lcdcEnabled = getBit(lcdc,7);
     bool bgWinEnabled = getBit(lcdc, 0);
@@ -388,7 +387,7 @@ void GPU::drawSprite(uint32_t * colorLine, Byte spriteLarge) {
         return std::get<0>(a) > std::get<0>(b);});
 
     int size = ready_to_gender.size();
-    for (int i = size > 10 ? size - 10 : 0 ; i < size; ++i) {
+    for (int i = size > 2 ? size - 2 : 0 ; i < size; ++i) {
         auto s = ready_to_gender[i];
         Word pixelAddress = std::get<1>(s);
         Byte colorLow = bytesVRam[pixelAddress];
@@ -411,5 +410,9 @@ void GPU::drawSprite(uint32_t * colorLine, Byte spriteLarge) {
             }
         }
     }
+}
+
+Byte GPU::getGrayCode(Byte colorCode, Byte reg) {
+    return static_cast<Byte>(reg >> (colorCode << 1) & 0x03);
 }
 

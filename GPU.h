@@ -18,17 +18,18 @@ public:
     bool accepts(Word address) override;
     Byte getByte(Word address) override;
     void setByte(Word address, Byte value) override;
-    void display();
+
     //it's the main cycle of the gpu
     void addTime(int clock);
     //choose the mode and the status matched with the mode
 
     //some var used to Scroll
-    int currentLine = 0, currentMode = 0;
+    Byte currentMode = 0;
     //two byte to store joypad information
     //judge if it's direction or select
 
 private:
+    void display();
     void setMode(Byte mode);
 
     void doDMA(Byte dma);
@@ -40,36 +41,21 @@ private:
 
     //some sdl var and pointer:
 
-    Byte getGrayCode(Byte colorCode, Byte reg){
-        return static_cast<Byte>(reg >> (colorCode << 1) & 0x03);
-    }
-    //the window info:
-
-    int innerClock = 0;
-    //color map:
+    static inline Byte getGrayCode(Byte colorCode, Byte reg);
 
     //some const mode number:
-
+    int innerClock = 0;
     const static int MODE_OAM = 2;
     const static int MODE_VRAM = 3;
     const static int MODE_HBLANK = 0;
     const static int MODE_VBLANK = 1;
     //about the ram of the video and sprite:
 
-    const static Word offsetVram = 0x8000;
-    const static Word lengthVram = 0x9800 - 0x8000;
 
-    const static Word offsetChr = 0x9800;
-    const static Word lengthChr = 0xA000 - 0x9800;
-
-    const static Word offsetOam = 0xFE00;
-    const static Word lengthOam = 0xFEA0 - 0xFE00;
     //the reg in the gpu:
-
     Byte regLcdControl = 0x91;
     Byte regLcdStatus = 0;
-
-    Byte regDMA;
+    Byte regDMA = 0;
     Byte regBGP = 0xE4;
     Byte regOBP0 = 0xE4;
     Byte regOBP1 = 0xE4;
@@ -79,11 +65,15 @@ private:
     Byte regLineYC = 0;
     Byte regWindowX = 0;
     Byte regWindowY = 0;
-    //tooo about interrupt:
 
-    void doDMA(){
-        //0xA0Bytes
-    }
+    const static Word offsetVram = 0x8000;
+    const static Word lengthVram = 0x9800 - 0x8000;
+
+    const static Word offsetChr = 0x9800;
+    const static Word lengthChr = 0xA000 - 0x9800;
+
+    const static Word offsetOam = 0xFE00;
+    const static Word lengthOam = 0xFEA0 - 0xFE00;
 
     std::array<Byte, lengthVram> bytesVRam{};
     std::array<Byte, lengthChr> bytesChr{};

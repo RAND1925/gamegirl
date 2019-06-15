@@ -9,8 +9,7 @@
 #include "Exceptions.h"
 extern "C" {
     #include "SDL.h"
-};
-
+}
 
 struct Color{
     Byte r, g, b, a;
@@ -18,9 +17,9 @@ struct Color{
 extern const Color realColorMap[4];
 
 class SDLManager {
-    SDL_Window *win;
-    SDL_Surface *surface;
-    SDL_PixelFormat* fmt;
+    SDL_Window *win{nullptr};
+    SDL_Surface *surface{nullptr};
+    SDL_PixelFormat* fmt{nullptr};
     SDL_Event e;
     int zoomTime = 1;
     const static int WINDOW_HEIGHT = 144;
@@ -42,7 +41,6 @@ public:
     Uint32 mapColor(Byte);;
     void setLine(Byte lineNum, Uint32 * line);
     Byte getJoypad(Byte in);
-
     bool handleInput ();
 
 };

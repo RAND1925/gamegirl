@@ -8,7 +8,7 @@
 #include "AddressSpace.h"
 #include "Exceptions.h"
 
-class Boot: public AddressSpace {
+class Boot : public AddressSpace {
 private:
     Byte bios[0x100]{
             0x31, 0xFE, 0xFF, 0xAF, 0x21, 0xFF, 0x9F, 0x32, 0xCB, 0x7C, 0x20, 0xFB, 0x21, 0x26, 0xFF, 0x0E,
@@ -29,15 +29,9 @@ private:
             0xF5, 0x06, 0x19, 0x78, 0x86, 0x23, 0x05, 0x20, 0xFB, 0x86, 0x20, 0xFE, 0x3E, 0x01, 0xE0, 0x50
     };
 public:
-    bool accepts(Word address) override{
-        return address < 0x100;
-    }
-    Byte getByte(Word address) override{
-        return bios[address];
-    }
-    void setByte(Word address, Byte value) override{
-        throw WrongAddressException("Boot[write]", address);
-    }
+    bool accepts(Word address) override;
+    Byte getByte(Word address) override;
+    void setByte(Word address, Byte value) override;
 };
 
 extern Boot boot;

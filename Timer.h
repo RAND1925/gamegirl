@@ -19,32 +19,10 @@ private:
     Byte regTma=0;//modulator ff06
     Byte regTac=0;//control ff07
 public:
-    Timer (){};
     void addTime(Byte cycle);
-    bool accepts(Word address) override{
-        return address>=0xFF04 && address<=0xFF07;
-    }
-    Byte getByte(Word address) override {
-        switch (address){
-            case 0xFF04: return regDiv;
-            case 0xFF05: return regTima;
-            case 0xFF06: return regTma;
-            case 0xFF07: return regTac;
-            default:
-                throw WrongAddressException("Timer[read]", address);
-        }
-    }
-    void setByte(Word address, Byte value) override {
-        switch (address) {
-            case 0xFF04: regDiv=0;break;
-            case 0xFF05: regTima=value;break;
-            case 0xFF06: regTma=value;break;
-            case 0xFF07: regTac=(value & 7);break;
-            default:
-                throw WrongAddressException("Timer[write]", address);
-        }
-
-    }
+    bool accepts(Word address) override;
+    Byte getByte(Word address) override;
+    void setByte(Word address, Byte value) override;
 };
  extern Timer timer;
 
