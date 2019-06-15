@@ -1,6 +1,6 @@
-#include <string>
-#include <iostream>
+
 #include <algorithm>
+#include <tuple>
 #include "gpu.h"
 #include "SDLManager.h"
 #include "InterruptManager.h"
@@ -64,7 +64,7 @@ void GPU::addTime(int clock)
             else
             {
                 //less than 144 ,comtinue to get the line
-                doDMA(regDMA);
+             //   doDMA(regDMA);
                 setMode(MODE_OAM);
             }
         }
@@ -75,7 +75,7 @@ void GPU::addTime(int clock)
         if (innerClock >= 456 * 10)
         {
             //back to the oam,reset the stat
-            doDMA(regDMA);
+      //      doDMA(regDMA);
             setMode(MODE_OAM);
             innerClock -= 456 * 10;
             regLineY=0;
@@ -361,31 +361,51 @@ void GPU::drawBg(uint32_t colorLine[], Byte bgWinDataLow, Byte bgMapHigh) {
         colorLine[counter] = rgbCode;
     }
 }
-
+using Sprite = std::tuple<Byte, Word, Byte>;
+        //0: x, 1, colorlow, 2 colorhigh
 void GPU::drawSprite(uint32_t * colorLine, Byte spriteLarge) {
 
     Byte spriteHeight = spriteLarge ? 16: 8;
-    for (int i = 0xA0 - 4; i >= 0; i-= 4){
+    std::vector<Sprite> ready_to_gender;
+    for (int i = 0xA0 - 4; i >= 0; i-= 4) {
+
         int spriteY = bytesOam[i] - 16;
         int yPixel = regLineY - spriteY;
-        if ((yPixel < 0) || (yPixel >= spriteHeight)){
+        if ((yPixel < 0) || (yPixel >= spriteHeight)) {
             continue;
         }
         int spriteX = bytesOam[i + 1] - 8;
-        if (spriteX < 0){
+        if (spriteX < 0 || spriteX >= 160) {
             continue;
         }
         Byte chrCode = bytesOam[i + 2];
-        Byte colorLow = bytesVram[chrCode * 0x10 + yPixel * 2];
-        Byte colorHigh = bytesVram[chrCode * 0x10 + yPixel * 2 + 1];
-        for (Byte counter = 0; counter < 8; ++counter) {
+        Byte infoCode = bytesOam[i + 3];
+        bool hFlip = getBit(infoCode, 5);
+        Word pixelAddress = (chrCode << 4u) + (hFlip?  (14 - yPixel * 2)  : yPixel * 2);
+        ready_to_gender.emplace_back(spriteX, pixelAddress, infoCode);
+    }
+    std::stable_sort(ready_to_gender.begin(), ready_to_gender.end(), [](Sprite a, Sprite b){
+        return std::get<0>(a) > std::get<0>(b);});
+
+    for (auto s: ready_to_gender) {
+        Word pixelAddress = std::get<1>(s);
+        Byte colorLow = bytesVram[pixelAddress];
+        Byte colorHigh = bytesVram[pixelAddress + 1];
+        Byte infoCode = std::get<2>(s);
+        Byte grayPalette = getBit(infoCode, 4) ? regOBP1: regOBP0;
+        bool vFlip = getBit(infoCode, 6);
+        for (Byte counter = 0; counter < 8; ++ counter) {
             Byte colorCode = getBit(colorLow, counter) | (getBit(colorHigh, counter) << 1);
-            Byte grayPalette = getBit(bytesOam[i + 3], 4) ? regOBP1: regOBP0;
             Byte grayCode = getGrayCode(colorCode, grayPalette);
-           // if (grayCode != 3)
+            // if (grayCode != 3)
             {
-                Uint32 rgbCode = sdlManager.mapColor(colorCode);
-                colorLine[counter + spriteX] = rgbCode;
+                Uint32 rgbCode = sdlManager.mapColor(grayCode);
+                if (vFlip) {
+                    colorLine[std::get<0>(s) + counter] = rgbCode;
+                }else {
+                    colorLine[std::get<0>(s) + 7 - counter] = rgbCode;
+                }
+
             }
         }
     }

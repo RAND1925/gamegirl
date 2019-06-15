@@ -24,7 +24,7 @@ public:
     //choose the mode and the status matched with the mode
 
     //some var used to Scroll
-    int currentLine = 0, currentMode = 0, counter = 0;
+    int currentLine = 0, currentMode = 0;
     //two byte to store joypad information
     //judge if it's direction or select
 
@@ -41,7 +41,7 @@ private:
     //some sdl var and pointer:
 
     Byte getGrayCode(Byte colorCode, Byte reg){
-        return static_cast<Byte>((reg >> (colorCode << 1)) & 0x03);
+        return static_cast<Byte>(reg >> (colorCode << 1) & 0x03);
     }
     //the window info:
 
