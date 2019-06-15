@@ -27,7 +27,6 @@ public:
             interruptManager.requestInterrupt(4);
         }
 
-
         regJoypad = newJoypad;
 
     }

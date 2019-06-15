@@ -29,7 +29,9 @@ public:
     //judge if it's direction or select
 
 private:
-    void setMode(int mode);
+    void setMode(Byte mode);
+
+    void doDMA(Byte dma);
 
     void draw(int);
     //to compare the 0xff44 0xff45 to judge if it's a interrupt

@@ -17,15 +17,10 @@ private:
     Byte* unusedSpaces{nullptr};
 
 public:
-	void addAddressSpace(AddressSpace * s){
-		spaces.push_back(s);
-	};
-	void removeAddressSpace(AddressSpace * s){
-	    spaces.erase(std::remove(spaces.begin(), spaces.end(), s), spaces.end());
-	}
-    MMU(){
-        unusedSpaces = new Byte[0x10000];
-    }
+	void addAddressSpace(AddressSpace * s);;
+	void removeAddressSpace(AddressSpace * s);
+    void init();
+    AddressSpace * findAddressSpace(Word address);
     Byte readByte(Word address);
     Word readWord(Word address);
     void writeByte(Word address, Byte value);

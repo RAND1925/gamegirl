@@ -4,7 +4,7 @@
 #include "gpu.h"
 #include "SDLManager.h"
 #include "InterruptManager.h"
-
+#include "MMU.h"
 GPU gpu;
 void GPU::addTime(int clock)
 {
@@ -85,7 +85,7 @@ void GPU::addTime(int clock)
     }
     setLCYInterrupt();
 }
-void GPU::setMode(int mode)
+void GPU::setMode(Byte mode)
 {
     if (currentMode == mode)
         return;
@@ -97,6 +97,8 @@ void GPU::setMode(int mode)
     //set the current mode into bit0 bit1
     statusLCDC |= currentMode & 0x03;
     regLcdStatus = statusLCDC;
+    if (mode == MODE_VBLANK)
+        interruptManager.requestInterrupt(0);
     bool interruptFlag = false ;
     switch (mode)
     {
@@ -117,8 +119,7 @@ void GPU::setMode(int mode)
     }
     if (interruptFlag)
         interruptManager.requestInterrupt(1);
-    if (mode == MODE_VBLANK)
-        interruptManager.requestInterrupt(0);
+
 }
 
 
@@ -300,6 +301,7 @@ void GPU::setByte(Word address, Byte value) {
                 return;
             case 0xFF46:
                 regDMA = value;
+                doDMA(regDMA);
                 return;
             case 0xFF47:
                 regBGP = value;
@@ -334,4 +336,15 @@ void GPU::display() {
 #endif
 }
 
+void GPU::doDMA(Byte dma) {
+    Word dmaAddress = (Word)dma << 8;
+#ifndef NLOG
+    logger << "DMA" << regDMA;
+#endif
+    AddressSpace * s = mmu.findAddressSpace(dmaAddress);
+    for (Byte i = 0; i < 0xA0; ++i){
+        bytesOam[i] = s->getByte(dmaAddress);
+    }
+
+}
 

@@ -31,7 +31,7 @@ class SDLManager {
     Byte joypadC1 = 0x0F;
     Byte joypadC0 = 0x0F;
     bool isQuit = false;
-
+    uint32_t tmp[160 * 144];
 public:
     ~SDLManager();
     void init(std::string title_window);

@@ -35,3 +35,23 @@ void MMU::writeWord(Word address, Word value){
     writeByte(address, (value & 0xFF));
     writeByte(address + 1, (value >> 8));
 }
+
+void MMU::addAddressSpace(AddressSpace *s) {
+    spaces.push_back(s);
+}
+
+void MMU::removeAddressSpace(AddressSpace *s) {
+    spaces.erase(std::remove(spaces.begin(), spaces.end(), s), spaces.end());
+}
+
+void MMU::init() {
+    unusedSpaces = new Byte[0x10000];
+}
+
+AddressSpace *MMU::findAddressSpace(Word address) {
+    for (auto s: spaces){
+        if (s->accepts(address))
+        return s;
+    }
+    return nullptr;
+}

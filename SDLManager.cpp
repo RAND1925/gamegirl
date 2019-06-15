@@ -19,7 +19,10 @@ void SDLManager::refreshWindow(){
     logger << "REFRESH!" << std::endl;
     //SDL_Delay(10);
 #else
-
+    SDL_LockSurface(surface);
+    uint32_t * pixels = (uint32_t*)surface->pixels;
+    std::copy(tmp, tmp + 160 * 144, pixels);
+    SDL_UnlockSurface(surface);
 #endif
     SDL_UpdateWindowSurface(win);
 }
@@ -33,16 +36,11 @@ SDLManager::~SDLManager(){
 
 Uint32 SDLManager::mapColor(Byte grayCode) {
     Color color = realColorMap[grayCode];
-    return SDL_MapRGB(fmt, color.r, color.g, color.b);
+    return SDL_MapRGBA(fmt, color.r, color.g, color.b, color.a);
 }
 
 void SDLManager::setLine(Byte lineNum, Uint32 *line) {
-    SDL_LockSurface(surface);
-    //the pixel matrix
-    //note: nut for 1 level array
-    auto pixels = static_cast<Uint32 *>(surface->pixels);
-    std::copy(line, line+160, pixels + lineNum * 160);
-    SDL_UnlockSurface(surface);
+    std::copy(line, line + 160, tmp + lineNum * 160);
 }
 
 void SDLManager::init(std::string title_window) {
