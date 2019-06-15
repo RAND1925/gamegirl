@@ -70,9 +70,9 @@ private:
     Byte regLcdStatus = 0;
 
     Byte regDMA;
-    Byte regBGP;
-    Byte regOBP0;
-    Byte regOBP1;
+    Byte regBGP = 0xE4;
+    Byte regOBP0 = 0xE4;
+    Byte regOBP1 = 0xE4;
     Byte regScrollX = 0;
     Byte regScrollY = 0;
     Byte regLineY = 0;

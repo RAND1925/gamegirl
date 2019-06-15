@@ -365,7 +365,7 @@ void GPU::drawBg(uint32_t colorLine[], Byte bgWinDataLow, Byte bgMapHigh) {
 void GPU::drawSprite(uint32_t * colorLine, Byte spriteLarge) {
 
     Byte spriteHeight = spriteLarge ? 16: 8;
-    for (Byte i = 0; i < 0xA0; i+= 4){
+    for (int i = 0xA0 - 4; i >= 0; i-= 4){
         int spriteY = bytesOam[i] - 16;
         int yPixel = regLineY - spriteY;
         if ((yPixel < 0) || (yPixel >= spriteHeight)){
@@ -382,7 +382,7 @@ void GPU::drawSprite(uint32_t * colorLine, Byte spriteLarge) {
             Byte colorCode = getBit(colorLow, counter) | (getBit(colorHigh, counter) << 1);
             Byte grayPalette = getBit(bytesOam[i + 3], 4) ? regOBP1: regOBP0;
             Byte grayCode = getGrayCode(colorCode, grayPalette);
-            if (grayCode != 3)
+           // if (grayCode != 3)
             {
                 Uint32 rgbCode = sdlManager.mapColor(colorCode);
                 colorLine[counter + spriteX] = rgbCode;

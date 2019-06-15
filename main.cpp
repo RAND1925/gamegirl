@@ -30,11 +30,11 @@ int main(int argc,char** argv) {
     // 02 -noboot init (tests)
     // 03 -noboot initAfterBoot (bgbtest)
 
-    int runMode = 1;
+    int runMode = 3;
     mmu.init();
     std::ios::sync_with_stdio(false);
 
-    const std::string FILE_PATH("../testRom/Tetris.gb");
+    const std::string FILE_PATH("../testRom/bgbtest.gb");
    // const std::string FILE_PATH("E:\\C++project\\gb-test-roms-master\\mem_timing-2\\rom_singles\\01-read_timing.gb");
     //cpu.initRegisters();
     cartridgeDriver.openFile(FILE_PATH);
