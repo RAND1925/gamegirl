@@ -3,9 +3,11 @@
 //
 
 #include "CPU.h"
-#include "Logger.h"
 #include "common.h"
-#include <iostream>
+#include "MMU.h"
+#include "InterruptManager.h"
+#include "Logger.h"
+
 CPU cpu;
 void CPU::initMap() {
 

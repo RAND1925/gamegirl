@@ -1,4 +1,4 @@
-//
+// split sdl part from others
 // Created by dell on 2019/6/6.
 //
 
@@ -11,6 +11,8 @@ extern "C" {
     #include "SDL.h"
 }
 
+#include "common.h"
+
 struct Color{
     Byte r, g, b, a;
 };
@@ -20,28 +22,31 @@ class SDLManager {
     SDL_Window *win{nullptr};
     SDL_Surface *surface{nullptr};
     SDL_PixelFormat* fmt{nullptr};
-    SDL_Event e;
-    int zoomTime = 1;
+    SDL_Event e{};
+
     const static int WINDOW_HEIGHT = 144;
     const static int WINDOW_WIDTH = 160;
     const static int BUFFER_HEIGHT = 256;
     const static int BUFFER_WIDTH = 256;
-    const static int WINDOW_POSITION_X = SDL_WINDOWPOS_UNDEFINED;
-    const static int WINDOW_POSITION_Y = SDL_WINDOWPOS_UNDEFINED;
+    int xPos = SDL_WINDOWPOS_UNDEFINED;
+    int yPos = SDL_WINDOWPOS_UNDEFINED;
+    int zoomTime = 1;
+    int fps = 60;
     Byte joypadC1 = 0x0F;
     Byte joypadC0 = 0x0F;
     bool isQuit = false;
-    uint32_t tmp[160 * 144];
+    uint32_t tmp[WINDOW_HEIGHT * WINDOW_WIDTH]{};
     uint32_t fpsTimer = 0;
-    const static int FPS = 60;
+
 public:
-    ~SDLManager();
-    void init(std::string title_window,int zoomTime = 1);
+
     void refreshWindow();
-    Uint32 mapColor(Byte);;
     void setLine(Byte lineNum, Uint32 * line);
+    Uint32 mapColor(Byte);;
     Byte getJoypad(Byte in);
     bool handleInput ();
+    ~SDLManager();
+    void init(const std::string& title_window, int xPos, int zoomTime, int yPos, int fps);
 
 };
 extern SDLManager sdlManager;

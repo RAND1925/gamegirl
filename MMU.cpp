@@ -2,18 +2,30 @@
 // Created by dell on 2019/4/17.
 //
 
-#include <iostream>
+#include <algorithm>
 #include "MMU.h"
+#include "Exceptions.h"
 
 MMU mmu;
-Byte MMU::readByte(Word address){
-    for (AddressSpace *s : spaces){
-        if (s->accepts(address)){
-            return s->getByte(address);
-        }
+
+AddressSpace *MMU::findAddressSpace(Word address) {
+    for (auto s: spaces){
+        if (s->accepts(address))
+            return s;
     }
-    //std::cout << address << ":unused[read]" << std::endl;
-    return unusedSpaces[address];
+    return nullptr;
+}
+
+Byte MMU::readByte(Word address){
+    try{
+        auto s = findAddressSpace(address);
+        if (s == nullptr) {
+            throw WrongAddressException("mmu[read]", address);
+        }
+        return s->getByte(address);
+    } catch (...) {
+        return unusedSpaces[address];
+    }
 }
 
 Word MMU::readWord(Word address){
@@ -21,14 +33,15 @@ Word MMU::readWord(Word address){
 }
 
 void MMU::writeByte(Word address, Byte value){
-    for (auto & s: spaces){
-        if (s->accepts(address)){
-            s->setByte(address, value);
-            return;
+    try{
+        auto s = findAddressSpace(address);
+        if (s == nullptr) {
+            throw WrongAddressException("mmu[write]", address);
         }
+        s->setByte(address, value);
+    } catch (...){
+        unusedSpaces[address] = value;
     }
-    //std::cout << address << ":unused[write]" << std::endl;
-    unusedSpaces[address] = value;
 }
 
 void MMU::writeWord(Word address, Word value){
@@ -46,12 +59,4 @@ void MMU::removeAddressSpace(AddressSpace *s) {
 
 void MMU::init() {
     unusedSpaces = new Byte[0x10000];
-}
-
-AddressSpace *MMU::findAddressSpace(Word address) {
-    for (auto s: spaces){
-        if (s->accepts(address))
-        return s;
-    }
-    return nullptr;
 }

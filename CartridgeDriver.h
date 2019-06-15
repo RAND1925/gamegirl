@@ -4,22 +4,13 @@
 
 #ifndef GAMEGIRL_CATRIDGE_H
 #define GAMEGIRL_CATRIDGE_H
-
-
-#include <fstream>
-#include <array>
-#include <vector>
 #include <string>
-#include <algorithm>
-#include <iterator>
-#include <iostream>
-
+#include <fstream>
+#include "common.h"
 #include "AddressSpace.h"
 #include "Catridges/Cartridge.h"
 #include "Catridges/Cartridge_ROM0.h"
 #include "Catridges/Cartridge_MBC1.h"
-#include "Exceptions.h"
-#include "common.h"
 
 
 class CartridgeDriver: public AddressSpace{

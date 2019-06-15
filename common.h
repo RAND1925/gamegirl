@@ -6,10 +6,10 @@
 #define GAMEGIRL_COMMON_H
 #include <cstdint>
 
-    using Byte = uint8_t;
-    using Word = uint16_t;
-    using SByte = int8_t;
-
+    using Byte = std::uint8_t;
+    using Word = std::uint16_t;
+    using SByte = std::int8_t;
+    using std::uint32_t;
     inline constexpr unsigned long long operator "" _kByte(const unsigned long long w){
         return w << 10;
     };

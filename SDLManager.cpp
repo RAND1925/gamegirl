@@ -37,9 +37,9 @@ void SDLManager::refreshWindow(){
     }
     SDL_UnlockSurface(surface);
     SDL_UpdateWindowSurface(win);
-    if (SDL_GetTicks() - fpsTimer < 1000 / FPS)
+    if (SDL_GetTicks() - fpsTimer < 1000 / fps)
     {
-        SDL_Delay(1000 / FPS - SDL_GetTicks() + fpsTimer);
+        SDL_Delay(1000 / fps - SDL_GetTicks() + fpsTimer);
     }
     fpsTimer = SDL_GetTicks();
 }
@@ -60,28 +60,6 @@ void SDLManager::setLine(Byte lineNum, Uint32 *line) {
     std::copy(line, line + 160, tmp + lineNum * 160);
 }
 
-void SDLManager::init(std::string title_window,int zoomTime) {
-    this->zoomTime = zoomTime;
-    int initRes = SDL_Init(SDL_INIT_EVERYTHING);
-    if (initRes < 0){
-        throw SDLException("init");
-    }
-    win = SDL_CreateWindow(title_window.c_str(), WINDOW_POSITION_X , WINDOW_POSITION_Y, WINDOW_WIDTH * zoomTime,WINDOW_HEIGHT * zoomTime, SDL_WINDOW_SHOWN);
-
-    if (win == nullptr){
-        throw SDLException("window");
-    }
-    //about the clock to fresh
-
-    //let *surface get the image from the *win
-    surface = SDL_GetWindowSurface(win);
-    //todo: set a flag pf Uint32 in surface
-    //???
-    fmt = surface->format;
-    auto pixel_format = SDL_MapRGB(surface->format, 193, 0, 120);
-    SDL_FillRect(surface, nullptr, pixel_format);
-    refreshWindow();
-}
 
 bool SDLManager::handleInput() {
     while (SDL_PollEvent(&e)) {
@@ -176,5 +154,27 @@ Byte SDLManager::getJoypad(Byte in) {
         in |= joypadC0;
     }
     return in;
+}
+
+void SDLManager::init(const std::string &title_window, int zoomTime, int xPos, int yPos, int fps) {
+    this->zoomTime = zoomTime;
+    this->xPos = xPos;
+    this->yPos = yPos;
+    this->fps = fps;this->zoomTime = zoomTime;
+    int initRes = SDL_Init(SDL_INIT_EVERYTHING);
+    if (initRes < 0){
+        throw SDLException("init");
+    }
+    win = SDL_CreateWindow(title_window.c_str(), xPos, yPos, WINDOW_WIDTH * zoomTime,WINDOW_HEIGHT * zoomTime, SDL_WINDOW_SHOWN);
+    if (win == nullptr){
+        throw SDLException("window create");
+    }
+    surface = SDL_GetWindowSurface(win);
+    //todo: set a flag pf Uint32 in surface
+    //???
+    fmt = surface->format;
+    auto pixel_format = SDL_MapRGBA(surface->format, 0xFF, 0xFF, 0xFF, 0xFF);
+    SDL_FillRect(surface, nullptr, pixel_format);
+    SDL_UpdateWindowSurface(win);
 };
 

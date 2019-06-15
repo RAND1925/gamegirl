@@ -10,14 +10,15 @@
 #include <array>
 
 class WRam: public AddressSpace {
-    const static Word offset = 0xC000;
-    const static Word length = 0x3E00 ;
-    std::array<Byte, length> bytes;
 public:
     bool accepts(Word address) override;
     Byte getByte(Word address) override;
     void setByte(Word address, Byte value) override;
-    WRam(){};
+
+private:
+    const static Word offset = 0xC000;
+    const static Word length = 0x3E00;
+    std::array<Byte, length> bytes{};
 };
 
 extern WRam wRam;

@@ -38,7 +38,9 @@ Byte InterruptManager::handleInterrupt() {
     Byte maskCode = static_cast<Byte>((iE & iF) & 0x1F);
     for(Byte i = 0; i < 5; ++i){
         if (getBit(maskCode, i)){
-            std::cout << "interrupt: " << i << std::endl;
+#ifndef NLOG
+            logger << "interrupt: " << i << std::endl;
+#endif
             resetBit(iF, i);
             return i;
         }

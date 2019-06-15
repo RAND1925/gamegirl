@@ -1,4 +1,4 @@
-//
+// cpu
 // Created by dell on 2019/4/16.
 //
 
@@ -6,13 +6,7 @@
 #define GAMEGIRL_CPU_H
 
 #include <functional>
-#include <iostream>
-#include <iomanip>
 #include "common.h"
-#include "Exceptions.h"
-#include "MMU.h"
-#include "InterruptManager.h"
-#include <fstream>
 
 class CPU {
 private:

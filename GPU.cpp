@@ -1,10 +1,12 @@
 
 #include <algorithm>
 #include <tuple>
+#include "MMU.h"
 #include "GPU.h"
 #include "SDLManager.h"
 #include "InterruptManager.h"
-#include "MMU.h"
+#include "Exceptions.h"
+
 GPU gpu;
 void GPU::addTime(int clock)
 {
@@ -87,6 +89,7 @@ void GPU::addTime(int clock)
     }
     setLCYInterrupt();
 }
+
 void GPU::setMode(Byte mode)
 {
     if (currentMode == mode)
@@ -127,16 +130,9 @@ void GPU::setMode(Byte mode)
 
 
 void GPU::draw(int yLine) {
-
-
 #ifndef NLOG
     display();
 #endif
-    //lcdc :
-    //OBJ 1-switch 2-size
-    //WINDOW 5-switch 6=selection
-    //BG 0-switch 3-bgcode 4-bgCharacter
-    //LCDC switch 7
     //check if it's in the real line
     if (yLine >= 144)
         return;
@@ -307,7 +303,7 @@ void GPU::doDMA(Byte dma) {
     if (dma > 0xF1){
         return;
     }
-    Word dmaAddress = (Word)dma << 8;
+    Word dmaAddress = (Word)dma << 8u;
 #ifndef NLOG
     logger << "DMA" << regDMA;
 #endif
@@ -315,7 +311,6 @@ void GPU::doDMA(Byte dma) {
     for (Byte i = 0; i < 0xA0; ++i){
         bytesOam[i] = s->getByte(dmaAddress + i);
     }
-
 }
 
 void GPU::drawBg(uint32_t colorLine[], Byte bgWinDataLow, Byte bgMapHigh) {
@@ -352,9 +347,8 @@ void GPU::drawBg(uint32_t colorLine[], Byte bgWinDataLow, Byte bgMapHigh) {
                 numTile = (SByte) (bytesChr[mapTile + (yTile * 32) + xTile]);
             colorLow = bytesVRam[dataTile + (numTile * 16) + (yPixel * 2)];
             colorHigh = bytesVRam[dataTile + (numTile * 16) + (yPixel * 2) + 1];
-            //    lastPixel = xTile;
         }
-        Byte colorCode = getBit(colorLow, xPixel) | (getBit(colorHigh, xPixel) << 1);
+        Byte colorCode = getBit(colorLow, xPixel) | (getBit(colorHigh, xPixel) << 1u);
         Byte grayCode = getGrayCode(colorCode, regBGP);
         Uint32 rgbCode = sdlManager.mapColor(grayCode);
         colorLine[counter] = rgbCode;
@@ -367,14 +361,13 @@ void GPU::drawSprite(uint32_t * colorLine, Byte spriteLarge) {
     Byte spriteHeight = spriteLarge ? 16: 8;
     std::vector<Sprite> ready_to_gender;
     for (int i = 0xA0 - 4; i >= 0; i-= 4) {
-
         int spriteY = bytesOam[i] - 16;
         int yPixel = regLineY - spriteY;
         if ((yPixel < 0) || (yPixel >= spriteHeight)) {
             continue;
         }
         int spriteX = bytesOam[i + 1] - 8;
-        if (spriteX < 0 || spriteX >= 160) {
+        if (spriteX < 8 || spriteX >= 160) {
             continue;
         }
         Byte chrCode = bytesOam[i + 2];
@@ -387,7 +380,7 @@ void GPU::drawSprite(uint32_t * colorLine, Byte spriteLarge) {
         return std::get<0>(a) > std::get<0>(b);});
 
     int size = ready_to_gender.size();
-    for (int i = size > 2 ? size - 2 : 0 ; i < size; ++i) {
+    for (int i = 0 ; i < size; ++i) {
         auto s = ready_to_gender[i];
         Word pixelAddress = std::get<1>(s);
         Byte colorLow = bytesVRam[pixelAddress];
@@ -396,17 +389,15 @@ void GPU::drawSprite(uint32_t * colorLine, Byte spriteLarge) {
         Byte grayPalette = getBit(infoCode, 4) ? regOBP1: regOBP0;
         bool xFlip = getBit(infoCode, 5);
         for (Byte counter = 0; counter < 8; ++ counter) {
+            Byte col = std::get<0>(s) + (xFlip ? counter : 7 - counter);
+            if (col < 0 || col >= 160)
+                continue;
             Byte colorCode = getBit(colorLow, counter) | (getBit(colorHigh, counter) << 1);
             Byte grayCode = getGrayCode(colorCode, grayPalette);
             if (grayCode != 0)
             {
                 Uint32 rgbCode = sdlManager.mapColor(grayCode);
-                if (xFlip) {
-                    colorLine[std::get<0>(s) + counter] = rgbCode;
-                }else {
-                    colorLine[std::get<0>(s) + 7 - counter] = rgbCode;
-                }
-
+                colorLine[col] = rgbCode;
             }
         }
     }
@@ -414,5 +405,10 @@ void GPU::drawSprite(uint32_t * colorLine, Byte spriteLarge) {
 
 Byte GPU::getGrayCode(Byte colorCode, Byte reg) {
     return static_cast<Byte>(reg >> (colorCode << 1) & 0x03);
+}
+
+void GPU::init(bool useSprite) {
+    this->useSprite = useSprite;
+
 }
 

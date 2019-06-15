@@ -3,6 +3,7 @@
 //
 
 #include "Boot.h"
+#include "Exceptions.h"
 
 Boot boot;
 

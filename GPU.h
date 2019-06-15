@@ -1,30 +1,30 @@
+// gpu, manage graphic
 #pragma once
-#include <string>
 #include <array>
 #include "const.h"
 #include "common.h"
-#include "SDL.h"
 #include "AddressSpace.h"
 #include "Logger.h"
-//todo :
+//
 // change the var name
-// complete the merge  from gpu
 class GPU : public AddressSpace
 {
 
 public:
     /***********************************************/
     //this is the certain format of the addressSpace
+    void addTime(int clock);
+    void init(bool useSprite);
+
     bool accepts(Word address) override;
     Byte getByte(Word address) override;
     void setByte(Word address, Byte value) override;
 
     //it's the main cycle of the gpu
-    void addTime(int clock);
+
     //choose the mode and the status matched with the mode
 
     //some var used to Scroll
-    Byte currentMode = 0;
     //two byte to store joypad information
     //judge if it's direction or select
 
@@ -39,18 +39,16 @@ private:
     //to compare the 0xff44 0xff45 to judge if it's a interrupt
     void setLCYInterrupt();
 
-    //some sdl var and pointer:
-
     static inline Byte getGrayCode(Byte colorCode, Byte reg);
+    Byte currentMode = 0;
 
     //some const mode number:
-    int innerClock = 0;
+    uint64_t innerClock = 0;
+    bool useSprite = true;
     const static int MODE_OAM = 2;
     const static int MODE_VRAM = 3;
     const static int MODE_HBLANK = 0;
     const static int MODE_VBLANK = 1;
-    //about the ram of the video and sprite:
-
 
     //the reg in the gpu:
     Byte regLcdControl = 0x91;
@@ -66,6 +64,7 @@ private:
     Byte regWindowX = 0;
     Byte regWindowY = 0;
 
+    //about the ram of the video and sprite:
     const static Word offsetVram = 0x8000;
     const static Word lengthVram = 0x9800 - 0x8000;
 

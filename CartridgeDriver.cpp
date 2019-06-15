@@ -3,6 +3,9 @@
 //
 
 #include "CartridgeDriver.h"
+#include "Catridges/Cartridge_ROM0.h"
+#include "Catridges/Cartridge_MBC1.h"
+#include "Exceptions.h"
 
 CartridgeDriver cartridgeDriver;
 
@@ -35,24 +38,21 @@ void CartridgeDriver::genCartridge(std::ifstream &stream) {
 }
 void CartridgeDriver::openFile(const std::string &filePath) {
   std::ifstream romStream;
-
   try {
     romStream.open(filePath, std::ios::binary);
     if (!romStream){
-      throw 0;
+      throw FileNotFoundException("driver[open file]", filePath);
     }
-
-  } catch(int) {
-    std::cerr << "fileNotFound" << std::endl;
-    throw;
-  } catch(std::ios::failure & e) {
-    std::cerr << e.what() << std::endl;
-    throw;
+  } catch(...) {
+      throw;
   }
-
   loadRom(romStream);
-  std::cout << "loading game:" << getTitle() << std::endl;
-  romStream.close();
+
+
+#ifndef NLOG
+  logger << "game loaded:" << getTitle() << std::endl;
+#endif
+
 }
 void CartridgeDriver::reopenFile(const std::string & filePath) {
   delete cartridgePointer;

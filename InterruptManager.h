@@ -1,4 +1,4 @@
-//
+// manage interrupt and halt , stop not used
 // Created by dell on 2019/6/5.
 //
 
@@ -6,8 +6,8 @@
 #define GAMEGIRL_INTERRUPTMANAGER_H
 
 #include "common.h"
-#include "Exceptions.h"
 #include "AddressSpace.h"
+#include "Exceptions.h"
 
 class InterruptManager:  public AddressSpace{
     bool iME = false;
@@ -27,7 +27,6 @@ public:
     bool getIME();
     void setStop(bool newStop);
     void setHalt(bool newHalt);
-
 
     bool accepts(Word address) override;
     Byte getByte(Word address) override;

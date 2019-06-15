@@ -3,6 +3,8 @@
 //
 
 #include "Timer.h"
+#include "InterruptManager.h"
+#include "Exceptions.h"
 
 Timer timer;
 void Timer::addTime(Byte cycle) {

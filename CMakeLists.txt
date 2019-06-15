@@ -3,6 +3,8 @@ project(gamegirl)
 
 set(CMAKE_CXX_STANDARD 17)
 
+set(CMAKE_CXX_FLAGS  "-O3 -march=corei7-avx -static")
+
 # PATH TO FindSDL2.cmake
 set(CMAKE_MODULE_PATH "D:/SDL2-2.0.9")
 
@@ -17,5 +19,5 @@ include_directories(${SDL2_INCLUDE_DIR})
 aux_source_directory(. SOURCE_FILES)
 add_executable(gamegirl ${SOURCE_FILES})
 
-target_link_libraries(gamegirl ${SDL2_LIBRARY})
+target_link_libraries(gamegirl CartridgesLib ${SDL2_LIBRARY} )
 
