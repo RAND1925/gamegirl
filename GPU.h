@@ -29,7 +29,6 @@ public:
     //judge if it's direction or select
 
 private:
-    void display();
     void setMode(Byte mode);
 
     void doDMA(Byte dma);
@@ -37,18 +36,17 @@ private:
     void drawSprite(uint32_t*, Byte spriteLarge);
     void draw(int);
     //to compare the 0xff44 0xff45 to judge if it's a interrupt
-    void setLCYInterrupt();
-
     static inline Byte getGrayCode(Byte colorCode, Byte reg);
     Byte currentMode = 0;
 
     //some const mode number:
     uint64_t innerClock = 0;
     bool useSprite = true;
-    const static int MODE_OAM = 2;
-    const static int MODE_VRAM = 3;
     const static int MODE_HBLANK = 0;
     const static int MODE_VBLANK = 1;
+    const static int MODE_OAM = 2;
+    const static int MODE_VRAM = 3;
+
 
     //the reg in the gpu:
     Byte regLcdControl = 0x91;
@@ -77,5 +75,9 @@ private:
     std::array<Byte, lengthVram> bytesVRam{};
     std::array<Byte, lengthChr> bytesChr{};
     std::array<Byte, lengthOam> bytesOam{};
+
+#ifndef NLOG
+    void display();
+#endif
 };
 extern GPU gpu;

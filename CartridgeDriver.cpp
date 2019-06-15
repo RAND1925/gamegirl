@@ -15,12 +15,12 @@ void CartridgeDriver::loadRom(std::ifstream &stream) {
     cartridgeType = (Byte)header[0x147];
     romBankCode = (Byte)header[0x148];
     if (romBankCode < 0x10){
-        romSize = 32_kByte << romBankCode;
+        romSize = (32_kByte) << romBankCode;
     } else {
         romSize = romSizeMap[romBankCode - 0x52] * 16_kByte;
     }
     ramBankCode = (Byte)header[0x149];
-    ramSize = ramSizeMap[ramBankCode];
+    ramSize = ramSizeMap[ramBankCode] * 1024;
     std::copy(header + 0x134, header + 0x142, std::back_insert_iterator<decltype(title)>(title));
     stream.clear();
     stream.seekg(0, std::ios::beg);
@@ -32,6 +32,8 @@ void CartridgeDriver::genCartridge(std::ifstream &stream) {
     cartridgePointer = new Cartridge_ROM0(stream);
     break;
   case 1:
+  case 2:
+  case 3:
     cartridgePointer = new Cartridge_MBC1(stream, romSize, ramSize);
     break;
   }

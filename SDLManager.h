@@ -6,6 +6,7 @@
 #define GAMEGIRL_SDLMANAGER_H
 
 #include <string>
+#include <fstream>
 #include "Exceptions.h"
 extern "C" {
     #include "SDL.h"
@@ -31,13 +32,14 @@ class SDLManager {
     int xPos = SDL_WINDOWPOS_UNDEFINED;
     int yPos = SDL_WINDOWPOS_UNDEFINED;
     int zoomTime = 1;
-    int fps = 60;
+    uint8_t fps = 60;
     Byte joypadC1 = 0x0F;
     Byte joypadC0 = 0x0F;
     bool isQuit = false;
     uint32_t tmp[WINDOW_HEIGHT * WINDOW_WIDTH]{};
     uint32_t fpsTimer = 0;
 
+    std::ofstream p{"a.txt"};
 public:
 
     void refreshWindow();

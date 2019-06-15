@@ -39,7 +39,13 @@ void SDLManager::refreshWindow(){
     SDL_UpdateWindowSurface(win);
     if (SDL_GetTicks() - fpsTimer < 1000 / fps)
     {
+#ifndef NLOG
+        logger << "frameTime:" << SDL_GetTicks() - fpsTimer << std::endl;
+#endif
+        p << "frameTime:" << SDL_GetTicks() - fpsTimer << std::endl;
+
         SDL_Delay(1000 / fps - SDL_GetTicks() + fpsTimer);
+
     }
     fpsTimer = SDL_GetTicks();
 }
@@ -157,6 +163,7 @@ Byte SDLManager::getJoypad(Byte in) {
 }
 
 void SDLManager::init(const std::string &title_window, int zoomTime, int xPos, int yPos, int fps) {
+
     this->zoomTime = zoomTime;
     this->xPos = xPos;
     this->yPos = yPos;

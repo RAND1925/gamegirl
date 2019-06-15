@@ -25,17 +25,14 @@ uint64_t step();
 bool init(int argc, char **argv);
 
 int main(int argc, char **argv) {
-
     int allCycle = 0;
     bool useBoot = init(argc, argv);
     if (useBoot) {
-        mmu.addAddressSpace(&boot);
         while (cpu.getPC() < 0x100) {
             allCycle += step();
         }
         mmu.removeAddressSpace(&boot);
     }
-    cpu.initRegistersAfterBoot();
     while (!isQuit) {
         allCycle += step();
 #ifndef NLOG
@@ -51,8 +48,7 @@ bool init(int argc, char **argv) {
         throw FileNotFoundException("argument wrong", "no file path ");
     }
     const std::string FILE_PATH(argv[1]);
-
-    uint32_t fps = 60;
+    uint8_t fps = 60;
     auto xPos = SDL_WINDOWPOS_UNDEFINED;
     auto yPos = SDL_WINDOWPOS_UNDEFINED;
     uint8_t zoomTime = 1;
@@ -94,6 +90,12 @@ bool init(int argc, char **argv) {
 #ifndef NLOG
     logger.open("gamegirl.log");
 #endif
+    if (useBoot){
+        mmu.addAddressSpace(&boot);
+        cpu.initRegisters();
+    } else {
+        cpu.initRegistersAfterBoot();
+    }
     mmu.addAddressSpace(&cartridgeDriver);
     mmu.addAddressSpace(&wRam);
     mmu.addAddressSpace(&zRam);

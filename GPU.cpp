@@ -14,6 +14,9 @@ void GPU::addTime(int clock)
     //setInterruptFlag(0, false);
     //setInterruptFlag(1, false);
     // check isLCDenabled if() acoordig to the oxff40
+#ifndef NLOG
+    display();
+#endif
     Byte statusLCD =regLcdControl;
     if (!getBit(statusLCD,7 ))
         return;
@@ -54,11 +57,9 @@ void GPU::addTime(int clock)
         {
             innerClock -= 205; //back to 0;
             //get the current line to draw
-            Byte yLine = regLineY;
-            draw(yLine);
-            yLine++;
-            regLineY=yLine;
-            if (yLine >= 144) //call for the interrrput
+            draw(regLineY);
+            regLineY++;
+            if (regLineY >= 144) //call for the interrrput
             {
                 setMode(MODE_VBLANK);
                 sdlManager.refreshWindow();
@@ -66,7 +67,7 @@ void GPU::addTime(int clock)
             else
             {
                 //less than 144 ,comtinue to get the line
-             //   doDMA(regDMA);
+                doDMA(regDMA);
                 setMode(MODE_OAM);
             }
         }
@@ -77,17 +78,23 @@ void GPU::addTime(int clock)
         if (innerClock >= 456 * 10)
         {
             //back to the oam,reset the stat
-      //      doDMA(regDMA);
+            doDMA(regDMA);
             setMode(MODE_OAM);
             innerClock -= 456 * 10;
             regLineY=0;
-            
         }
         else
             regLineY=yLine;
         break;
     }
-    setLCYInterrupt();
+    if (regLineY == regLineYC){
+        setBit(regLcdStatus, 2);
+        if (getBit(regLcdControl,6)){
+            interruptManager.requestInterrupt(1);
+        }
+    } else {
+        resetBit(regLcdStatus, 2);
+    }
 }
 
 void GPU::setMode(Byte mode)
@@ -95,28 +102,28 @@ void GPU::setMode(Byte mode)
     if (currentMode == mode)
         return;
     currentMode = mode;
-    Byte statusLCDC = regLcdStatus;
     //rese the 0bit and 1bit of the status
     //and 1111|1100
-    statusLCDC &= 0xFC;
+    regLcdStatus &= 0xFCu;
     //set the current mode into bit0 bit1
-    statusLCDC |= currentMode & 0x03;
-    regLcdStatus = statusLCDC;
+    regLcdStatus |= currentMode & 0x03u;
+
     if (mode == MODE_VBLANK)
         interruptManager.requestInterrupt(0);
     bool interruptFlag = false ;
     switch (mode)
     {
-    case MODE_VBLANK:
-        if (getBit(statusLCDC,4))
-            interruptFlag = true;
-        break;
     case MODE_HBLANK:
-        if (getBit(statusLCDC,3))
+        if (getBit(regLcdStatus,3))
             interruptFlag = true;
         break;
+    case MODE_VBLANK:
+        if (getBit(regLcdStatus,4))
+            interruptFlag = true;
+        break;
+
     case MODE_OAM:
-        if (getBit(statusLCDC,5))
+        if (getBit(regLcdStatus,5))
             interruptFlag = true;
         break;
     default:
@@ -124,7 +131,6 @@ void GPU::setMode(Byte mode)
     }
     if (interruptFlag)
         interruptManager.requestInterrupt(1);
-
 }
 
 
@@ -153,24 +159,10 @@ void GPU::draw(int yLine) {
     if (bgWinEnabled) {
         drawBg(colorLine,bgWinDataLow, bgMapHigh);
     }
-    if (spriteEnabled){
+    if (spriteEnabled && useSprite){
         drawSprite(colorLine, spriteLarge);
     }
     sdlManager.setLine(yLine, colorLine);
-}
-
-void GPU::setLCYInterrupt()
-{
-    Byte yLine = regLineY;
-    Byte yLine_cp = regLineYC;
-    Byte statusLCDC = regLcdStatus;
-    //write to the stat bit 2
-    if (yLine == yLine_cp){
-        setBit(statusLCDC, 2);
-    } else {
-        resetBit(statusLCDC, 2);
-    }
-    regLcdStatus=statusLCDC;
 }
 
 Byte GPU::getByte(Word address) {
@@ -287,18 +279,16 @@ void GPU::setByte(Word address, Byte value) {
     }
     throw WrongAddressException("GPU[write]", address);
 }
-
-void GPU::display() {
 #ifndef NLOG
+void GPU::display() {
     logger << "LCDC:" << std::hex <<(int)regLcdControl << ' '
            << "STAT:" << std::hex <<(int)regLcdStatus << ' '
            << "SCX:" << std::hex <<(int)regScrollX << ' '
            << "SCY:" << std::hex <<(int)regScrollY << ' '
            << "LY:" << std::hex <<(int)regLineY << ' '
            << "LYC:" << std::hex <<(int)regLineYC << std::endl;
-#endif
 }
-
+#endif
 void GPU::doDMA(Byte dma) {
     if (dma > 0xF1){
         return;
@@ -367,7 +357,7 @@ void GPU::drawSprite(uint32_t * colorLine, Byte spriteLarge) {
             continue;
         }
         int spriteX = bytesOam[i + 1] - 8;
-        if (spriteX < 8 || spriteX >= 160) {
+        if (spriteX >= 160) {
             continue;
         }
         Byte chrCode = bytesOam[i + 2];

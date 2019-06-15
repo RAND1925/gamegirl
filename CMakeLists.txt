@@ -3,11 +3,11 @@ project(gamegirl)
 
 set(CMAKE_CXX_STANDARD 17)
 
-set(CMAKE_CXX_FLAGS  "-O3 -march=corei7-avx -static")
+add_compile_options(-O3 -Wall -march=native -static)
+
 
 # PATH TO FindSDL2.cmake
 set(CMAKE_MODULE_PATH "D:/SDL2-2.0.9")
-
 # PATH TO SDL
 set(SDL2_PATH "D:/SDL2-2.0.9")
 

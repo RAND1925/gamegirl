@@ -2211,7 +2211,7 @@ void CPU::initMap() {
 
 Byte CPU::step() {
 #ifndef NLOG
-  display();
+    display();
 #endif
   Byte timing = 4;
   if (interruptManager.hasInterrupt()) {
@@ -2233,24 +2233,6 @@ Byte CPU::step() {
   }
   return timing;
 }
-
-void CPU::display() {
-#ifndef NLOG
-  logger << "a:" << std::hex << (int)registers.a << ' ' << "f:" << std::hex
-         << (int)registers.f << ' ' << "b:" << std::hex << (int)registers.b
-         << ' ' << "c:" << std::hex << (int)registers.c << ' '
-         << "d:" << std::hex << (int)registers.d << ' ' << "e:" << std::hex
-         << (int)registers.e << ' ' << "h:" << std::hex << (int)registers.h
-         << ' ' << "l:" << std::hex << (int)registers.l << ' '
-         << "ie:" << std::hex << (int)mmu.readByte(0xFFFF) << ' '
-         << "if:" << std::hex << (int)mmu.readByte(0xFF0F) << ' '
-         << "sp:" << std::hex << (int)registers.sp << ' ' << "pc:" << std::hex
-         << (int)registers.pc << ' '
-         << "stack:" << (int)mmu.readWord(registers.sp) << ' ' << "opNum"
-         << (int)mmu.readByte(registers.pc) << ' ' << std::endl;
-#endif
-}
-
 void CPU::initRegisters() {
   registers.a = 0x11;
   registers.f = 0x80;
@@ -2595,3 +2577,21 @@ void CPU::restart(Word addr) {
   rsv();
   call(addr);
 }
+
+
+#ifndef NLOG
+void CPU::display() {
+    logger << "a:" << std::hex << (int)registers.a << ' ' << "f:" << std::hex
+           << (int)registers.f << ' ' << "b:" << std::hex << (int)registers.b
+           << ' ' << "c:" << std::hex << (int)registers.c << ' '
+           << "d:" << std::hex << (int)registers.d << ' ' << "e:" << std::hex
+           << (int)registers.e << ' ' << "h:" << std::hex << (int)registers.h
+           << ' ' << "l:" << std::hex << (int)registers.l << ' '
+           << "ie:" << std::hex << (int)mmu.readByte(0xFFFF) << ' '
+           << "if:" << std::hex << (int)mmu.readByte(0xFF0F) << ' '
+           << "sp:" << std::hex << (int)registers.sp << ' ' << "pc:" << std::hex
+           << (int)registers.pc << ' '
+           << "stack:" << (int)mmu.readWord(registers.sp) << ' ' << "opNum"
+           << (int)mmu.readByte(registers.pc) << ' ' << std::endl;
+}
+#endif

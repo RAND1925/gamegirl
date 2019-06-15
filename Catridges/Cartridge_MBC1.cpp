@@ -8,7 +8,7 @@ Cartridge_MBC1::Cartridge_MBC1(std::ifstream &s, size_t romSize, size_t ramSize)
     rom.reserve(romSize);
     if (ramSize == 0) {
         ram.reserve(0x8000);
-    } else{
+    } else {
         ram.reserve(ramSize);
     }
     char *buffer = nullptr;

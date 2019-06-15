@@ -14,13 +14,13 @@ class WrongAddressException: public std::exception{
     std::string _msg{};
     Word _address = 0;
 public:
-    WrongAddressException(const std::string msg, Word address);
+    WrongAddressException(std::string  msg, Word address);
 };
 class FileNotFoundException: public std::exception{
     std::string _msg{};
     std::string _path{};
 public:
-    FileNotFoundException(const std::string msg, const std::string path);
+    FileNotFoundException(std::string msg, std::string path);
 };
 
 class SDLException: public std::exception{
@@ -31,10 +31,10 @@ public:
 
 class InterruptException: public std::exception{
     std::string _msg{};
-    Byte _iF = 0;
-    Byte _iE = 0;
+    Byte _iF;
+    Byte _iE;
 public:
-    InterruptException(std::string  msg, Byte iE, Byte iF);
+    InterruptException(std::string msg, Byte iE, Byte iF);
 };
 
 #endif //GAMEGIRL_ERRORS_H
