@@ -45,13 +45,13 @@ private:
     std::vector<Byte> rom;
     std::vector<Byte> ram;
     bool ramEnabled = false;
-    Byte romBank = 0;
+    Byte romBank = 1;
     Byte ramBank = 0;// also upprombank
     Byte mode = 0;
 public:
     Cartridge_Mbc1(std::ifstream & s, size_t romSize, size_t ramSize){
         rom.reserve(romSize);
-        ram.reserve(ramSize);
+        ram.reserve(0x8000);
         char* buffer = new char[romSize];
         s.read(buffer, romSize);
         std::copy(buffer, buffer + romSize, rom.begin());
@@ -65,47 +65,37 @@ public:
         if (page < 0x4){
             return rom[address];
         } else if (page >= 0x4 && page < 0x8){
-            uint32_t trueAddress;
-            if (mode == 0) {
-                Byte upperRomBank = ramBank;
-                if (upperRomBank == 0x60 || upperRomBank == 0x40 || upperRomBank == 0x20){
-                    ++upperRomBank;
-                }
-                trueAddress = (upperRomBank * 0x80000) | (romBank * 0x4000) | address;
+            uint32_t trueAddress = ((uint32_t)romBank << 14u) | (address - 0x4000);
 
-            } else{
-                trueAddress = (romBank * 0x4000) | address;
+            if (mode == 0) {
+                trueAddress += (uint32_t)ramBank << 19u;
             }
             return rom[trueAddress];
         } else if(page >= 0xA && page < 0xC){
-            /*
-            if (mode == 1){
-                if (ramEnabled){
-                    return ram[ramBank * 0x2000 | address];
-                }
-            }*/
-            return ram[ramBank * 0x2000 | address];
+            return ram[((uint64_t)ramBank << 13u) | (address & 0x1FFFu)];
         }
         throw WrongAddressException("mbc1[read]", address);
     };
     void setByte(Word address, Byte value) override {
-        Byte page = address >> 13;
-        if (page >= 0xA && page < 0xC){
-            ram[ramBank * 0x2000 | address] = value;
+        Byte page = address >> 12;
+        if (page == 0xA || page == 0xB){
+            ram[(uint64_t)ramBank << 13u | (address & 0x1FFFu)] = value;
         }
-        else if (page == 0x0){
+        else if (page == 0x0 || page == 0x1){
             ramEnabled = (value & 0xF) == 0xA;
         }
-        else if (page == 0x1){
+        else if (page == 0x2 || page == 0x3){
             value &= 0x1F;
-            if (value == 0)
+            if (value == 0) {
                 romBank = 1;
-            romBank = value;
+            } else {
+                romBank = value;
+            }
           }
-        else if (page == 0x2){
+        else if (page == 0x4 || page == 0x5){
             ramBank = value & 0x3;
         }
-        else if(page == 0x3){
+        else if(page == 0x6 || page == 0x7){
             mode = value & 0x1;
         }
         //throw WrongAddressException("mbc1[write]", address);
@@ -161,8 +151,6 @@ public:
         std::copy(header + 0x134, header + 0x142, std::back_insert_iterator<decltype(title)>(title));
         stream.clear();
         stream.seekg(0, std::ios::beg);
-
-
         genCartridge(stream, romSize, ramSize);
     };
 

@@ -34,7 +34,7 @@ int main(int argc,char** argv) {
     mmu.init();
     std::ios::sync_with_stdio(false);
 
-    const std::string FILE_PATH("../testRom/Tetris.gb");
+    const std::string FILE_PATH("../testRom/mario.gb");
    // const std::string FILE_PATH("E:\\C++project\\gb-test-roms-master\\mem_timing-2\\rom_singles\\01-read_timing.gb");
     //cpu.initRegisters();
     cartridgeDriver.openFile(FILE_PATH);
