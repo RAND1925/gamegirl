@@ -9,6 +9,7 @@ set(CMAKE_MODULE_PATH "D:/SDL2-2.0.9")
 # PATH TO SDL
 set(SDL2_PATH "D:/SDL2-2.0.9")
 
+add_subdirectory(Catridges)
 find_package(SDL2 REQUIRED)
 
 include_directories(${SDL2_INCLUDE_DIR})

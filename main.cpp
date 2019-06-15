@@ -4,7 +4,7 @@
 #include "ZRam.h"
 #include "GPU.h"
 #include "Timer.h"
-#include "Cartridge.h"
+#include "CartridgeDriver.h"
 #include "InterruptManager.h"
 #include "CPU.h"
 #include "Logger.h"
@@ -60,7 +60,7 @@ int main(int argc,char** argv) {
     mmu.addAddressSpace(&zRam);
 
     if (runMode == 0) {
-        while (cpu.getPc() < 0x100){
+        while (cpu.getPC() < 0x100){
             allCycle += step();
         }
         mmu.removeAddressSpace(&boot);
@@ -68,7 +68,7 @@ int main(int argc,char** argv) {
     if (runMode != 2) {
         cpu.initRegistersAfterBoot();
     } else {
-        cpu.setPc(0x100);
+        cpu.setPC(0x100);
     }
     while(!isQuit){
 
