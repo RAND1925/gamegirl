@@ -31,15 +31,16 @@ int main(int argc,char** argv) {
     // 03 -noboot initAfterBoot (bgbtest)
 
     int runMode = 3;
+    int zoomTime = 4;
     mmu.init();
     std::ios::sync_with_stdio(false);
 
-    const std::string FILE_PATH("../testRom/mario.gb");
+    const std::string FILE_PATH("../testRom/Tetris.gb");
    // const std::string FILE_PATH("E:\\C++project\\gb-test-roms-master\\mem_timing-2\\rom_singles\\01-read_timing.gb");
     //cpu.initRegisters();
     cartridgeDriver.openFile(FILE_PATH);
 
-    sdlManager.init(cartridgeDriver.getTitle());
+    sdlManager.init(cartridgeDriver.getTitle(),zoomTime);
     cpu.initMap();
     uint64_t allCycle = 0;
 #ifndef NLOG

@@ -4,7 +4,6 @@
 
 #include "SDLManager.h"
 #include "Logger.h"
-
 const Color realColorMap[4]{
         {0xFF, 0xFF, 0xFF, 0x00},
         {0xAA, 0xAA, 0xAA, 0x55},
@@ -21,7 +20,33 @@ void SDLManager::refreshWindow(){
 #else
     SDL_LockSurface(surface);
     uint32_t * pixels = (uint32_t*)surface->pixels;
-    std::copy(tmp, tmp + 160 * 144, pixels);
+    if (zoomTime == 1){
+        std::copy(tmp, tmp + 160 * 144, pixels);
+    } else{
+        for(Byte i = 0; i < 144; ++i){
+            /*
+            uint32_t * lineBegin = pixels + i * zoomTime * 160 * zoomTime;
+            for(Byte j = 0; j < 160; ++j){
+                uint32_t *blockBegin = lineBegin + j * zoomTime;
+                for(Byte k = 0; k < zoomTime; ++k){
+                    blockBegin[k] = tmp[i * 160 + j];
+                }
+            }
+            for (Byte m = 1; m < zoomTime; ++m){
+                std::copy(lineBegin, lineBegin + zoomTime * 160, lineBegin + i * zoomTime * 160);
+            }*/
+            uint32_t * lineBegin = pixels + i * 160 * zoomTime * zoomTime;
+            for(Byte j = 0; j < 160; ++j){
+                uint32_t *blockBegin = lineBegin + j * zoomTime;
+                for(Byte k = 0; k < zoomTime; ++k){
+                    blockBegin[k] = tmp[i * 160 + j];
+                }
+            }
+            for (Byte m = 1; m < zoomTime; ++m){
+                std::copy(lineBegin, lineBegin + zoomTime * 160, lineBegin + m * zoomTime * 160);
+            }
+        }
+    }
     SDL_UnlockSurface(surface);
 #endif
     SDL_UpdateWindowSurface(win);
@@ -43,12 +68,13 @@ void SDLManager::setLine(Byte lineNum, Uint32 *line) {
     std::copy(line, line + 160, tmp + lineNum * 160);
 }
 
-void SDLManager::init(std::string title_window) {
+void SDLManager::init(std::string title_window,int zoomTime) {
+    this->zoomTime = zoomTime;
     int initRes = SDL_Init(SDL_INIT_EVERYTHING);
     if (initRes < 0){
         throw SDLException("init");
     }
-    win = SDL_CreateWindow(title_window.c_str(), WINDOW_POSITION_X, WINDOW_POSITION_Y, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+    win = SDL_CreateWindow(title_window.c_str(), WINDOW_POSITION_X , WINDOW_POSITION_Y, WINDOW_WIDTH * zoomTime,WINDOW_HEIGHT * zoomTime, SDL_WINDOW_SHOWN);
 
     if (win == nullptr){
         throw SDLException("window");

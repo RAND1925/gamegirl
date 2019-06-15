@@ -22,6 +22,7 @@ class SDLManager {
     SDL_Surface *surface;
     SDL_PixelFormat* fmt;
     SDL_Event e;
+    int zoomTime = 1;
     const static int WINDOW_HEIGHT = 144;
     const static int WINDOW_WIDTH = 160;
     const static int BUFFER_HEIGHT = 256;
@@ -34,11 +35,10 @@ class SDLManager {
     uint32_t tmp[160 * 144];
 public:
     ~SDLManager();
-    void init(std::string title_window);
+    void init(std::string title_window,int zoomTime = 1);
     void refreshWindow();
     Uint32 mapColor(Byte);;
     void setLine(Byte lineNum, Uint32 * line);
-
     Byte getJoypad(Byte in);
 
     bool handleInput ();
