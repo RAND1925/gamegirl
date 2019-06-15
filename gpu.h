@@ -32,7 +32,8 @@ private:
     void setMode(Byte mode);
 
     void doDMA(Byte dma);
-
+    void drawBg(uint32_t*, Byte bgWinDataLow, Byte bgMapHigh);
+    void drawSprite(uint32_t*, Byte spriteLarge);
     void draw(int);
     //to compare the 0xff44 0xff45 to judge if it's a interrupt
     void setLCYInterrupt();

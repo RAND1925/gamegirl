@@ -30,7 +30,7 @@ int main(int argc,char** argv) {
     // 02 -noboot init (tests)
     // 03 -noboot initAfterBoot (bgbtest)
 
-    int runMode = 0;
+    int runMode = 1;
     mmu.init();
     std::ios::sync_with_stdio(false);
 

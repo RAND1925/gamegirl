@@ -64,6 +64,7 @@ void GPU::addTime(int clock)
             else
             {
                 //less than 144 ,comtinue to get the line
+                doDMA(regDMA);
                 setMode(MODE_OAM);
             }
         }
@@ -74,6 +75,7 @@ void GPU::addTime(int clock)
         if (innerClock >= 456 * 10)
         {
             //back to the oam,reset the stat
+            doDMA(regDMA);
             setMode(MODE_OAM);
             innerClock -= 456 * 10;
             regLineY=0;
@@ -140,60 +142,26 @@ void GPU::draw(int yLine) {
         return;
 
     Byte lcdc = regLcdControl;
+    bool lcdcEnabled = getBit(lcdc,7);
+    bool bgWinEnabled = getBit(lcdc, 0);
+    bool bgWinDataLow = getBit(lcdc,4);
+    bool bgMapHigh = getBit(lcdc, 3);
+    bool winEnabled = getBit(lcdc,5);
+    bool winMapHigh = getBit(lcdc,6);
+    bool spriteEnabled = getBit(lcdc, 1);
+    bool spriteLarge = getBit(lcdc, 2);
 
     if (!getBit(lcdc, 7)) {
         //todo: turn off screen
     }
-    if (getBit(lcdc, 0)) {
-        //to decide which mao tile to use
-        bool flagTile = getBit(lcdc, 4);
-        //In the first case, patterns have signed numbers from 0 to 255
-        //(i.e. pattern #0 lies at address $8000).
-        // In the second case, patterns have signed numbers from -128 to 127 //(i.e. pattern #0 lies at address $9000).
-        Word dataTile, mapTile;
-        //check the display is enable or not
-        if (flagTile)
-            dataTile = 0x0000;
-        else
-            dataTile = 0x1000;
-
-        //get the map
-        if (getBit(lcdc, 3))
-            mapTile = 0x400;
-        else
-            mapTile = 0x000;
-
-        Uint32 colorLine[160];
-        Byte xScroll = regScrollX;
-        Byte yScroll = regScrollY;
-        int yDraw = (yLine + yScroll) % 256;
-        int yTile = yDraw / 8;
-        int yPixel = yDraw % 8;
-        //?????
-        Byte colorLow = 0, colorHigh = 0;
-
-        for (size_t counter = 0; counter < 160; counter++) {
-            int xDraw = static_cast<int>((counter + xScroll) % 256);
-            int xTile = xDraw / 8;
-            Byte xPixel = static_cast<Byte>(8 - xDraw % 8 - 1);
-            {
-                int numTile;
-
-                if (flagTile)
-                    numTile = bytesChr[mapTile + (yTile * 32) + xTile];
-                else
-                    numTile = (SByte) (bytesChr[mapTile + (yTile * 32) + xTile]);
-                colorLow = bytesVram[dataTile + (numTile * 16) + (yPixel * 2)];
-                colorHigh = bytesVram[dataTile + (numTile * 16) + (yPixel * 2) + 1];
-                //    lastPixel = xTile;
-            }
-            Byte colorCode = getBit(colorLow, xPixel) | (getBit(colorHigh, xPixel) << 1);
-            Byte grayCode = getGrayCode(colorCode, regBGP);
-            Uint32 rgbCode = sdlManager.mapColor(grayCode);
-            colorLine[counter] = rgbCode;
-        }
-        sdlManager.setLine(yLine, colorLine);
+    uint32_t colorLine[160] = {0};
+    if (bgWinEnabled) {
+        drawBg(colorLine,bgWinDataLow, bgMapHigh);
     }
+    if (spriteEnabled){
+        drawSprite(colorLine, spriteLarge);
+    }
+    sdlManager.setLine(yLine, colorLine);
 }
 
 void GPU::setLCYInterrupt()
@@ -337,14 +305,89 @@ void GPU::display() {
 }
 
 void GPU::doDMA(Byte dma) {
+    if (dma > 0xF1){
+        return;
+    }
     Word dmaAddress = (Word)dma << 8;
 #ifndef NLOG
     logger << "DMA" << regDMA;
 #endif
     AddressSpace * s = mmu.findAddressSpace(dmaAddress);
     for (Byte i = 0; i < 0xA0; ++i){
-        bytesOam[i] = s->getByte(dmaAddress);
+        bytesOam[i] = s->getByte(dmaAddress + i);
     }
 
+}
+
+void GPU::drawBg(uint32_t colorLine[], Byte bgWinDataLow, Byte bgMapHigh) {
+    Word dataTile, mapTile;
+    //check the display is enable or not
+    if (bgWinDataLow)
+        dataTile = 0x0000;
+    else
+        dataTile = 0x1000;
+
+    //get the map
+    if (bgMapHigh)
+        mapTile = 0x400;
+    else
+        mapTile = 0x000;
+
+    Byte xScroll = regScrollX;
+    Byte yScroll = regScrollY;
+    int yDraw = (regLineY + yScroll) % 256;
+    int yTile = yDraw / 8;
+    int yPixel = yDraw % 8;
+    //?????
+    Byte colorLow = 0, colorHigh = 0;
+
+    for (size_t counter = 0; counter < 160; counter++) {
+        int xDraw = ((counter + xScroll) % 256);
+        int xTile = xDraw / 8;
+        Byte xPixel = static_cast<Byte>(8 - xDraw % 8 - 1);
+        {
+            int numTile;
+            if (bgWinDataLow)
+                numTile = bytesChr[mapTile + (yTile * 32) + xTile];
+            else
+                numTile = (SByte) (bytesChr[mapTile + (yTile * 32) + xTile]);
+            colorLow = bytesVram[dataTile + (numTile * 16) + (yPixel * 2)];
+            colorHigh = bytesVram[dataTile + (numTile * 16) + (yPixel * 2) + 1];
+            //    lastPixel = xTile;
+        }
+        Byte colorCode = getBit(colorLow, xPixel) | (getBit(colorHigh, xPixel) << 1);
+        Byte grayCode = getGrayCode(colorCode, regBGP);
+        Uint32 rgbCode = sdlManager.mapColor(grayCode);
+        colorLine[counter] = rgbCode;
+    }
+}
+
+void GPU::drawSprite(uint32_t * colorLine, Byte spriteLarge) {
+
+    Byte spriteHeight = spriteLarge ? 16: 8;
+    for (Byte i = 0; i < 0xA0; i+= 4){
+        int spriteY = bytesOam[i] - 16;
+        int yPixel = regLineY - spriteY;
+        if ((yPixel < 0) || (yPixel >= spriteHeight)){
+            continue;
+        }
+        int spriteX = bytesOam[i + 1] - 8;
+        if (spriteX < 0){
+            continue;
+        }
+        Byte chrCode = bytesOam[i + 2];
+        Byte colorLow = bytesVram[chrCode * 0x10 + yPixel * 2];
+        Byte colorHigh = bytesVram[chrCode * 0x10 + yPixel * 2 + 1];
+        for (Byte counter = 0; counter < 8; ++counter) {
+            Byte colorCode = getBit(colorLow, counter) | (getBit(colorHigh, counter) << 1);
+            Byte grayPalette = getBit(bytesOam[i + 3], 4) ? regOBP1: regOBP0;
+            Byte grayCode = getGrayCode(colorCode, grayPalette);
+            if (grayCode != 3)
+            {
+                Uint32 rgbCode = sdlManager.mapColor(colorCode);
+                colorLine[counter + spriteX] = rgbCode;
+            }
+        }
+    }
 }
 
