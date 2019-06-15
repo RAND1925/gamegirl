@@ -85,7 +85,7 @@ private:
         //0xA0Bytes
     }
 
-    std::array<Byte, lengthVram> bytesVram{};
+    std::array<Byte, lengthVram> bytesVRam{};
     std::array<Byte, lengthChr> bytesChr{};
     std::array<Byte, lengthOam> bytesOam{};
 };

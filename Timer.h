@@ -30,6 +30,8 @@ public:
             case 0xFF05: return regTima;
             case 0xFF06: return regTma;
             case 0xFF07: return regTac;
+            default:
+                throw WrongAddressException("Timer[read]", address);
         }
     }
     void setByte(Word address, Byte value) override {
@@ -38,7 +40,10 @@ public:
             case 0xFF05: regTima=value;break;
             case 0xFF06: regTma=value;break;
             case 0xFF07: regTac=(value & 7);break;
+            default:
+                throw WrongAddressException("Timer[write]", address);
         }
+
     }
 };
  extern Timer timer;

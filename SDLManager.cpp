@@ -11,30 +11,18 @@ const Color realColorMap[4]{
         {0x00, 0x00, 0x00, 0xFF}
 };
 
-
 SDLManager sdlManager;
 void SDLManager::refreshWindow(){
 #ifndef NLOG
     logger << "REFRESH!" << std::endl;
-    //SDL_Delay(10);
-#else
+#endif
     SDL_LockSurface(surface);
     uint32_t * pixels = (uint32_t*)surface->pixels;
     if (zoomTime == 1){
         std::copy(tmp, tmp + 160 * 144, pixels);
     } else{
         for(Byte i = 0; i < 144; ++i){
-            /*
-            uint32_t * lineBegin = pixels + i * zoomTime * 160 * zoomTime;
-            for(Byte j = 0; j < 160; ++j){
-                uint32_t *blockBegin = lineBegin + j * zoomTime;
-                for(Byte k = 0; k < zoomTime; ++k){
-                    blockBegin[k] = tmp[i * 160 + j];
-                }
-            }
-            for (Byte m = 1; m < zoomTime; ++m){
-                std::copy(lineBegin, lineBegin + zoomTime * 160, lineBegin + i * zoomTime * 160);
-            }*/
+
             uint32_t * lineBegin = pixels + i * 160 * zoomTime * zoomTime;
             for(Byte j = 0; j < 160; ++j){
                 uint32_t *blockBegin = lineBegin + j * zoomTime;
@@ -48,8 +36,12 @@ void SDLManager::refreshWindow(){
         }
     }
     SDL_UnlockSurface(surface);
-#endif
     SDL_UpdateWindowSurface(win);
+    if (SDL_GetTicks() - fpsTimer < 1000 / FPS)
+    {
+        SDL_Delay(1000 / FPS - SDL_GetTicks() + fpsTimer);
+    }
+    fpsTimer = SDL_GetTicks();
 }
 
 SDLManager::~SDLManager(){

@@ -33,6 +33,8 @@ class SDLManager {
     Byte joypadC0 = 0x0F;
     bool isQuit = false;
     uint32_t tmp[160 * 144];
+    uint32_t fpsTimer = 0;
+    const static int FPS = 60;
 public:
     ~SDLManager();
     void init(std::string title_window,int zoomTime = 1);
