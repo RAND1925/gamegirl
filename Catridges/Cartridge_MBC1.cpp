@@ -36,14 +36,14 @@ Byte Cartridge_MBC1::getByte(Word address) {
             trueAddress += (uint32_t)ramBank << 19u;
         }
         return rom[trueAddress];
-    } else if(page >= 0xA && page < 0xC){
+    } else if(page == 0xA || page == 0xB){
         return ram[((uint64_t)ramBank << 13u) | (address & 0x1FFFu)];
     }
     throw WrongAddressException("mbc1[read]", address);
 }
 
 void Cartridge_MBC1::setByte(Word address, Byte value) {
-    Byte page = address >> 12;
+    Byte page = address >> 12u;
     if (page == 0xA || page == 0xB){
         ram[(uint64_t)ramBank << 13u | (address & 0x1FFFu)] = value;
     } else if (page == 0x0 || page == 0x1){

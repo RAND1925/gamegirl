@@ -78,10 +78,12 @@ void GPU::addTime(int clock)
         if (innerClock >= 456 * 10)
         {
             //back to the oam,reset the stat
-            doDMA(regDMA);
             setMode(MODE_OAM);
             innerClock -= 456 * 10;
-            regLineY=0;
+            regLineY=0
+
+                    ;
+            doDMA(regDMA);
         }
         else
             regLineY=yLine;
@@ -157,8 +159,8 @@ void GPU::draw() {
     }
     uint32_t colorLine[160] = {0};
     if (bgWinEnabled) {
-        drawBg(colorLine,bgWinDataLow, bgMapHigh);
-        if(winEnabled && regLineY >= regWindowY ){
+        drawBg(colorLine, bgWinDataLow, bgMapHigh);
+        if(winEnabled){
             drawWin(colorLine, bgWinDataLow, winMapHigh);
         }
     }
@@ -225,13 +227,22 @@ bool GPU::accepts(Word address) {
 void GPU::setByte(Word address, Byte value) {
 
     if (address >= offsetVram && address < offsetVram + lengthVram) {
+        if(currentMode == MODE_VRAM){
+            return;
+        }
         bytesVRam[address - offsetVram] = value;
         return;
     } else if (address >= offsetChr && address < offsetChr + lengthChr){
+        if ( currentMode == MODE_VRAM){
+            return;
+        }
         bytesChr[address - offsetChr] = value;
         return;
     }
     else if (address >= offsetOam && address < offsetOam + lengthOam) {
+        if (currentMode == MODE_OAM || currentMode == MODE_VRAM){
+            return;
+        }
         bytesOam[address - offsetOam] = value;
         return;
     }
@@ -259,7 +270,9 @@ void GPU::setByte(Word address, Byte value) {
                 return;
             case 0xFF46:
                 regDMA = value;
-                doDMA(regDMA);
+                if (value >= 0X80 && value < 0xA0){
+                    doDMA(regDMA);
+                }
                 return;
             case 0xFF47:
                 regBGP = value;
@@ -284,7 +297,8 @@ void GPU::setByte(Word address, Byte value) {
 }
 #ifndef NLOG
 void GPU::display() {
-    logger << "LCDC:" << std::hex <<(int)regLcdControl << ' '
+    logger << "L"
+              "CDC:" << std::hex <<(int)regLcdControl << ' '
            << "STAT:" << std::hex <<(int)regLcdStatus << ' '
            << "SCX:" << std::hex <<(int)regScrollX << ' '
            << "SCY:" << std::hex <<(int)regScrollY << ' '
@@ -300,9 +314,17 @@ void GPU::doDMA(Byte dma) {
 #ifndef NLOG
     logger << "DMA" << regDMA;
 #endif
-    AddressSpace * s = mmu.findAddressSpace(dmaAddress);
-    for (Byte i = 0; i < 0xA0; ++i){
-        bytesOam[i] = s->getByte(dmaAddress + i);
+    if ((dma >= 0xA0 && dma <= 0xF1) || dma <= 0x80){
+        AddressSpace * s = mmu.findAddressSpace(dmaAddress);
+        for (Byte i = 0; i < 0xA0; ++i){
+            bytesOam[i] = s->getByte(dmaAddress + i);
+        }
+    } else if(dma >= 0x80 && dma < 0x98) {
+        Word offset = dmaAddress - 0x8000;
+        std::copy(bytesVRam.begin() + offset, bytesVRam.begin() + offset + 0xA0, bytesOam.begin());
+    } else if(dma >= 0x98 && dma < 0xA0) {
+        Word offset = dmaAddress - 0x9800;
+        std::copy(bytesChr.begin() + offset, bytesChr.begin() + offset + 0xA0, bytesOam.begin());
     }
 }
 
@@ -327,7 +349,6 @@ void GPU::drawBg(uint32_t * colorLine, bool bgWinDataLow, bool bgMapHigh){
     int yPixel = yDraw % 8;
     //?????
     Byte colorLow = 0, colorHigh = 0;
-
     for (size_t counter = 0; counter < 160; counter++) {
         int xDraw = ((counter + xScrl) % 256);
         int xTile = xDraw / 8;
@@ -342,6 +363,7 @@ void GPU::drawBg(uint32_t * colorLine, bool bgWinDataLow, bool bgMapHigh){
             colorHigh = bytesVRam[dataTile + (numTile * 16) + (yPixel * 2) + 1];
         }
         Byte colorCode = getBit(colorLow, xPixel) | (getBit(colorHigh, xPixel) << 1u);
+
         Byte grayCode = getGrayCode(colorCode, regBGP);
         Uint32 rgbCode = sdlManager.mapColor(grayCode);
         colorLine[counter] = rgbCode;
@@ -349,6 +371,14 @@ void GPU::drawBg(uint32_t * colorLine, bool bgWinDataLow, bool bgMapHigh){
 }
 
 void GPU::drawWin(uint32_t colorLine[], bool bgWinDataLow, bool winMapHigh) {
+    if(regWindowX < 7){
+        regWindowX = 7;
+    }
+    Byte xWin = regWindowX - 7;
+    Byte yWin = regWindowY;
+    int yDraw = regLineY - yWin;
+    if(yDraw < 0)
+        return;
     Word dataTile, mapTile;
     //check the display is enable or not
     if (bgWinDataLow)
@@ -362,16 +392,15 @@ void GPU::drawWin(uint32_t colorLine[], bool bgWinDataLow, bool winMapHigh) {
     else
         mapTile = 0x000;
 
-    Byte xWin = regWindowX;
-    Byte yWin = regWindowY;
-    int yDraw = (regLineY - yWin) % 256;
     int yTile = yDraw / 8;
     int yPixel = yDraw % 8;
     //?????
     Byte colorLow = 0, colorHigh = 0;
-
-    for (size_t counter = regWindowX; counter < 160; counter++) {
-        int xDraw = ((counter - xWin) % 256);
+    for (size_t counter = 0; counter < 160; counter++) {
+        if (counter < xWin){
+            continue;
+        }
+        int xDraw = counter - xWin;
         int xTile = xDraw / 8;
         Byte xPixel = static_cast<Byte>(8 - xDraw % 8 - 1);
         {
@@ -385,16 +414,15 @@ void GPU::drawWin(uint32_t colorLine[], bool bgWinDataLow, bool winMapHigh) {
         }
         Byte colorCode = getBit(colorLow, xPixel) | (getBit(colorHigh, xPixel) << 1u);
         Byte grayCode = getGrayCode(colorCode, regBGP);
-        Uint32 rgbCode = sdlManager.mapColor(grayCode);
+        uint32_t rgbCode = sdlManager.mapColor(grayCode);
         colorLine[counter] = rgbCode;
     }
 }
 using Sprite = std::tuple<Byte, Word, Byte>;
         //0: x, 1, colorlow, 2 colorhigh
 void GPU::drawSprite(uint32_t * colorLine, bool spriteLarge) {
-
     Byte spriteHeight = spriteLarge ? 16: 8;
-    std::vector<Sprite> ready_to_gender;
+    std::vector<Sprite> ready_to_gender{};
     for (int i = 0xA0 - 4; i >= 0; i-= 4) {
         int spriteY = bytesOam[i] - 16;
         int yPixel = regLineY - spriteY;
@@ -411,8 +439,8 @@ void GPU::drawSprite(uint32_t * colorLine, bool spriteLarge) {
         Word pixelAddress = (chrCode << 4u) + (yFlip?  (14 - yPixel * 2)  : yPixel * 2);
         ready_to_gender.emplace_back(spriteX, pixelAddress, infoCode);
     }
-    std::stable_sort(ready_to_gender.begin(), ready_to_gender.end(), [](Sprite a, Sprite b){
-        return std::get<0>(a) > std::get<0>(b);});
+ //   std::stable_sort(ready_to_gender.begin(), ready_to_gender.end(), [](Sprite a, Sprite b){
+    //    return std::get<0>(a) > std::get<0>(b);});
 
     int size = ready_to_gender.size();
     for (int i = 0 ; i < size; ++i) {
@@ -428,12 +456,12 @@ void GPU::drawSprite(uint32_t * colorLine, bool spriteLarge) {
             if (col < 0 || col >= 160)
                 continue;
             Byte colorCode = getBit(colorLow, counter) | (getBit(colorHigh, counter) << 1);
-            Byte grayCode = getGrayCode(colorCode, grayPalette);
-            if (grayCode != 0)
-            {
-                Uint32 rgbCode = sdlManager.mapColor(grayCode);
-                colorLine[col] = rgbCode;
+            if (colorCode == 0){
+                continue;
             }
+            Byte grayCode = getGrayCode(colorCode, grayPalette);
+            uint32_t rgbCode = sdlManager.mapColor(grayCode);
+            colorLine[col] = rgbCode;
         }
     }
 }
@@ -444,6 +472,5 @@ Byte GPU::getGrayCode(Byte colorCode, Byte reg) {
 
 void GPU::init(bool useSprite) {
     this->useSprite = useSprite;
-
 }
 

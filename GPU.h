@@ -60,7 +60,7 @@ private:
     Byte regScrollY = 0;
     Byte regLineY = 0;
     Byte regLineYC = 0;
-    Byte regWindowX = 0;
+    Byte regWindowX = 7;
     Byte regWindowY = 0;
 
     //about the ram of the video and sprite:
