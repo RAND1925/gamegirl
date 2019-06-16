@@ -17,8 +17,11 @@ extern "C" {
 struct Color{
     Byte r, g, b, a;
 };
-extern const Color realColorMap[4];
-
+extern Color realColorMap[4];
+extern Color coleredMap1[4];
+extern Color coleredMap2[4];
+extern Color coleredMap3[4];
+extern Color coleredMap4[4];
 class SDLManager {
 public:
 
@@ -29,6 +32,7 @@ public:
     bool handleInput ();
     ~SDLManager();
     void init(const std::string& title_window, int xPos, int zoomTime, int yPos, int fps);
+    void changeColor(int i);
     static SDLManager* getSDLManager();
 protected:
     SDLManager()= default;

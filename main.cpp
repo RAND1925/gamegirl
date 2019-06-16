@@ -55,7 +55,7 @@ bool init(int argc, char **argv) {
     bool useBoot = false;
     bool useSprite = true;
     optind++;
-    const std::string optString{"bSf:x:y:z:"};
+    const std::string optString{"bSf:x:y:z:c:"};
     const char* const optPtr = optString.c_str();
     int option;
     while ((option = getopt(argc, argv, optPtr)) != -1){
@@ -77,6 +77,11 @@ bool init(int argc, char **argv) {
                 break;
             case 'S':
                 useSprite = false;
+                break;
+            case 'c': {
+                SDLManager::getSDLManager()->changeColor(std::atoi(optarg));
+                break;
+            }
             default:
                 break;
         }
