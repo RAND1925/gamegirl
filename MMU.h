@@ -35,12 +35,14 @@ public:
     void addAddressSpace(AddressSpace * s);;
     void removeAddressSpace(AddressSpace * s);
     void init();
+    static MMU* getMMU();
 
+protected:
+    MMU()= default;
 private:
     std::vector<AddressSpace *> spaces{};
     Byte* unusedSpaces{nullptr};
 
 };
-extern MMU mmu;
 
 #endif //GAMEGIRL_MMU_H

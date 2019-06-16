@@ -5,8 +5,6 @@
 #include "Boot.h"
 #include "Exceptions.h"
 
-Boot boot;
-
 bool Boot::accepts(Word address) {
     return address < 0x100;
 }

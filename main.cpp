@@ -28,10 +28,10 @@ int main(int argc, char **argv) {
     int allCycle = 0;
     bool useBoot = init(argc, argv);
     if (useBoot) {
-        while (cpu.getPC() < 0x100) {
+        while (CPU::getCPU()->getPC() < 0x100) {
             allCycle += step();
         }
-        mmu.removeAddressSpace(&boot);
+        MMU::getMMU()->removeAddressSpace(Boot::getBoot());
     }
     while (!isQuit) {
         allCycle += step();
@@ -82,37 +82,37 @@ bool init(int argc, char **argv) {
         }
     }
     std::ios::sync_with_stdio(false);
-    cartridgeDriver.openFile(FILE_PATH);
-    sdlManager.init(cartridgeDriver.getTitle(), zoomTime, xPos, yPos, fps);
-    gpu.init(useSprite);
-    cpu.initMap();
-    mmu.init();
+    CartridgeDriver::getCartridgeDriver()->openFile(FILE_PATH);
+    SDLManager::getSDLManager()->init(CartridgeDriver::getCartridgeDriver()->getTitle(), zoomTime, xPos, yPos, fps);
+    GPU::getGPU()->init(useSprite);
+    CPU::getCPU()->initMap();
+    MMU::getMMU()->init();
 #ifndef NLOG
     logger.open("gamegirl.log");
 #endif
     if (useBoot){
-        mmu.addAddressSpace(&boot);
-        cpu.initRegisters();
+        MMU::getMMU()->addAddressSpace(Boot::getBoot());
+        CPU::getCPU()->initRegisters();
     } else {
-        cpu.initRegistersAfterBoot();
+        CPU::getCPU()->initRegistersAfterBoot();
     }
-    mmu.addAddressSpace(&cartridgeDriver);
-    mmu.addAddressSpace(&wRam);
-    mmu.addAddressSpace(&zRam);
-    mmu.addAddressSpace(&gpu);
-    mmu.addAddressSpace(&timer);
-    mmu.addAddressSpace(&joypad);
-    mmu.addAddressSpace(&interruptManager);
-    mmu.addAddressSpace(&emptySpace);
+    MMU::getMMU()->addAddressSpace(CartridgeDriver::getCartridgeDriver()->getCartridgePointer());
+    MMU::getMMU()->addAddressSpace(WRam::getWRam());
+    MMU::getMMU()->addAddressSpace(ZRam::getZRam());
+    MMU::getMMU()->addAddressSpace(GPU::getGPU());
+    MMU::getMMU()->addAddressSpace(Timer::getTimer());
+    MMU::getMMU()->addAddressSpace(Joypad::getJoypad());
+    MMU::getMMU()->addAddressSpace(InterruptManager::getInterruptManager());
+    MMU::getMMU()->addAddressSpace(EmptySpace::getEmptySpace());
     return useBoot;
 }
 
 uint64_t step() {
-    isQuit = sdlManager.handleInput();
-    joypad.update();
-    Byte cpuCycle = cpu.step();
-    timer.addTime(cpuCycle);
-    gpu.addTime(cpuCycle);
-    return cpuCycle;
+    isQuit = SDLManager::getSDLManager()->handleInput();
+    Joypad::getJoypad()->update();
+    Byte cycle = CPU::getCPU()->step();
+    Timer::getTimer()->addTime(cycle);
+    GPU::getGPU()->addTime(cycle);
+    return cycle;
 };
 

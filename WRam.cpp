@@ -3,7 +3,6 @@
 //
 #include "WRam.h"
 
-WRam wRam;
 
 bool WRam::accepts(Word address) {
     return address >= offset && address < offset + length;
@@ -15,4 +14,9 @@ Byte WRam::getByte(Word address) {
 
 void WRam::setByte(Word address, Byte value) {
     bytes[address & 0x1FFF] = value;
+}
+
+WRam *WRam::getWRam() {
+    static WRam wRam;
+    return &wRam;
 }

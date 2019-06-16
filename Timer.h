@@ -15,6 +15,10 @@ public:
     bool accepts(Word address) override;
     Byte getByte(Word address) override;
     void setByte(Word address, Byte value) override;
+    static Timer* getTimer();
+
+protected:
+    Timer()= default;
 
 private:
     uint64_t counter=0;
@@ -25,6 +29,6 @@ private:
     Byte regTac=0;//control ff07
 
 };
- extern Timer timer;
+
 
 #endif //GAMEGIRL_TIMER_H

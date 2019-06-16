@@ -8,7 +8,6 @@
 #include "InterruptManager.h"
 #include "Logger.h"
 
-CPU cpu;
 void CPU::initMap() {
 
   auto nothing = [this]() { return 0; };
@@ -17,28 +16,28 @@ void CPU::initMap() {
   }
   // ld A into others;
   opMap[0x02] = [this]() {
-    mmu.writeByte(getBC(), registers.a);
+    MMU::getMMU()->writeByte(getBC(), registers.a);
     return 8;
   };
   opMap[0x12] = [this]() {
-    mmu.writeByte(getDE(), registers.a);
+    MMU::getMMU()->writeByte(getDE(), registers.a);
     return 8;
   };
   opMap[0xEA] = [this]() {
-    mmu.writeByte(getImmediateValue16(), registers.a);
+    MMU::getMMU()->writeByte(getImmediateValue16(), registers.a);
     return 16;
   };
 
   opMap[0x0A] = [this]() {
-    ld8(registers.a, mmu.readByte(getBC()));
+    ld8(registers.a, MMU::getMMU()->readByte(getBC()));
     return 8;
   };
   opMap[0x1A] = [this]() {
-    ld8(registers.a, mmu.readByte(getDE()));
+    ld8(registers.a, MMU::getMMU()->readByte(getDE()));
     return 8;
   };
   opMap[0xFA] = [this]() {
-    ld8(registers.a, mmu.readByte(getImmediateValue16()));
+    ld8(registers.a, MMU::getMMU()->readByte(getImmediateValue16()));
     return 16;
   };
 
@@ -72,7 +71,7 @@ void CPU::initMap() {
     return 8;
   };
   opMap[0x36] = [this]() {
-    mmu.writeByte(getHL(), getImmediateValue8());
+    MMU::getMMU()->writeByte(getHL(), getImmediateValue8());
     return 12;
   };
 
@@ -102,7 +101,7 @@ void CPU::initMap() {
     return 4;
   };
   opMap[0x46] = [this]() {
-    ld8(registers.b, mmu.readByte(getHL()));
+    ld8(registers.b, MMU::getMMU()->readByte(getHL()));
     return 8;
   };
   opMap[0x47] = [this]() {
@@ -136,7 +135,7 @@ void CPU::initMap() {
     return 4;
   };
   opMap[0x4E] = [this]() {
-    ld8(registers.c, mmu.readByte(getHL()));
+    ld8(registers.c, MMU::getMMU()->readByte(getHL()));
     return 8;
   };
   opMap[0x4F] = [this]() {
@@ -170,7 +169,7 @@ void CPU::initMap() {
     return 4;
   };
   opMap[0x56] = [this]() {
-    ld8(registers.d, mmu.readByte(getHL()));
+    ld8(registers.d, MMU::getMMU()->readByte(getHL()));
     return 8;
   };
   opMap[0x57] = [this]() {
@@ -204,7 +203,7 @@ void CPU::initMap() {
     return 4;
   };
   opMap[0x5E] = [this]() {
-    ld8(registers.e, mmu.readByte(getHL()));
+    ld8(registers.e, MMU::getMMU()->readByte(getHL()));
     return 8;
   };
   opMap[0x5F] = [this]() {
@@ -238,7 +237,7 @@ void CPU::initMap() {
     return 4;
   };
   opMap[0x66] = [this]() {
-    ld8(registers.h, mmu.readByte(getHL()));
+    ld8(registers.h, MMU::getMMU()->readByte(getHL()));
     return 8;
   };
   opMap[0x67] = [this]() {
@@ -272,7 +271,7 @@ void CPU::initMap() {
     return 4;
   };
   opMap[0x6E] = [this]() {
-    ld8(registers.l, mmu.readByte(getHL()));
+    ld8(registers.l, MMU::getMMU()->readByte(getHL()));
     return 8;
   };
   opMap[0x6F] = [this]() {
@@ -282,31 +281,31 @@ void CPU::initMap() {
 
   // ld to (hl)
   opMap[0x70] = [this]() {
-    mmu.writeByte(getHL(), registers.b);
+    MMU::getMMU()->writeByte(getHL(), registers.b);
     return 4;
   };
   opMap[0x71] = [this]() {
-    mmu.writeByte(getHL(), registers.c);
+    MMU::getMMU()->writeByte(getHL(), registers.c);
     return 4;
   };
   opMap[0x72] = [this]() {
-    mmu.writeByte(getHL(), registers.d);
+    MMU::getMMU()->writeByte(getHL(), registers.d);
     return 4;
   };
   opMap[0x73] = [this]() {
-    mmu.writeByte(getHL(), registers.e);
+    MMU::getMMU()->writeByte(getHL(), registers.e);
     return 4;
   };
   opMap[0x74] = [this]() {
-    mmu.writeByte(getHL(), registers.h);
+    MMU::getMMU()->writeByte(getHL(), registers.h);
     return 4;
   };
   opMap[0x75] = [this]() {
-    mmu.writeByte(getHL(), registers.l);
+    MMU::getMMU()->writeByte(getHL(), registers.l);
     return 4;
   };
   opMap[0x77] = [this]() {
-    mmu.writeByte(getHL(), registers.a);
+    MMU::getMMU()->writeByte(getHL(), registers.a);
     return 8;
   };
 
@@ -336,7 +335,7 @@ void CPU::initMap() {
     return 4;
   };
   opMap[0x7E] = [this]() {
-    ld8(registers.a, mmu.readByte(getHL()));
+    ld8(registers.a, MMU::getMMU()->readByte(getHL()));
     return 8;
   };
   opMap[0x7F] = [this]() {
@@ -347,40 +346,40 @@ void CPU::initMap() {
   // FF00
 
   opMap[0xF2] = [this]() {
-    ld8(registers.a, mmu.readByte(registers.c + (Word)0xFF00));
+    ld8(registers.a, MMU::getMMU()->readByte(registers.c + (Word)0xFF00));
     return 8;
   };
   opMap[0xE2] = [this]() {
-    mmu.writeByte(registers.c + (Word)0xFF00, registers.a);
+    MMU::getMMU()->writeByte(registers.c + (Word)0xFF00, registers.a);
     return 8;
   };
   opMap[0xF0] = [this]() {
-    ld8(registers.a, mmu.readByte(getImmediateValue8() + (Word)0xFF00));
+    ld8(registers.a, MMU::getMMU()->readByte(getImmediateValue8() + (Word)0xFF00));
     return 12;
   };
   opMap[0xE0] = [this]() {
-    mmu.writeByte(getImmediateValue8() + (Word)0xFF00, registers.a);
+    MMU::getMMU()->writeByte(getImmediateValue8() + (Word)0xFF00, registers.a);
     return 12;
   };
 
   // increase & decement
   opMap[0x3A] = [this]() {
-    ld8(registers.a, mmu.readByte(getHL()));
+    ld8(registers.a, MMU::getMMU()->readByte(getHL()));
     setHL((getHL() - 1));
     return 8;
   };
   opMap[0x32] = [this]() {
-    mmu.writeByte(getHL(), registers.a);
+    MMU::getMMU()->writeByte(getHL(), registers.a);
     setHL((getHL() - 1));
     return 8;
   };
   opMap[0x2A] = [this]() {
-    ld8(registers.a, mmu.readByte(getHL()));
+    ld8(registers.a, MMU::getMMU()->readByte(getHL()));
     setHL((getHL() + 1));
     return 8;
   };
   opMap[0x22] = [this]() {
-    mmu.writeByte(getHL(), registers.a);
+    MMU::getMMU()->writeByte(getHL(), registers.a);
     setHL((getHL() + 1));
     return 8;
   };
@@ -418,7 +417,7 @@ void CPU::initMap() {
 
   // ld(nn) sp
   opMap[0x08] = [this]() {
-    mmu.writeWord(getImmediateValue16(), registers.sp);
+    MMU::getMMU()->writeWord(getImmediateValue16(), registers.sp);
     return 20;
   };
 
@@ -488,7 +487,7 @@ void CPU::initMap() {
     return 4;
   };
   opMap[0x86] = [this]() {
-    ld8(registers.a, add(registers.a, mmu.readByte(getHL())));
+    ld8(registers.a, add(registers.a, MMU::getMMU()->readByte(getHL())));
     return 8;
   };
   opMap[0xC6] = [this]() {
@@ -526,7 +525,7 @@ void CPU::initMap() {
     return 4;
   };
   opMap[0x8E] = [this]() {
-    ld8(registers.a, adc(registers.a, mmu.readByte(getHL())));
+    ld8(registers.a, adc(registers.a, MMU::getMMU()->readByte(getHL())));
     return 8;
   };
   opMap[0xCE] = [this]() {
@@ -564,7 +563,7 @@ void CPU::initMap() {
     return 4;
   };
   opMap[0x96] = [this]() {
-    ld8(registers.a, sub(registers.a, mmu.readByte(getHL())));
+    ld8(registers.a, sub(registers.a, MMU::getMMU()->readByte(getHL())));
     return 8;
   };
   opMap[0xD6] = [this]() {
@@ -602,7 +601,7 @@ void CPU::initMap() {
     return 4;
   };
   opMap[0x9E] = [this]() {
-    ld8(registers.a, sbc(registers.a, mmu.readByte(getHL())));
+    ld8(registers.a, sbc(registers.a, MMU::getMMU()->readByte(getHL())));
     return 8;
   };
   opMap[0xDE] = [this]() {
@@ -641,7 +640,7 @@ void CPU::initMap() {
     return 4;
   };
   opMap[0xA6] = [this]() {
-    ld8(registers.a, andAL(registers.a, mmu.readByte(getHL())));
+    ld8(registers.a, andAL(registers.a, MMU::getMMU()->readByte(getHL())));
     return 8;
   };
   opMap[0xE6] = [this]() {
@@ -679,7 +678,7 @@ void CPU::initMap() {
     return 4;
   };
   opMap[0xB6] = [this]() {
-    ld8(registers.a, orAL(registers.a, mmu.readByte(getHL())));
+    ld8(registers.a, orAL(registers.a, MMU::getMMU()->readByte(getHL())));
     return 8;
   };
   opMap[0xF6] = [this]() {
@@ -717,7 +716,7 @@ void CPU::initMap() {
     return 4;
   };
   opMap[0xAE] = [this]() {
-    ld8(registers.a, xorAL(registers.a, mmu.readByte(getHL())));
+    ld8(registers.a, xorAL(registers.a, MMU::getMMU()->readByte(getHL())));
     return 8;
   };
   opMap[0xEE] = [this]() {
@@ -755,7 +754,7 @@ void CPU::initMap() {
     return 4;
   };
   opMap[0xBE] = [this]() {
-    cp(registers.a, mmu.readByte(getHL()));
+    cp(registers.a, MMU::getMMU()->readByte(getHL()));
     return 8;
   };
   opMap[0xFE] = [this]() {
@@ -793,7 +792,7 @@ void CPU::initMap() {
     return 4;
   };
   opMap[0x34] = [this]() {
-    mmu.writeByte(getHL(), inc(mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), inc(MMU::getMMU()->readByte(getHL())));
     return 12;
   };
 
@@ -827,7 +826,7 @@ void CPU::initMap() {
     return 4;
   };
   opMap[0x35] = [this]() {
-    mmu.writeByte(getHL(), dec(mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), dec(MMU::getMMU()->readByte(getHL())));
     return 12;
   };
 
@@ -925,7 +924,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x36] = [this]() {
-    mmu.writeByte(getHL(), swap(mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), swap(MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -1154,28 +1153,28 @@ void CPU::initMap() {
   // reti
   opMap[0xD9] = [this]() {
     ret();
-    interruptManager.setIME(true);
+    InterruptManager::getInterruptManager()->setIME(true);
     return 8;
   };
 
   // stop
   opMap[0x10] = [this]() {
-    interruptManager.setStop(true);
+    InterruptManager::getInterruptManager()->setStop(true);
     getImmediateValue8();
     return 4;
   };
   // halt
   opMap[0x76] = [this]() {
-    interruptManager.setHalt(true);
+    InterruptManager::getInterruptManager()->setHalt(true);
     return 4;
   };
   // DI & EI
   opMap[0xF3] = [this]() {
-    interruptManager.setIME(false);
+    InterruptManager::getInterruptManager()->setIME(false);
     return 4;
   };
   opMap[0xFB] = [this]() {
-    interruptManager.setIME(true);
+    InterruptManager::getInterruptManager()->setIME(true);
     return 4;
   };
 
@@ -1209,7 +1208,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x06] = [this]() {
-    mmu.writeByte(getHL(), rlc(mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), rlc(MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -1243,7 +1242,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x16] = [this]() {
-    mmu.writeByte(getHL(), rl(mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), rl(MMU::getMMU()->readByte(getHL())));
     return 16;
   };
   // rrc
@@ -1276,7 +1275,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x0E] = [this]() {
-    mmu.writeByte(getHL(), rrc(mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), rrc(MMU::getMMU()->readByte(getHL())));
     return 16;
   };
   // rr
@@ -1309,7 +1308,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x1E] = [this]() {
-    mmu.writeByte(getHL(), rr(mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), rr(MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -1343,7 +1342,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x26] = [this]() {
-    mmu.writeByte(getHL(), sla(mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), sla(MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -1377,7 +1376,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x2E] = [this]() {
-    mmu.writeByte(getHL(), sra(mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), sra(MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -1411,7 +1410,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x3E] = [this]() {
-    mmu.writeByte(getHL(), srl(mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), srl(MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -1445,7 +1444,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x46] = [this]() {
-    bit(0, mmu.readByte(getHL()));
+    bit(0, MMU::getMMU()->readByte(getHL()));
     return 16;
   };
 
@@ -1478,7 +1477,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x4E] = [this]() {
-    bit(1, mmu.readByte(getHL()));
+    bit(1, MMU::getMMU()->readByte(getHL()));
     return 16;
   };
 
@@ -1511,7 +1510,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x56] = [this]() {
-    bit(2, mmu.readByte(getHL()));
+    bit(2, MMU::getMMU()->readByte(getHL()));
     return 16;
   };
 
@@ -1544,7 +1543,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x5E] = [this]() {
-    bit(3, mmu.readByte(getHL()));
+    bit(3, MMU::getMMU()->readByte(getHL()));
     return 16;
   };
 
@@ -1577,7 +1576,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x66] = [this]() {
-    bit(4, mmu.readByte(getHL()));
+    bit(4, MMU::getMMU()->readByte(getHL()));
     return 16;
   };
 
@@ -1610,7 +1609,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x6E] = [this]() {
-    bit(5, mmu.readByte(getHL()));
+    bit(5, MMU::getMMU()->readByte(getHL()));
     return 16;
   };
 
@@ -1643,7 +1642,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x76] = [this]() {
-    bit(6, mmu.readByte(getHL()));
+    bit(6, MMU::getMMU()->readByte(getHL()));
     return 16;
   };
 
@@ -1676,7 +1675,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x7E] = [this]() {
-    bit(7, mmu.readByte(getHL()));
+    bit(7, MMU::getMMU()->readByte(getHL()));
     return 16;
   };
   // set
@@ -1709,7 +1708,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0xC6] = [this]() {
-    mmu.writeByte(getHL(), set(0, mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), set(0, MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -1742,7 +1741,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0xCE] = [this]() {
-    mmu.writeByte(getHL(), set(1, mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), set(1, MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -1775,7 +1774,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0xD6] = [this]() {
-    mmu.writeByte(getHL(), set(2, mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), set(2, MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -1808,7 +1807,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0xDE] = [this]() {
-    mmu.writeByte(getHL(), set(3, mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), set(3, MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -1841,7 +1840,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0xE6] = [this]() {
-    mmu.writeByte(getHL(), set(4, mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), set(4, MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -1874,7 +1873,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0xEE] = [this]() {
-    mmu.writeByte(getHL(), set(5, mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), set(5, MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -1907,7 +1906,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0xF6] = [this]() {
-    mmu.writeByte(getHL(), set(6, mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), set(6, MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -1940,7 +1939,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0xFE] = [this]() {
-    mmu.writeByte(getHL(), set(7, mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), set(7, MMU::getMMU()->readByte(getHL())));
     return 16;
   };
   // res
@@ -1973,7 +1972,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x86] = [this]() {
-    mmu.writeByte(getHL(), res(0, mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), res(0, MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -2006,7 +2005,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x8E] = [this]() {
-    mmu.writeByte(getHL(), res(1, mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), res(1, MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -2039,7 +2038,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x96] = [this]() {
-    mmu.writeByte(getHL(), res(2, mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), res(2, MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -2072,7 +2071,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0x9E] = [this]() {
-    mmu.writeByte(getHL(), res(3, mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), res(3, MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -2105,7 +2104,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0xA6] = [this]() {
-    mmu.writeByte(getHL(), res(4, mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), res(4, MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -2138,7 +2137,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0xAE] = [this]() {
-    mmu.writeByte(getHL(), res(5, mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), res(5, MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -2171,7 +2170,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0xB6] = [this]() {
-    mmu.writeByte(getHL(), res(6, mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), res(6, MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 
@@ -2204,7 +2203,7 @@ void CPU::initMap() {
     return 8;
   };
   opCBMap[0xBE] = [this]() {
-    mmu.writeByte(getHL(), res(7, mmu.readByte(getHL())));
+    MMU::getMMU()->writeByte(getHL(), res(7, MMU::getMMU()->readByte(getHL())));
     return 16;
   };
 }
@@ -2214,15 +2213,15 @@ Byte CPU::step() {
     display();
 #endif
   Byte timing = 4;
-  if (interruptManager.hasInterrupt()) {
-    Byte interruptCode = interruptManager.handleInterrupt();
+  if (InterruptManager::getInterruptManager()->hasInterrupt()) {
+    Byte interruptCode = InterruptManager::getInterruptManager()->handleInterrupt();
     restart(0x40 + (interruptCode << 3));
     return 32;
   } else {
-    if (interruptManager.handleHalt()) {
-      Byte opNum = mmu.readByte(registers.pc);
+    if (InterruptManager::getInterruptManager()->handleHalt()) {
+      Byte opNum = MMU::getMMU()->readByte(registers.pc);
       if (opNum == 0xCB) {
-        Byte cbNum = mmu.readByte(registers.pc + 1);
+        Byte cbNum = MMU::getMMU()->readByte(registers.pc + 1);
         timing = CBTable[cbNum] * 4;
       } else {
         timing = normalTable[opNum] * 4;
@@ -2357,16 +2356,16 @@ Byte CPU::dec(Byte a) {
 
 Word CPU::dec(Word a) { return a - 1; }
 
-Byte CPU::getImmediateValue8() { return mmu.readByte(registers.pc++); }
+Byte CPU::getImmediateValue8() { return MMU::getMMU()->readByte(registers.pc++); }
 
 Word CPU::getImmediateValue16() {
-  Word v = mmu.readWord(registers.pc);
+  Word v = MMU::getMMU()->readWord(registers.pc);
   registers.pc += 2;
   return v;
 }
 
 SByte CPU::getSignedImmediateValue8() {
-  return (SByte)mmu.readByte(registers.pc++);
+  return (SByte)MMU::getMMU()->readByte(registers.pc++);
 }
 
 void CPU::ld8(Byte &lhs, Byte rhs) { lhs = rhs; }
@@ -2402,13 +2401,13 @@ void CPU::setDE(Word t) { setR16(registers.d, registers.e, t); }
 
 void CPU::push16(Word val) {
   registers.sp -= 2;
-  mmu.writeWord(registers.sp, val);
+  MMU::getMMU()->writeWord(registers.sp, val);
 
   // according to gb instructions25, I thought it should be +=2
 }
 
 Word CPU::pop16() {
-  Word val = mmu.readWord(registers.sp);
+  Word val = MMU::getMMU()->readWord(registers.sp);
   registers.sp += 2;
   return val;
 }
@@ -2578,6 +2577,11 @@ void CPU::restart(Word addr) {
   call(addr);
 }
 
+CPU *CPU::getCPU() {
+    static CPU cpu;
+    return &cpu;
+}
+
 
 #ifndef NLOG
 void CPU::display() {
@@ -2587,11 +2591,11 @@ void CPU::display() {
            << "d:" << std::hex << (int)registers.d << ' ' << "e:" << std::hex
            << (int)registers.e << ' ' << "h:" << std::hex << (int)registers.h
            << ' ' << "l:" << std::hex << (int)registers.l << ' '
-           << "ie:" << std::hex << (int)mmu.readByte(0xFFFF) << ' '
-           << "if:" << std::hex << (int)mmu.readByte(0xFF0F) << ' '
+           << "ie:" << std::hex << (int)MMU::getMMU()->readByte(0xFFFF) << ' '
+           << "if:" << std::hex << (int)MMU::getMMU()->readByte(0xFF0F) << ' '
            << "sp:" << std::hex << (int)registers.sp << ' ' << "pc:" << std::hex
            << (int)registers.pc << ' '
-           << "stack:" << (int)mmu.readWord(registers.sp) << ' ' << "opNum"
-           << (int)mmu.readByte(registers.pc) << ' ' << std::endl;
+           << "stack:" << (int)MMU::getMMU()->readWord(registers.sp) << ' ' << "opNum"
+           << (int)MMU::getMMU()->readByte(registers.pc) << ' ' << std::endl;
 }
 #endif

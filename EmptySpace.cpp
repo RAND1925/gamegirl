@@ -4,9 +4,8 @@
 
 #include "EmptySpace.h"
 
-EmptySpace emptySpace;
 bool EmptySpace::accepts(Word address) {
-    return address <= 0xFEA0 && address <= 0xFF80;
+    return address >= 0xFEA0 && address <= 0xFF80;
 }
 
 void EmptySpace::setByte(Word address, Byte value) {
@@ -15,4 +14,9 @@ void EmptySpace::setByte(Word address, Byte value) {
 
 Byte EmptySpace::getByte(Word address) {
     return bytes[address - 0xFFA0];
+}
+
+EmptySpace *EmptySpace::getEmptySpace() {
+    static EmptySpace emptySpace;
+    return &emptySpace;
 }

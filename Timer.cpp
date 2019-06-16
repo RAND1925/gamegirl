@@ -6,7 +6,6 @@
 #include "InterruptManager.h"
 #include "Exceptions.h"
 
-Timer timer;
 void Timer::addTime(Byte cycle) {
     divider+=cycle;
     if(divider >= 256){
@@ -29,7 +28,7 @@ void Timer::addTime(Byte cycle) {
         counter-=currClock;
        // counter=0;
         if(regTima==0xFF){
-            interruptManager.requestInterrupt(2);
+            InterruptManager::getInterruptManager()->requestInterrupt(2);
             regTima=regTma;
         } else {
             regTima++;
@@ -62,5 +61,10 @@ void Timer::setByte(Word address, Byte value) {
             throw WrongAddressException("Timer[write]", address);
     }
 
+}
+
+Timer *Timer::getTimer() {
+    static Timer timer;
+    return &timer;
 }
 

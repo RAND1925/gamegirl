@@ -7,7 +7,6 @@
 #include "Catridges/Cartridge_MBC1.h"
 #include "Exceptions.h"
 
-CartridgeDriver cartridgeDriver;
 
 void CartridgeDriver::loadRom(std::ifstream &stream) {
     char header[0x150] = {0};
@@ -49,8 +48,6 @@ void CartridgeDriver::openFile(const std::string &filePath) {
       throw;
   }
   loadRom(romStream);
-
-
 #ifndef NLOG
   logger << "game loaded:" << getTitle() << std::endl;
 #endif
@@ -68,13 +65,4 @@ Cartridge *CartridgeDriver::getCartridgePointer() {
 }
 std::string CartridgeDriver::getTitle() {
   return title;
-}
-bool CartridgeDriver::accepts(Word address) {
-  return cartridgePointer->accepts(address);
-}
-Byte CartridgeDriver::getByte(Word address) {
-  return cartridgePointer->getByte(address);
-}
-void CartridgeDriver::setByte(Word address, Byte value) {
-  cartridgePointer->setByte(address, value);
 }

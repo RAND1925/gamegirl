@@ -4,7 +4,6 @@
 
 #include "InterruptManager.h"
 
-InterruptManager interruptManager;
 
 void InterruptManager::requestInterrupt(Byte bit) {
     setBit(iF, bit);
@@ -85,4 +84,9 @@ void InterruptManager::setByte(Word address, Byte value) {
 
 void InterruptManager::setIME(bool newIME) {
     iME = newIME;
+}
+
+InterruptManager *InterruptManager::getInterruptManager() {
+    static InterruptManager interruptManager;
+    return &interruptManager;
 }

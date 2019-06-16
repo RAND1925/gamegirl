@@ -6,8 +6,6 @@
 #include "MMU.h"
 #include "Exceptions.h"
 
-MMU mmu;
-
 AddressSpace *MMU::findAddressSpace(Word address) {
     for (auto s: spaces){
         if (s->accepts(address))
@@ -59,4 +57,9 @@ void MMU::removeAddressSpace(AddressSpace *s) {
 
 void MMU::init() {
     unusedSpaces = new Byte[0x10000];
+}
+
+MMU *MMU::getMMU() {
+    static MMU mmu;
+    return &mmu;
 }

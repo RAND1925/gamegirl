@@ -9,12 +9,23 @@
 #include "common.h"
 
 class CPU {
-private:
 
+public:
+    Byte step();
+    inline Word getPC(){return registers.pc;};
+    void initRegisters();
+    void initRegistersAfterBoot();
+    void initMap();
+    static CPU* getCPU();
+
+protected:
+    CPU()= default;
+
+private:
     struct Registers {
         Byte a, f, b, c, d, e, h, l;
         Word sp, pc;
-    } registers, backup;
+    } registers{}, backup{};
 
     using FlagSetter = std::function<void(void)>;
     using FlagGetter = std::function<Byte(void)>;
@@ -123,16 +134,12 @@ private:
             2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2,
             2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 2, 2, 4, 2
     };
+
+
+#ifndef NLOG
+private:
     void display();
-public:
-
-    Byte step();
-
-    inline void setPC(Word pc){ registers.pc = pc;};
-    inline Word getPC(){return registers.pc;};
-    void initRegisters();
-    void initRegistersAfterBoot();
-    void initMap();
+#endif
 };
 
 extern CPU cpu;

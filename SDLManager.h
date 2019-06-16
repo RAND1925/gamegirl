@@ -20,6 +20,19 @@ struct Color{
 extern const Color realColorMap[4];
 
 class SDLManager {
+public:
+
+    void refreshWindow();
+    void setLine(Byte lineNum, Uint32 * line);
+    Uint32 mapColor(Byte);;
+    Byte getJoypad(Byte in);
+    bool handleInput ();
+    ~SDLManager();
+    void init(const std::string& title_window, int xPos, int zoomTime, int yPos, int fps);
+    static SDLManager* getSDLManager();
+protected:
+    SDLManager()= default;
+private:
     SDL_Window *win{nullptr};
     SDL_Surface *surface{nullptr};
     SDL_PixelFormat* fmt{nullptr};
@@ -38,18 +51,9 @@ class SDLManager {
     bool isQuit = false;
     uint32_t tmp[WINDOW_HEIGHT * WINDOW_WIDTH]{};
     uint32_t fpsTimer = 0;
-public:
-
-    void refreshWindow();
-    void setLine(Byte lineNum, Uint32 * line);
-    Uint32 mapColor(Byte);;
-    Byte getJoypad(Byte in);
-    bool handleInput ();
-    ~SDLManager();
-    void init(const std::string& title_window, int xPos, int zoomTime, int yPos, int fps);
 
 };
-extern SDLManager sdlManager;
+
 
 #endif //GAMEGIRL_SDLMANAGER_H
 

@@ -15,10 +15,18 @@ public:
     bool accepts(Word address) override;
     Byte getByte(Word address) override;
     void setByte(Word address, Byte value) override;
+    static Joypad* getJoypad(){
+        static Joypad joypad;
+        return &joypad;
+    }
+
+protected:
+    Joypad()= default;
 
 private:
     Byte regJoypad = 0x0F;
+
 };
-extern Joypad joypad;
+
 
 #endif //GAMEGIRL_JOYPAD_H

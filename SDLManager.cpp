@@ -11,7 +11,6 @@ const Color realColorMap[4]{
         {0x00, 0x00, 0x00, 0xFF}
 };
 
-SDLManager sdlManager;
 void SDLManager::refreshWindow(){
 #ifndef NLOG
     logger << "REFRESH!" << std::endl;
@@ -181,5 +180,10 @@ void SDLManager::init(const std::string &title_window, int zoomTime, int xPos, i
     auto pixel_format = SDL_MapRGBA(surface->format, 0xFF, 0xFF, 0xFF, 0xFF);
     SDL_FillRect(surface, nullptr, pixel_format);
     SDL_UpdateWindowSurface(win);
+}
+
+SDLManager *SDLManager::getSDLManager() {
+    static SDLManager sdlManager;
+    return &sdlManager;
 };
 

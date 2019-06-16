@@ -4,7 +4,6 @@
 
 #include "Joypad.h"
 
-Joypad joypad;
 
 bool Joypad::accepts(Word address) {
     return address == 0xFF00;
@@ -19,9 +18,9 @@ void Joypad::setByte(Word address, Byte value) {
 }
 
 void Joypad::update() {
-    Byte newJoypad = sdlManager.getJoypad(regJoypad);
+    Byte newJoypad = SDLManager::getSDLManager()->getJoypad(regJoypad);
     if (newJoypad != regJoypad){
-        interruptManager.requestInterrupt(4);
+        InterruptManager::getInterruptManager()->requestInterrupt(4);
     }
     regJoypad = newJoypad;
 }
