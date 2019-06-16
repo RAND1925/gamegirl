@@ -38,8 +38,6 @@ class SDLManager {
     bool isQuit = false;
     uint32_t tmp[WINDOW_HEIGHT * WINDOW_WIDTH]{};
     uint32_t fpsTimer = 0;
-
-    std::ofstream p{"a.txt"};
 public:
 
     void refreshWindow();

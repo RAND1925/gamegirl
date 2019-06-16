@@ -32,9 +32,10 @@ private:
     void setMode(Byte mode);
 
     void doDMA(Byte dma);
-    void drawBg(uint32_t*, Byte bgWinDataLow, Byte bgMapHigh);
-    void drawSprite(uint32_t*, Byte spriteLarge);
-    void draw(int);
+    void drawBg(uint32_t*, bool bgWinDataLow, bool bgMapHigh);
+    void drawWin(uint32_t*, bool bgWinDataLow, bool winMapHigh);
+    void drawSprite(uint32_t*, bool spriteLarge);
+    void draw();
     //to compare the 0xff44 0xff45 to judge if it's a interrupt
     static inline Byte getGrayCode(Byte colorCode, Byte reg);
     Byte currentMode = 0;

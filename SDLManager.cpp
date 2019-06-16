@@ -42,7 +42,7 @@ void SDLManager::refreshWindow(){
 #ifndef NLOG
         logger << "frameTime:" << SDL_GetTicks() - fpsTimer << std::endl;
 #endif
-        SDL_Delay(1000 / fps - SDL_GetTicks() + fpsTimer);
+    //    SDL_Delay(1000 / fps - SDL_GetTicks() + fpsTimer);
 
     }
     fpsTimer = SDL_GetTicks();
