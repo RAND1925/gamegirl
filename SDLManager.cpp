@@ -10,7 +10,30 @@ Color realColorMap[4]{
         {0x55, 0x55, 0x55, 0xAA},
         {0x00, 0x00, 0x00, 0xFF}
 };
-
+Color coleredMap1[4] = {
+        {0xFF, 0xFA, 0xCD, 0x00},
+        {0xFF, 0xCA, 0x28, 0x55},
+        {0xFF, 0x00, 0x00, 0xAA},
+        {0x00, 0x00, 0x00, 0xFF}
+};
+Color coleredMap2[4] = {
+        {0xE0, 0xFF, 0xFF, 0x00},
+        {107, 194, 53, 0x55},
+        {6, 128, 67, 0xAA},
+        {0x00, 0x00, 0x00, 0xFF}
+};
+Color coleredMap3[4] = {
+        {0xFF, 0xE1, 0xFF, 0x00},
+        {0xFF, 0xBB, 0xFF, 0x55},
+        {0xBB, 0xFF, 0xFF, 0xAA},
+        {0x00, 0x00, 0x00, 0xFF}
+};
+Color coleredMap4[4] = {
+        {0x00, 0x00, 0x00, 0x00},
+        {0xFF, 0xCA, 0x28, 0x55},
+        {0xEE, 0xEE, 0x00, 0xAA},
+        {0xFF, 0xFF, 0xFF, 0xFF}
+};
 void SDLManager::refreshWindow(){
 #ifndef NLOG
     logger << "REFRESH!" << std::endl;
@@ -159,6 +182,36 @@ Byte SDLManager::getJoypad(Byte in) {
     return in;
 }
 
+void SDLManager::changeColor(int choice) {
+    switch (choice) {
+        case 1: {
+            for (int i = 0; i < 4; i++) {
+                realColorMap[i] = coleredMap1[i];
+            }
+            break;
+        }
+        case 2:{
+            for (int i = 0; i < 4; i++) {
+                realColorMap[i] = coleredMap2[i];
+            }
+            break;
+        }
+        case 3:{
+            for (int i = 0; i < 4; i++) {
+                realColorMap[i] = coleredMap3[i];
+            }
+            break;
+        }
+        case 4:{
+            for (int i = 0; i < 4; i++) {
+                realColorMap[i] = coleredMap4[i];
+            }
+            break;
+        }
+        default:
+            break;
+    }
+}
 void SDLManager::init(const std::string &title_window, int zoomTime, int xPos, int yPos, int fps) {
 
     this->zoomTime = zoomTime;
