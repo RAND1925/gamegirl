@@ -66,7 +66,7 @@ void GPU::addTime(int clock)
             else
             {
                 //less than 144 ,comtinue to get the line
-                doDMA(regDMA);
+             //   doDMA(regDMA);
                 setMode(MODE_OAM);
             }
         }
@@ -267,9 +267,8 @@ void GPU::setByte(Word address, Byte value) {
                 return;
             case 0xFF46:
                 regDMA = value;
-             //   if (value >= 0X80 && value < 0xA0){
-             //      doDMA(regDMA);
-            //    }
+                doDMA(regDMA);
+
                 return;
             case 0xFF47:
                 regBGP = value;
