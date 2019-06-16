@@ -56,7 +56,7 @@ void GPU::addTime(int clock)
         {
             innerClock -= 205; //back to 0;
             //get the current line to draw
-            draw(regLineY);
+            draw();
             regLineY++;
             if (regLineY >= 144) //call for the interrrput
             {
@@ -134,12 +134,12 @@ void GPU::setMode(Byte mode)
 
 
 
-void GPU::draw(int yLine) {
+void GPU::draw() {
 #ifndef NLOG
     display();
 #endif
     //check if it's in the real line
-    if (yLine >= 144)
+    if (regLineY >= 144)
         return;
     Byte lcdc = regLcdControl;
     bool lcdcEnabled = getBit(lcdc,7);
@@ -157,11 +157,14 @@ void GPU::draw(int yLine) {
     uint32_t colorLine[160] = {0};
     if (bgWinEnabled) {
         drawBg(colorLine,bgWinDataLow, bgMapHigh);
+        if(winEnabled && regLineY >= regWindowY ){
+            drawWin(colorLine, bgWinDataLow, winMapHigh);
+        }
     }
     if (spriteEnabled && useSprite){
         drawSprite(colorLine, spriteLarge);
     }
-    SDLManager::getSDLManager()->setLine(yLine, colorLine);
+    SDLManager::getSDLManager()->setLine(regLineY, colorLine);
 }
 
 Byte GPU::getByte(Word address) {
@@ -196,9 +199,9 @@ Byte GPU::getByte(Word address) {
             case 0xFF49:
                 return regOBP1;
             case 0xFF4A:
-                return regWindowX;
-            case 0xFF4B:
                 return regWindowY;
+            case 0xFF4B:
+                return regWindowX;
             default:
                 break;
         }
@@ -267,10 +270,10 @@ void GPU::setByte(Word address, Byte value) {
                 regOBP1 = value;
                 return;
             case 0xFF4A:
-                regWindowX = value;
+                regWindowY = value;
                 return;
             case 0xFF4B:
-                regWindowY = value;
+                regWindowX = value;
                 return;
             default:
                 break;
@@ -302,7 +305,7 @@ void GPU::doDMA(Byte dma) {
     }
 }
 
-void GPU::drawBg(uint32_t colorLine[], Byte bgWinDataLow, Byte bgMapHigh) {
+void GPU::drawBg(uint32_t * colorLine, bool bgWinDataLow, bool bgMapHigh){
     Word dataTile, mapTile;
     //check the display is enable or not
     if (bgWinDataLow)
@@ -316,16 +319,58 @@ void GPU::drawBg(uint32_t colorLine[], Byte bgWinDataLow, Byte bgMapHigh) {
     else
         mapTile = 0x000;
 
-    Byte xScroll = regScrollX;
-    Byte yScroll = regScrollY;
-    int yDraw = (regLineY + yScroll) % 256;
+    Byte xScrl = regScrollX;
+    Byte yScrl = regScrollY;
+    int yDraw = (regLineY + yScrl) % 256;
     int yTile = yDraw / 8;
     int yPixel = yDraw % 8;
     //?????
     Byte colorLow = 0, colorHigh = 0;
 
     for (size_t counter = 0; counter < 160; counter++) {
-        int xDraw = ((counter + xScroll) % 256);
+        int xDraw = ((counter + xScrl) % 256);
+        int xTile = xDraw / 8;
+        Byte xPixel = static_cast<Byte>(8 - xDraw % 8 - 1);
+        {
+            int numTile;
+            if (bgWinDataLow)
+                numTile = bytesChr[mapTile + (yTile * 32) + xTile];
+            else
+                numTile = (SByte) (bytesChr[mapTile + (yTile * 32) + xTile]);
+            colorLow = bytesVRam[dataTile + (numTile * 16) + (yPixel * 2)];
+            colorHigh = bytesVRam[dataTile + (numTile * 16) + (yPixel * 2) + 1];
+        }
+        Byte colorCode = getBit(colorLow, xPixel) | (getBit(colorHigh, xPixel) << 1u);
+        Byte grayCode = getGrayCode(colorCode, regBGP);
+        Uint32 rgbCode = SDLManager::getSDLManager()->mapColor(grayCode);
+        colorLine[counter] = rgbCode;
+    }
+}
+
+void GPU::drawWin(uint32_t colorLine[], bool bgWinDataLow, bool winMapHigh) {
+    Word dataTile, mapTile;
+    //check the display is enable or not
+    if (bgWinDataLow)
+        dataTile = 0x0000;
+    else
+        dataTile = 0x1000;
+
+    //get the map
+    if (winMapHigh)
+        mapTile = 0x400;
+    else
+        mapTile = 0x000;
+
+    Byte xWin = regWindowX;
+    Byte yWin = regWindowY;
+    int yDraw = (regLineY - yWin) % 256;
+    int yTile = yDraw / 8;
+    int yPixel = yDraw % 8;
+    //?????
+    Byte colorLow = 0, colorHigh = 0;
+
+    for (size_t counter = regWindowX; counter < 160; counter++) {
+        int xDraw = ((counter - xWin) % 256);
         int xTile = xDraw / 8;
         Byte xPixel = static_cast<Byte>(8 - xDraw % 8 - 1);
         {
@@ -345,7 +390,7 @@ void GPU::drawBg(uint32_t colorLine[], Byte bgWinDataLow, Byte bgMapHigh) {
 }
 using Sprite = std::tuple<Byte, Word, Byte>;
         //0: x, 1, colorlow, 2 colorhigh
-void GPU::drawSprite(uint32_t * colorLine, Byte spriteLarge) {
+void GPU::drawSprite(uint32_t * colorLine, bool spriteLarge) {
 
     Byte spriteHeight = spriteLarge ? 16: 8;
     std::vector<Sprite> ready_to_gender;
