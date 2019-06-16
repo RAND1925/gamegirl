@@ -4,7 +4,6 @@
 
 #include "InterruptManager.h"
 
-InterruptManager interruptManager;
 
 void InterruptManager::requestInterrupt(Byte bit) {
     setBit(iF, bit);

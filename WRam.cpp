@@ -3,7 +3,6 @@
 //
 #include "WRam.h"
 
-WRam wRam;
 
 bool WRam::accepts(Word address) {
     return address >= offset && address < offset + length;

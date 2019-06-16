@@ -11,7 +11,6 @@ const Color realColorMap[4]{
         {0x00, 0x00, 0x00, 0xFF}
 };
 
-SDLManager sdlManager;
 void SDLManager::refreshWindow(){
 #ifndef NLOG
     logger << "REFRESH!" << std::endl;

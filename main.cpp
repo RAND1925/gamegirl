@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
         while (cpu.getPC() < 0x100) {
             allCycle += step();
         }
-        mmu.removeAddressSpace(&boot);
+        MMU::getMMU()->removeAddressSpace(&boot);
     }
     while (!isQuit) {
         allCycle += step();
@@ -82,37 +82,37 @@ bool init(int argc, char **argv) {
         }
     }
     std::ios::sync_with_stdio(false);
-    cartridgeDriver.openFile(FILE_PATH);
-    sdlManager.init(cartridgeDriver.getTitle(), zoomTime, xPos, yPos, fps);
-    gpu.init(useSprite);
+    CartridgeDriver::getCartridgeDriver()->openFile(FILE_PATH);
+    SDLManager::getSDLManager()->init(CartridgeDriver::getCartridgeDriver()->getTitle(), zoomTime, xPos, yPos, fps);
+    GPU::getGPU()->init(useSprite);
     cpu.initMap();
-    mmu.init();
+    MMU::getMMU()->init();
 #ifndef NLOG
     logger.open("gamegirl.log");
 #endif
     if (useBoot){
-        mmu.addAddressSpace(&boot);
+        MMU::getMMU()->addAddressSpace(&boot);
         cpu.initRegisters();
     } else {
         cpu.initRegistersAfterBoot();
     }
-    mmu.addAddressSpace(&cartridgeDriver);
-    mmu.addAddressSpace(&wRam);
-    mmu.addAddressSpace(&zRam);
-    mmu.addAddressSpace(&gpu);
-    mmu.addAddressSpace(&timer);
-    mmu.addAddressSpace(&joypad);
-    mmu.addAddressSpace(&interruptManager);
-    mmu.addAddressSpace(&emptySpace);
+    MMU::getMMU()->addAddressSpace(CartridgeDriver::getCartridgeDriver());
+    MMU::getMMU()->addAddressSpace(WRam::getWRam());
+    MMU::getMMU()->addAddressSpace(ZRam::getZRam());
+    MMU::getMMU()->addAddressSpace(GPU::getGPU());
+    MMU::getMMU()->addAddressSpace(Timer::getTimer());
+    MMU::getMMU()->addAddressSpace(Joypad::getJoypad());
+    MMU::getMMU()->addAddressSpace(InterruptManager::getInterruptManager());
+    MMU::getMMU()->addAddressSpace(EmptySpace::getEmptySpace());
     return useBoot;
 }
 
 uint64_t step() {
-    isQuit = sdlManager.handleInput();
-    joypad.update();
+    isQuit = SDLManager::getSDLManager()->handleInput();
+    Joypad::getJoypad()->update();
     Byte cpuCycle = cpu.step();
-    timer.addTime(cpuCycle);
-    gpu.addTime(cpuCycle);
+    Timer::getTimer()->addTime(cpuCycle);
+    GPU::getGPU()->addTime(cpuCycle);
     return cpuCycle;
 };
 

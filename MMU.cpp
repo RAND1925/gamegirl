@@ -6,7 +6,6 @@
 #include "MMU.h"
 #include "Exceptions.h"
 
-MMU mmu;
 
 AddressSpace *MMU::findAddressSpace(Word address) {
     for (auto s: spaces){

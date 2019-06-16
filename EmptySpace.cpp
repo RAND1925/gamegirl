@@ -4,7 +4,6 @@
 
 #include "EmptySpace.h"
 
-EmptySpace emptySpace;
 bool EmptySpace::accepts(Word address) {
     return address <= 0xFEA0 && address <= 0xFF80;
 }

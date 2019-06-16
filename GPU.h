@@ -19,6 +19,10 @@ public:
     bool accepts(Word address) override;
     Byte getByte(Word address) override;
     void setByte(Word address, Byte value) override;
+    static GPU* getGPU(){
+        static GPU gpu;
+        return &gpu;
+    }
 
     //it's the main cycle of the gpu
 
@@ -27,7 +31,8 @@ public:
     //some var used to Scroll
     //two byte to store joypad information
     //judge if it's direction or select
-
+protected:
+    GPU(){};
 private:
     void setMode(Byte mode);
 
@@ -80,4 +85,4 @@ private:
     void display();
 #endif
 };
-extern GPU gpu;
+

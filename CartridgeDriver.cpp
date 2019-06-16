@@ -7,7 +7,6 @@
 #include "Catridges/Cartridge_MBC1.h"
 #include "Exceptions.h"
 
-CartridgeDriver cartridgeDriver;
 
 void CartridgeDriver::loadRom(std::ifstream &stream) {
     char header[0x150] = {0};

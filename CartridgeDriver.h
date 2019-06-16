@@ -14,6 +14,24 @@
 
 
 class CartridgeDriver: public AddressSpace{
+public:
+    void loadRom(std::ifstream & stream);;
+    void openFile(const std::string & filePath);
+    void reopenFile(const std::string & filePath);
+    Cartridge* getCartridgePointer();
+    std::string getTitle();
+
+    bool accepts(Word address) override;;
+    Byte getByte(Word address) override;;
+    void setByte(Word address, Byte value) override;;
+    ~CartridgeDriver();
+    static CartridgeDriver *getCartridgeDriver(){
+        static CartridgeDriver cartridgeDriver;
+        return &cartridgeDriver;
+    }
+
+protected:
+    CartridgeDriver(){};
 private:
     Byte cartridgeType;
     Byte romBankCode;
@@ -26,19 +44,7 @@ private:
     int romSizeMap[3] = {72, 80,96};
     void genCartridge(std::ifstream & stream);
 
-public:
-    void loadRom(std::ifstream & stream);;
-    void openFile(const std::string & filePath);
-    void reopenFile(const std::string & filePath);
-    Cartridge* getCartridgePointer();
-    std::string getTitle();
-
-    bool accepts(Word address) override;;
-    Byte getByte(Word address) override;;
-    void setByte(Word address, Byte value) override;;
-    ~CartridgeDriver();
-
 };
 
-extern CartridgeDriver cartridgeDriver;
+
 #endif //GAMEGIRL_CATRIDGE_H

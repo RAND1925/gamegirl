@@ -10,11 +10,7 @@
 #include "Exceptions.h"
 
 class InterruptManager:  public AddressSpace{
-    bool iME = false;
-    Byte iE = 0x00;//FFFF
-    Byte iF = 0xE1;//FF0F
-    bool stop = false;
-    bool halt = false;
+
 public:
     void requestInterrupt(Byte bit);
 
@@ -31,8 +27,22 @@ public:
     bool accepts(Word address) override;
     Byte getByte(Word address) override;
     void setByte(Word address, Byte value) override;
+    static InterruptManager* getInterruptManager(){
+        static InterruptManager interruptManager;
+        return &interruptManager;
+    }
+
+protected:
+    InterruptManager(){};
+private:
+    bool iME = false;
+    Byte iE = 0x00;//FFFF
+    Byte iF = 0xE1;//FF0F
+    bool stop = false;
+    bool halt = false;
+
 };
 
-extern InterruptManager interruptManager;
+
 
 #endif //GAMEGIRL_INTERRUPTMANAGER_H

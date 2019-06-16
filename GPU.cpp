@@ -7,7 +7,6 @@
 #include "InterruptManager.h"
 #include "Exceptions.h"
 
-GPU gpu;
 void GPU::addTime(int clock)
 {
     //reset the flag
@@ -62,7 +61,7 @@ void GPU::addTime(int clock)
             if (regLineY >= 144) //call for the interrrput
             {
                 setMode(MODE_VBLANK);
-                sdlManager.refreshWindow();
+                SDLManager::getSDLManager()->refreshWindow();
             }
             else
             {
@@ -90,7 +89,7 @@ void GPU::addTime(int clock)
     if (regLineY == regLineYC){
         setBit(regLcdStatus, 2);
         if (getBit(regLcdControl,6)){
-            interruptManager.requestInterrupt(1);
+            InterruptManager::getInterruptManager()->requestInterrupt(1);
         }
     } else {
         resetBit(regLcdStatus, 2);
@@ -109,7 +108,7 @@ void GPU::setMode(Byte mode)
     regLcdStatus |= currentMode & 0x03u;
 
     if (mode == MODE_VBLANK)
-        interruptManager.requestInterrupt(0);
+        InterruptManager::getInterruptManager()->requestInterrupt(0);
     bool interruptFlag = false ;
     switch (mode)
     {
@@ -130,7 +129,7 @@ void GPU::setMode(Byte mode)
         break;
     }
     if (interruptFlag)
-        interruptManager.requestInterrupt(1);
+        InterruptManager::getInterruptManager()->requestInterrupt(1);
 }
 
 
@@ -162,7 +161,7 @@ void GPU::draw(int yLine) {
     if (spriteEnabled && useSprite){
         drawSprite(colorLine, spriteLarge);
     }
-    sdlManager.setLine(yLine, colorLine);
+    SDLManager::getSDLManager()->setLine(yLine, colorLine);
 }
 
 Byte GPU::getByte(Word address) {
@@ -297,7 +296,7 @@ void GPU::doDMA(Byte dma) {
 #ifndef NLOG
     logger << "DMA" << regDMA;
 #endif
-    AddressSpace * s = mmu.findAddressSpace(dmaAddress);
+    AddressSpace * s = MMU::getMMU()->findAddressSpace(dmaAddress);
     for (Byte i = 0; i < 0xA0; ++i){
         bytesOam[i] = s->getByte(dmaAddress + i);
     }
@@ -340,7 +339,7 @@ void GPU::drawBg(uint32_t colorLine[], Byte bgWinDataLow, Byte bgMapHigh) {
         }
         Byte colorCode = getBit(colorLow, xPixel) | (getBit(colorHigh, xPixel) << 1u);
         Byte grayCode = getGrayCode(colorCode, regBGP);
-        Uint32 rgbCode = sdlManager.mapColor(grayCode);
+        Uint32 rgbCode = SDLManager::getSDLManager()->mapColor(grayCode);
         colorLine[counter] = rgbCode;
     }
 }
@@ -386,7 +385,7 @@ void GPU::drawSprite(uint32_t * colorLine, Byte spriteLarge) {
             Byte grayCode = getGrayCode(colorCode, grayPalette);
             if (grayCode != 0)
             {
-                Uint32 rgbCode = sdlManager.mapColor(grayCode);
+                Uint32 rgbCode = SDLManager::getSDLManager()->mapColor(grayCode);
                 colorLine[col] = rgbCode;
             }
         }

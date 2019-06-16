@@ -4,7 +4,6 @@
 
 #include "ZRam.h"
 
-ZRam zRam;
 
 bool ZRam::accepts(Word address) {
     return address >= offset && address < offset + length;
