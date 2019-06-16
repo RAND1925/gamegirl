@@ -17,7 +17,7 @@ extern "C" {
 struct Color{
     Byte r, g, b, a;
 };
-extern const Color realColorMap[4];
+extern Color realColorMap[4];
 
 class SDLManager {
 public:
