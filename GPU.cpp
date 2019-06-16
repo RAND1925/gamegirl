@@ -151,7 +151,7 @@ void GPU::draw() {
     bool spriteEnabled = getBit(lcdc, 1);
     bool spriteLarge = getBit(lcdc, 2);
 
-    if (!getBit(lcdc, 7)) {
+    if (!lcdcEnabled) {
         //todo: turn off screen
     }
     uint32_t colorLine[160] = {0};
