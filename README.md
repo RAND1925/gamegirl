@@ -6,6 +6,10 @@
 
  ## Build
 Building the emulator requires [`SDL2`](https://www.libsdl.org/) and `cmake` on `Windows`. 
+(Note: CmakeList.txt needs 2 environment variables:
+    SDL_PATH: path to sdl
+    CMKE_MODULE_PATH: path to findSDL2.cmake
+)
 For test, it has been tested  on Windows 10  and Arch Linux.
 To complie the project on Windows (need `MinGW` environment):
 ````
