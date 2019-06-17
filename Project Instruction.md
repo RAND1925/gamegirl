@@ -26,7 +26,8 @@
 
 
 ###各部分功能
- | 部件             | 功能          
+
+| 部件             | 功能          
 | ------------- |:-------------:
 |  CPU          | 进⾏行行命令的执行、中断的判断 |
 |GPU            |  画面显示部分模式转换及读写|
@@ -49,11 +50,11 @@
 目前此模拟器已经可以在Windows 10和Arch Linux下运行：
 
 
-Windows 10
-<img src=Windows.png width="800" hegiht="450" align=center >
+Windows 1
+<img src ="https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/Windows.png" width="800" hegiht="450" align=center >
 
 Linux
-<img src=Linux1.png  width="800" hegiht="450" align=center />
+<img src="https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/Linux1.png"  width="800" hegiht="450" align=center />
 
 
 
