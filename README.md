@@ -26,7 +26,7 @@ $ g++ ./Catridges/* ./*.cpp ./*.h -o gamegirl.out -O3 --std=c++17 -march=corei7-
 
 Here are some screenshot of the test.
 ![image](https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/cpu_instrs.png)
-
+</br>
 ![image](https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/bgb_test.png)
 ## Play 
  Using terminal to boot, format:
@@ -51,11 +51,12 @@ Here are some screenshot of the test.
 ###1. Mario Land
 ![Mairo](https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/Mario.png)
 ![Mario](https://github.com/NorthernLights-1/ImageRepositry/blob/gamegirl/MairoTitle.png)
-###2. Tetris
+</br>
 ###2. Tetris
 ![Tetris](https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/Tetirs.png)
 ![Tetris](https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/TetrisTitle.png)
 
+</br>
 
 ###3. Zelda
 ![Zelda](https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/Zelda_title.png)
