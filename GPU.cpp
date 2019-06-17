@@ -429,7 +429,7 @@ void GPU::drawSprite(uint32_t * colorLine, bool spriteLarge) {
         Byte chrCode = bytesOam[i + 2];
         Byte infoCode = bytesOam[i + 3];
         bool yFlip = getBit(infoCode, 6);
-        Word pixelAddress = (chrCode << 4u) + (yFlip?  (14 - yPixel * 2)  : yPixel * 2);
+        Word pixelAddress = (chrCode << 4u) + (yFlip?  ((spriteHeight - 1 - yPixel) * 2)  : yPixel * 2);
         ready_to_gender.emplace_back(spriteX, pixelAddress, infoCode);
     }
     std::stable_sort(ready_to_gender.begin(), ready_to_gender.end(), [](Sprite a, Sprite b){
