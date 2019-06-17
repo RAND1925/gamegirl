@@ -30,15 +30,19 @@ Here are some screenshot of the test.
 ![image](https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/bgb_test.png)
 ## Play 
  Using terminal to boot, format:
- gamegirl path_to_gb_rom \[-c v\] \[-z v\] \[-f v\] \[-x v\] \[-y v\] \[-b\] \[-S \]
-   path_to_gb_rom  rom file path
-   -z  zoomTime
-   -c  colorMode
-   -f  fps
-   -x  window display position x
-   -y  window display position y
-   -b  use boot (display the logo)
-   -S  disable sprites
+ gamegirl path_to_gb_rom \\[-c v\] [-z v\] \\[-f v\] \\[-x v\] \\[-y v\] \\[-b\] \\[-S \] 
+ 
+
+|    code       | function          
+| ------------- |:-------------:
+|path_to_gb_rom |rom file path|
+|-z|zoomTime|
+|-c|colorMode|
+|-f|fps|
+|-x|window display position x|
+|-y |window display position y|
+| -b|use boot (display the logo)|
+|-S|disable sprites|
     
 ## Input
  The key bindings are: 
