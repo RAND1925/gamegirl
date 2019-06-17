@@ -25,7 +25,7 @@
 - 6.16 命令行参数，单例化，规范代码
 
 
-###各部分功能
+## 各部分功能
 
 | 部件             | 功能          
 | ------------- |:-------------:
@@ -87,7 +87,7 @@ Linux:
 |c|             输入"c"，启用~~CGB功能~~自定义颜色 |
 c1----Classical   ;     c2 ---- ~~Good For Eve~~  Green ;  c3----Pink
 </br>
-<img src=Tetris3.png width="200" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src=Tetris5.png width="200" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src=Tetris6.png width="200" ></br>
+<img src="https://github.com/NorthernLights-1/ImageRepositry/tree/master/gamegirl/Tetris3.png" width="200" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://github.com/NorthernLights-1/ImageRepositry/tree/master/gamegirl/Tetris5.png" width="200" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://github.com/NorthernLights-1/ImageRepositry/tree/master/gamegirl/Tetris6.png" width="200" ></br>
 
 ### 按键输入
 方向键：  <kbd>&uarr;</kbd>, <kbd>&darr;</kbd>, <kbd>&larr;</kbd>, <kbd>&rarr;</kbd>
