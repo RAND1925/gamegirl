@@ -66,7 +66,7 @@ void GPU::addTime(int clock)
             else
             {
                 //less than 144 ,comtinue to get the line
-             //   doDMA(regDMA);
+                //doDMA(regDMA);
                 setMode(MODE_OAM);
             }
         }
