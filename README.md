@@ -47,12 +47,10 @@ Here are some screenshot of the test.
 
 
  
-## Game Screenshot
-###1. Mario Land
+## Game Screensho
 ![Mairo](https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/Mario.png)
-![Mario](https://github.com/NorthernLights-1/ImageRepositry/blob/gamegirl/MairoTitle.png)
+![Mario](https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/MarioTitle.png)
 </br>
-###2. Tetris
 ![Tetris](https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/Tetirs.png)
 ![Tetris](https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/TetrisTitle.png)
 
