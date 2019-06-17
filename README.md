@@ -17,7 +17,7 @@ MINGW64 $ cmake .
 ````
 To complie the project on Linux:
 ````
-$ g++ ./Catridges/* ./*.cpp ./*.h -o a.out -O3 --std=c++17 -march=corei7-avx -lSDL2 -lSDL2main
+$ g++ ./Catridges/* ./*.cpp ./*.h -o gamegirl.out -O3 --std=c++17 -march=corei7-avx -lSDL2 -lSDL2main
 ````
 (Note:It uses the avx--Advanced Vector Extensions)
 
@@ -28,11 +28,25 @@ Here are some screenshot of the test.
 ![image](https://github.com/NorthernLights-1/ImageRepositry/tree/master/gamegirl/cpu_instrs.png)
 
 ![image](https://github.com/NorthernLights-1/ImageRepositry/tree/master/gamegirl/bgb_test.png)
+## Play 
+ Using terminal to boot, format:
+ gamegirl path_to_gb_rom \[-c v\] \[-z v\] \[-f v\] \[-x v\] \[-y v\] \[-b\] \[-S \]
+   path_to_gb_rom  rom file path
+   -z  zoomTime
+   -c  colorMode
+   -f  fps
+   -x  window display position x
+   -y  window display position y
+   -b  use boot (display the logo)
+   -S  disable sprites
+    
 ## Input
  The key bindings are: 
  Direction:  <kbd>&uarr;</kbd>, <kbd>&darr;</kbd>, <kbd>&larr;</kbd>, <kbd>&rarr;</kbd>
  Selection:  <kbd>X</kbd> for B, <kbd>Z</kbd> for A, <kbd>Enter</kbd> for START , <kbd>Backspace</kbd> for SELECT.
 
+
+ 
 ## Game Screenshot
 ###1. Mario Land
 ![Mairo](https://github.com/NorthernLights-1/ImageRepositry/tree/master/gamegirl/Mario.png)
