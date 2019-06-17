@@ -25,9 +25,9 @@ $ g++ ./Catridges/* ./*.cpp ./*.h -o gamegirl.out -O3 --std=c++17 -march=corei7-
  The emulators is using the roms from [`Blargg's test ROMs`](http://blargg.parodius.com/gb-tests/) and [`bgbTest.gb`](http://bgb.bircd.org/) to test the hardware accurency.
 
 Here are some screenshot of the test.
-![image](https://github.com/NorthernLights-1/ImageRepositry/tree/master/gamegirl/cpu_instrs.png)
+![image](https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/cpu_instrs.png)
 
-![image](https://github.com/NorthernLights-1/ImageRepositry/tree/master/gamegirl/bgb_test.png)
+![image](https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/bgb_test.png)
 ## Play 
  Using terminal to boot, format:
  gamegirl path_to_gb_rom \[-c v\] \[-z v\] \[-f v\] \[-x v\] \[-y v\] \[-b\] \[-S \]
@@ -49,12 +49,12 @@ Here are some screenshot of the test.
  
 ## Game Screenshot
 ###1. Mario Land
-![Mairo](https://github.com/NorthernLights-1/ImageRepositry/tree/master/gamegirl/Mario.png)
-![Mario](https://github.com/NorthernLights-1/ImageRepositry/tree/master/gamegirl/MairoTitle.png)
-
+![Mairo](https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/Mario.png)
+![Mario](https://github.com/NorthernLights-1/ImageRepositry/blob/gamegirl/MairoTitle.png)
+###2. Tetris
 ###2. Tetris
 ![Tetris](https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/Tetirs.png)
-![Tetris](https://github.com/NorthernLights-1/ImageRepositry/tree/master/gamegirl/TetrisTitle.png)
+![Tetris](https://github.com/NorthernLights-1/ImageRepositry/blob/master/gamegirl/TetrisTitle.png)
 
 
 ###3. Zelda
