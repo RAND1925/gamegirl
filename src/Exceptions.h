@@ -7,15 +7,23 @@
 
 #include <exception>
 #include <string>
+#include <cassert>
 #include "common.h"
 #include "Logger.h"
+
+
+#define NO_WRONG_ADDRESS_ERROR
+
+/* wrong address is an assertion now
+ */
 class WrongAddressException: public std::exception{
 
     std::string _msg{};
     Word _address = 0;
 public:
-    WrongAddressException(std::string  msg, Word address);
+    WrongAddressException(std::string  msg, Word address);;
 };
+
 class FileNotFoundException: public std::exception{
     std::string _msg{};
     std::string _path{};

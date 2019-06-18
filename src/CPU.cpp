@@ -1090,35 +1090,35 @@ void CPU::initMap() {
   // restart
   opMap[0xC7] = [this]() {
     restart(0x00);
-    return 32;
+    return 20;
   };
   opMap[0xCF] = [this]() {
     restart(0x08);
-    return 32;
+    return 20;
   };
   opMap[0xD7] = [this]() {
     restart(0x10);
-    return 32;
+    return 20;
   };
   opMap[0xDF] = [this]() {
     restart(0x18);
-    return 32;
+    return 20;
   };
   opMap[0xE7] = [this]() {
     restart(0x20);
-    return 32;
+    return 20;
   };
   opMap[0xEF] = [this]() {
     restart(0x28);
-    return 32;
+    return 20;
   };
   opMap[0xF7] = [this]() {
     restart(0x30);
-    return 32;
+    return 20;
   };
   opMap[0xFF] = [this]() {
     restart(0x38);
-    return 32;
+    return 20;
   };
   // ret
   opMap[0xC9] = [this]() {
@@ -2215,8 +2215,8 @@ Byte CPU::step() {
   Byte timing = 4;
   if (InterruptManager::getInterruptManager()->hasInterrupt()) {
     Byte interruptCode = InterruptManager::getInterruptManager()->handleInterrupt();
-    restart(0x40 + (interruptCode << 3));
-    return 32;
+    restart(0x40 + (interruptCode << 3u));
+    return 20;
   } else {
     if (InterruptManager::getInterruptManager()->handleHalt()) {
       Byte opNum = MMU::getMMU()->readByte(registers.pc);
@@ -2390,7 +2390,7 @@ Word CPU::getDE() { return getR16(registers.d, registers.e); }
 void CPU::setAF(Word t) {
   registers.a = (Byte)(t >> 8u);
   registers.f &= 0x0Fu;
-  registers.f |= (Byte)(t & 0xF0);
+  registers.f |= (Byte)(t & 0xF0u);
 }
 
 void CPU::setHL(Word t) { setR16(registers.h, registers.l, t); }
@@ -2417,7 +2417,7 @@ Byte CPU::swap(Byte a) {
   resetN();
   resetC();
   resetH();
-  return Byte(a << 4) + Byte(a >> 4);
+  return Byte(a << 4u) | Byte(a >> 4u);
 }
 
 void CPU::daa() {
@@ -2425,30 +2425,30 @@ void CPU::daa() {
   if (getN()) {
     if (getH()) {
       ra -= 0x06;
-      ra &= 0xFF;
+      ra &= 0xFFu;
     }
     if (getC()) {
       ra -= 0x60;
     }
   } else {
-    if ((ra & 0x0F) > 0x09 || getH()) {
+    if ((ra & 0x0Fu) > 0x09 || getH()) {
       ra += 0x06;
     }
     if (ra > 0x9F || getC()) {
       ra += 0x60;
     }
   }
-  (ra & 0xFF) == 0 ? setZ() : resetZ();
+  (ra & 0xFFu) == 0 ? setZ() : resetZ();
   resetH();
-  if (ra & 0x100)
+  if (ra & 0x100u)
     setC();
-  registers.a = (Byte)(ra & 0xFF);
+  registers.a = (ra & 0xFFu);
 }
 
 Byte CPU::cpl(Byte a) {
   setN();
   setH();
-  return (a ^ 0xFF);
+  return (a ^ 0xFFu);
 }
 
 void CPU::ccf() {
@@ -2467,8 +2467,8 @@ void CPU::scf() {
 }
 
 Byte CPU::rlc(Byte a) {
-  Byte bit_7 = a >> 7;
-  Byte res = (a << 1) | bit_7;
+  Byte bit_7 = a >> 7u;
+  Byte res = (a << 1u) | bit_7;
   (res == 0) ? setZ() : resetZ();
   resetN();
   resetH();
@@ -2477,8 +2477,8 @@ Byte CPU::rlc(Byte a) {
 }
 
 Byte CPU::rl(Byte a) {
-  Byte bit_7 = a >> 7;
-  Byte res = (a << 1) | getC();
+  Byte bit_7 = a >> 7u;
+  Byte res = (a << 1u) | getC();
   (res == 0) ? setZ() : resetZ();
   resetN();
   resetH();
@@ -2497,8 +2497,8 @@ Byte CPU::rrc(Byte a) {
 }
 
 Byte CPU::sla(Byte a) {
-  Byte bit_7 = a >> 7;
-  Byte res = a << 1;
+  Byte bit_7 = a >> 7u;
+  Byte res = a << 1u;
   (res == 0) ? setZ() : resetZ();
   resetN();
   resetH();
@@ -2508,8 +2508,8 @@ Byte CPU::sla(Byte a) {
 }
 
 Byte CPU::rr(Byte a) {
-  Byte bit_0 = a << 7;
-  Byte res = (a >> 1) + (getC() << 7);
+  Byte bit_0 = a << 7u;
+  Byte res = (a >> 1u) + (getC() << 7u);
   (res == 0) ? setZ() : resetZ();
   resetN();
   resetH();
@@ -2530,8 +2530,8 @@ Byte CPU::sra(Byte a) {
 }
 
 Byte CPU::srl(Byte a) {
-  Byte bit_0 = a << 7;
-  Byte res = a >> 1;
+  Byte bit_0 = a << 7u;
+  Byte res = a >> 1u;
   (res == 0) ? setZ() : resetZ();
   resetN();
   resetH();

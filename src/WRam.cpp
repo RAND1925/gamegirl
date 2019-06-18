@@ -9,11 +9,11 @@ bool WRam::accepts(Word address) {
 }
 
 Byte WRam::getByte(Word address) {
-    return  bytes[address & 0x1FFF];
+    return  bytes[address & 0x1FFFu];
 }
 
 void WRam::setByte(Word address, Byte value) {
-    bytes[address & 0x1FFF] = value;
+    bytes[address & 0x1FFFu] = value;
 }
 
 WRam *WRam::getWRam() {

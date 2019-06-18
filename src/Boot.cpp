@@ -14,5 +14,4 @@ Byte Boot::getByte(Word address) {
 }
 
 void Boot::setByte(Word address, Byte value) {
-    throw WrongAddressException("Boot[write]", address);
 }

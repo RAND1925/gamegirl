@@ -45,7 +45,7 @@ private:
     int xPos = SDL_WINDOWPOS_UNDEFINED;
     int yPos = SDL_WINDOWPOS_UNDEFINED;
     int zoomTime = 1;
-    uint8_t fps = 60;
+    int fps = -1;
     Byte joypadC1 = 0x0F;
     Byte joypadC0 = 0x0F;
     bool isQuit = false;

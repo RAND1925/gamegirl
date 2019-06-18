@@ -11,7 +11,7 @@ Color realColorMap[4]{
         {0x55, 0x55, 0x55, 0xAA},
         {0x00, 0x00, 0x00, 0xFF}
 };
-Color coleredMap[4][4] = {
+Color coloredMap[4][4] = {
         {
                 {0xFF, 0xFA, 0xCD, 0x00},
                 {0xFF, 0xCA, 0x28, 0x55},
@@ -63,14 +63,16 @@ void SDLManager::refreshWindow() {
     }
     SDL_UnlockSurface(surface);
     SDL_UpdateWindowSurface(win);
-    if (SDL_GetTicks() - fpsTimer < 1000 / fps) {
-#ifndef NLOG
-        logger << "frameTime:" << SDL_GetTicks() - fpsTimer << std::endl;
-#endif
-        //    SDL_Delay(1000 / fps - SDL_GetTicks() + fpsTimer);
+    if (fps != -1){
+        if (SDL_GetTicks() - fpsTimer < 1000 / fps) {
+    #ifndef NLOG
+            logger << "frameTime:" << SDL_GetTicks() - fpsTimer << std::endl;
+    #endif
+               SDL_Delay(1000 / fps - SDL_GetTicks() + fpsTimer);
 
+        }
+        fpsTimer = SDL_GetTicks();
     }
-    fpsTimer = SDL_GetTicks();
 }
 
 SDLManager::~SDLManager() {
@@ -187,7 +189,7 @@ Byte SDLManager::getJoypad(Byte in) {
 
 void SDLManager::changeColor(int choice) {
     for (int i = 0; i < 4; i++) {
-        realColorMap[i] = coleredMap[choice-1][i];
+        realColorMap[i] = coloredMap[choice-1][i];
     }
 }
 

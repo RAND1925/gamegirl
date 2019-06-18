@@ -2,6 +2,7 @@
 // Created by jjf09 on 2019/5/24.
 //
 
+#include <cassert>
 #include "Timer.h"
 #include "InterruptManager.h"
 #include "Exceptions.h"
@@ -17,8 +18,8 @@ void Timer::addTime(Byte cycle) {
         return;
     }
     counter+=cycle;
-    uint64_t currClock;
-    switch(regTac & 0x3){
+    uint64_t currClock = 0;
+    switch(regTac & 0x3u){
         case 0: currClock=1024;break;
         case 1: currClock=16;break;
         case 2: currClock=64;break;
@@ -26,7 +27,6 @@ void Timer::addTime(Byte cycle) {
     }
     while (counter >= currClock){
         counter-=currClock;
-       // counter=0;
         if(regTima==0xFF){
             InterruptManager::getInterruptManager()->requestInterrupt(2);
             regTima=regTma;
@@ -47,7 +47,10 @@ Byte Timer::getByte(Word address) {
         case 0xFF06: return regTma;
         case 0xFF07: return regTac;
         default:
+#ifndef NO_WRONG_ADDRESS_ERROR
             throw WrongAddressException("Timer[read]", address);
+#endif
+            assert(false);
     }
 }
 
@@ -56,9 +59,12 @@ void Timer::setByte(Word address, Byte value) {
         case 0xFF04: regDiv=0;break;
         case 0xFF05: regTima=value;break;
         case 0xFF06: regTma=value;break;
-        case 0xFF07: regTac=(value & 7);break;
+        case 0xFF07: regTac=(value & 7u);break;
         default:
+#ifndef NO_WRONG_ADDRESS_ERROR
             throw WrongAddressException("Timer[write]", address);
+#endif
+            assert(false);
     }
 
 }

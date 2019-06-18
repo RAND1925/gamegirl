@@ -31,8 +31,4 @@ FileNotFoundException::FileNotFoundException(std::string msg, const std::string 
 #endif
 }
 
-WrongAddressException::WrongAddressException(std::string msg, Word address) : _msg(std::move(msg)), _address(address){
-#ifndef NLOG
-    logger << "ERROR: " << _msg << " in " << address << std::endl;
-#endif
-}
+WrongAddressException::WrongAddressException(std::string msg, Word address) {}

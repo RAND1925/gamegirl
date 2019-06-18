@@ -65,20 +65,16 @@ bool InterruptManager::accepts(Word address) {
 Byte InterruptManager::getByte(Word address) {
     if (address == 0xFF0F) {
         return iF;
-    } else if (address == 0xFFFF) {
-        return iE;
     } else {
-        throw WrongAddressException("Interrupt[read]", address);
+        return iE;
     }
 }
 
 void InterruptManager::setByte(Word address, Byte value) {
     if (address == 0xFF0F) {
         setIF(value);
-    } else if (address == 0xFFFF) {
+    } else  {
         iE = value;
-    } else {
-        throw WrongAddressException("Interrupt[write]", address);
     }
 }
 

@@ -5,6 +5,7 @@
 #include "GPU.h"
 #include "SDLManager.h"
 #include "InterruptManager.h"
+#include <cassert>
 #include "Exceptions.h"
 
 void GPU::addTime(int clock)
@@ -206,7 +207,10 @@ Byte GPU::getByte(Word address) {
                 break;
         }
     }
+#ifndef NO_WRONG_ADDRESS_ERROR
     throw WrongAddressException("GPU[read]", address);
+#endif
+    assert(false);
 }
 
 bool GPU::accepts(Word address) {
@@ -286,10 +290,13 @@ void GPU::setByte(Word address, Byte value) {
                 regWindowX = value;
                 return;
             default:
-                break;
+                assert(false);
         }
     }
+#ifndef NO_WRONG_ADDRESS_ERROR
     throw WrongAddressException("GPU[write]", address);
+#endif
+
 }
 #ifndef NLOG
 void GPU::display() {
@@ -310,7 +317,7 @@ void GPU::doDMA(Byte dma) {
     logger << "DMA" << regDMA;
 #endif
     if ((dma >= 0xA0 && dma <= 0xF1) || dma <= 0x80){
-        AddressSpace * s = MMU::getMMU()->findAddressSpace(dmaAddress);
+        AddressSpace* s = MMU::getMMU()->findAddressSpace(dmaAddress);
         for (Byte i = 0; i < 0xA0; ++i){
             bytesOam[i] = s->getByte(dmaAddress + i);
         }
