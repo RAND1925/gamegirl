@@ -18,10 +18,6 @@ struct Color{
     Byte r, g, b, a;
 };
 extern Color realColorMap[4];
-extern Color coleredMap1[4];
-extern Color coleredMap2[4];
-extern Color coleredMap3[4];
-extern Color coleredMap4[4];
 class SDLManager {
 public:
 
