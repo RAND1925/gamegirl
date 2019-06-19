@@ -20,8 +20,9 @@ struct Color{
 extern Color realColorMap[4];
 class SDLManager {
 public:
+    void refreshScreen();
+    void closeScreen();
 
-    void refreshWindow();
     void setLine(Byte lineNum, Uint32 * line);
     Uint32 mapColor(Byte);;
     Byte getJoypad(Byte in);

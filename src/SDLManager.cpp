@@ -38,7 +38,7 @@ Color coloredMap[4][4] = {
         }
 };
 
-void SDLManager::refreshWindow() {
+void SDLManager::refreshScreen() {
 #ifndef NLOG
     logger << "REFRESH!" << std::endl;
 #endif
@@ -221,5 +221,11 @@ void SDLManager::init(const std::string &title_window, int zoomTime, int xPos, i
 SDLManager *SDLManager::getSDLManager() {
     static SDLManager sdlManager;
     return &sdlManager;
+}
+
+void SDLManager::closeScreen() {
+    auto pixel_format = SDL_MapRGBA(surface->format, 0xFF, 0xFF, 0xFF, 0xFF);
+    SDL_FillRect(surface, nullptr, pixel_format);
+    SDL_UpdateWindowSurface(win);
 };
 
