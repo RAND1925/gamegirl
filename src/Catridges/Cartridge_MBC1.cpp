@@ -39,7 +39,7 @@ Byte Cartridge_MBC1::getByte(Word address) {
     } else if(page == 0xA || page == 0xB){
         return ram[((uint64_t)ramBank << 13u) | (address & 0x1FFFu)];
     }
-    #ifndef NO_WRONG_ADDRESS_ERROR
+    #ifndef NO_ADDRESS_ERROR
     throw WrongAddressException("mbc1[read]", address);
     #endif
 }

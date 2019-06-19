@@ -46,7 +46,7 @@ public:
 protected:
     MMU()= default;
 
-#ifndef NO_WRONG_ADDRESS_ERROR
+#ifndef NO_ADDRESS_ERROR
     Byte* unusedSpaces{nullptr};
 #endif
 };

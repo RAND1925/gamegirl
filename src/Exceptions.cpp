@@ -12,12 +12,15 @@
 #include "Exceptions.h"
 #include "SDL.h"
 
+#ifndef NO_ADDRESS_ERROR
 InterruptException::InterruptException(std::string  msg, Byte iE, Byte iF)
         :_msg(std::move(msg)), _iF(iF), _iE(iE){
 #ifndef NLOG
     logger << "ERROR: " << _msg << "iE" << std::hex << (int)iE << "iF"<< std::hex <<(int)iF << std::endl;
 #endif
 }
+
+#endif
 
 SDLException::SDLException(std::string msg) : _msg(std::move(msg)){
 #ifndef NLOG
@@ -31,4 +34,3 @@ FileNotFoundException::FileNotFoundException(std::string msg, const std::string 
 #endif
 }
 
-WrongAddressException::WrongAddressException(std::string msg, Word address) {}

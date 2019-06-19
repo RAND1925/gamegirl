@@ -44,7 +44,9 @@ Byte InterruptManager::handleInterrupt() {
             return i;
         }
     }
+#ifndef NO_ADDRESS_ERROR
     throw InterruptException("", iE, iF);
+#endif
 }
 
 bool InterruptManager::handleHalt() {

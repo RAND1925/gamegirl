@@ -207,10 +207,11 @@ Byte GPU::getByte(Word address) {
                 break;
         }
     }
-#ifndef NO_WRONG_ADDRESS_ERROR
+#ifndef NO_ADDRESS_ERROR
     throw WrongAddressException("GPU[read]", address);
 #endif
     assert(false);
+    return 0xFFu;
 }
 
 bool GPU::accepts(Word address) {
@@ -293,7 +294,7 @@ void GPU::setByte(Word address, Byte value) {
                 assert(false);
         }
     }
-#ifndef NO_WRONG_ADDRESS_ERROR
+#ifndef NO_ADDRESS_ERROR
     throw WrongAddressException("GPU[write]", address);
 #endif
 
@@ -467,7 +468,7 @@ void GPU::drawSprite(uint32_t * colorLine, bool spriteLarge) {
 }
 
 Byte GPU::getGrayCode(Byte colorCode, Byte reg) {
-    return static_cast<Byte>(reg >> (colorCode << 1) & 0x03);
+    return static_cast<Byte>(reg >> (colorCode << 1u) & 0x03u);
 }
 
 void GPU::init(bool useSprite) {

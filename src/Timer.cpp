@@ -47,7 +47,7 @@ Byte Timer::getByte(Word address) {
         case 0xFF06: return regTma;
         case 0xFF07: return regTac;
         default:
-#ifndef NO_WRONG_ADDRESS_ERROR
+#ifndef NO_ADDRESS_ERROR
             throw WrongAddressException("Timer[read]", address);
 #endif
             assert(false);
@@ -61,7 +61,7 @@ void Timer::setByte(Word address, Byte value) {
         case 0xFF06: regTma=value;break;
         case 0xFF07: regTac=(value & 7u);break;
         default:
-#ifndef NO_WRONG_ADDRESS_ERROR
+#ifndef NO_ADDRESS_ERROR
             throw WrongAddressException("Timer[write]", address);
 #endif
             assert(false);

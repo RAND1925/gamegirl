@@ -12,10 +12,11 @@
 #include "Logger.h"
 
 
-#define NO_WRONG_ADDRESS_ERROR
+#define NO_ADDRESS_ERROR
 
-/* wrong address is an assertion now
- */
+#ifndef NO_ADDRESS_ERROR
+ wrong address is an assertion now
+
 class WrongAddressException: public std::exception{
 
     std::string _msg{};
@@ -23,6 +24,16 @@ class WrongAddressException: public std::exception{
 public:
     WrongAddressException(std::string  msg, Word address);;
 };
+
+
+ class InterruptException: public std::exception{
+    std::string _msg{};
+    Byte _iF;
+    Byte _iE;
+public:
+    InterruptException(std::string msg, Byte iE, Byte iF);
+};
+#endif
 
 class FileNotFoundException: public std::exception{
     std::string _msg{};
@@ -37,12 +48,6 @@ public:
     explicit SDLException(std::string  msg);
 };
 
-class InterruptException: public std::exception{
-    std::string _msg{};
-    Byte _iF;
-    Byte _iE;
-public:
-    InterruptException(std::string msg, Byte iE, Byte iF);
-};
+
 
 #endif //GAMEGIRL_ERRORS_H

@@ -16,7 +16,7 @@ AddressSpace* MMU::findAddressSpace(Word address) {
 }
 
 Byte MMU::readByte(Word address){
-#ifndef NO_WRONG_ADDRESS_ERROR
+#ifndef NO_ADDRESS_ERROR
     try{
         auto s = findAddressSpace(address);
         if (s == nullptr) {
@@ -36,7 +36,7 @@ Word MMU::readWord(Word address){
 }
 
 void MMU::writeByte(Word address, Byte value){
-#ifndef NO_WRONG_ADDRESS_ERROR
+#ifndef NO_ADDRESS_ERROR
     try{
         auto s = findAddressSpace(address);
         if (s == nullptr) {
@@ -65,7 +65,7 @@ void MMU::removeAddressSpace(AddressSpace *s) {
 }
 
 void MMU::init() {
-#ifndef NO_WRONG_ADDRESS_ERROR
+#ifndef NO_ADDRESS_ERROR
     unusedSpaces = new Byte[0x10000];
 #endif
 }
