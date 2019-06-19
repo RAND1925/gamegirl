@@ -153,7 +153,7 @@ void GPU::draw() {
     bool spriteLarge = getBit(lcdc, 2);
 
     if (!lcdcEnabled) {
-        SDLManager::getSDLManager()->closeScreen();
+     //   SDLManager::getSDLManager()->closeScreen();
     }
     uint32_t colorLine[160] = {0};
     if (bgWinEnabled) {
@@ -433,12 +433,13 @@ void GPU::drawSprite(uint32_t * colorLine, bool spriteLarge) {
         int spriteX = bytesOam[i + 1] - 8;
         if (spriteX >= 160) {
             continue;
+
         }
         Byte chrCode = bytesOam[i + 2];
         Byte infoCode = bytesOam[i + 3];
-        if (getBit(infoCode, 7) == 1){
+      /*  if (getBit(infoCode, 7) == 1){
             continue;
-        }
+        }*/
         bool yFlip = getBit(infoCode, 6);
         Word pixelAddress = (chrCode << 4u) + (yFlip?  ((spriteHeight - 1 - yPixel) * 2)  : yPixel * 2);
         ready_to_gender.emplace_back(spriteX, pixelAddress, infoCode);
