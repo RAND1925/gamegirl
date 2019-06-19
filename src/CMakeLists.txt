@@ -7,9 +7,9 @@ add_compile_options(-O3 -Wall -march=corei7-avx -static)
 add_subdirectory(Catridges)
 
 # PATH TO FindSDL2.cmake
-#set(CMAKE_MODULE_PATH "path_to_FindSDL2.camke")
+set(CMAKE_MODULE_PATH "D:\\SDL2-2.0.9")
 # PATH TO SDL
-#set(SDL2_PATH "path_to_sdl2")
+set(SDL2_PATH "D:\\SDL2-2.0.9\\")
 
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIR})

@@ -13,25 +13,19 @@
 #include "Battery.h"
 class Cartridge_MBC1: public Cartridge, public Battery{
 public:
-    Cartridge_MBC1(std::ifstream & s, size_t romSize, size_t ramSize, std::string filePath);
+    Cartridge_MBC1(const std::string& filePath, size_t romSize, size_t ramSize);
     bool accepts(Word address) override;
     Byte getByte(Word address) override;
     void setByte(Word address, Byte value) override;
 
 private:
-    size_t ramSize = 0;
-    size_t romSize = 0;
     std::string filePath;
+    size_t romSize = 0;
+    size_t ramSize = 0;
     std::vector<Byte> rom;
     std::vector<Byte> ram;
-    void saveFile(std::string) override{};
-    void loadFile(std::string savePath) override{
-        std::ifstream loadFile(savePath, std::ios::binary);
-        char* buffer = new char[ramSize];
-        loadFile.read(buffer, ramSize);
-        std::copy(buffer, buffer + ramSize, ram.begin());
-        delete[](buffer);
-    };
+    void saveData(const std::string &) override{};
+    void loadData(const std::string & savePath) override;;
     bool ramEnabled = false;
     Byte romBank = 1;
     Byte ramBank = 0;// also upprombank

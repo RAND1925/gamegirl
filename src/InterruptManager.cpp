@@ -44,9 +44,7 @@ Byte InterruptManager::handleInterrupt() {
             return i;
         }
     }
-#ifndef NO_ADDRESS_ERROR
-    throw InterruptException("", iE, iF);
-#endif
+
 }
 
 bool InterruptManager::handleHalt() {
@@ -67,15 +65,16 @@ bool InterruptManager::accepts(Word address) {
 Byte InterruptManager::getByte(Word address) {
     if (address == 0xFF0F) {
         return iF;
-    } else {
+    } else if (address == 0xFFFF) {
         return iE;
     }
+    return 0xFF;
 }
 
 void InterruptManager::setByte(Word address, Byte value) {
     if (address == 0xFF0F) {
         setIF(value);
-    } else  {
+    } else if (address == 0xFFFF) {
         iE = value;
     }
 }

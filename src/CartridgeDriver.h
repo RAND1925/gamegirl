@@ -15,12 +15,16 @@
 
 class CartridgeDriver {
 public:
-    void loadRom(std::ifstream &stream);;
     void openFile(const std::string &filePath);
-    void reopenFile(const std::string &filePath);
+
+   // void reopenFile(const std::string &filePath);
+
     Cartridge *getCartridgePointer();
+
     std::string getTitle();
+
     ~CartridgeDriver();
+
     static CartridgeDriver *getCartridgeDriver() {
         static CartridgeDriver cartridgeDriver;
         return &cartridgeDriver;
@@ -40,9 +44,7 @@ private:
     std::string filePath;
     int ramSizeMap[5] = {0, 2, 8, 32, 128};
     int romSizeMap[3] = {72, 80, 96};
-    void genCartridge(std::ifstream &stream);
-
-
+    void genCartridge();
 
 #endif //GAMEGIRL_CATRIDGE_H
 };

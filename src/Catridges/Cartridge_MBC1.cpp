@@ -4,30 +4,25 @@
 
 #include "Cartridge_MBC1.h"
 
-Cartridge_MBC1::Cartridge_MBC1(std::ifstream &s, size_t romSize, size_t ramSize, std::string filePath) {
-    this->filePath = filePath;
-    std::string savePath{filePath};
-    savePath += "0";
-    auto dotPos = savePath.rfind('.');
-    savePath.replace(dotPos + 1,3, "sav");
-    this->ramSize = ramSize;
-    this->romSize = romSize;
+Cartridge_MBC1::Cartridge_MBC1(const std::string &filePath, size_t romSize,
+                               size_t ramSize):filePath(filePath), romSize(romSize),ramSize(ramSize) {
+
     rom.reserve(romSize);
     if (ramSize == 0) {
         ram.reserve(0x2000);
     } else {
         ram.reserve(ramSize);
     }
-    char *buffer = nullptr;
-    try{
-        buffer = new char[romSize];
-    } catch (std::bad_alloc & e){
-        throw;
-    }
+    char *buffer = new char[romSize];
+    std::ifstream s(filePath, std::ios::binary);
     s.read(buffer, romSize);
     std::copy(buffer, buffer + romSize, rom.begin());
     delete [] buffer;
-    loadFile(savePath);
+    std::string savePath{filePath};
+    savePath.reserve(savePath.length()+1);
+    auto dotPos = savePath.rfind('.');
+    savePath.replace(dotPos + 1,3, "sav");
+    loadData(savePath);
 }
 bool Cartridge_MBC1::accepts(Word address) {
     return address < 0x8000 || (address >= 0xA000 && address < 0xC000);
@@ -47,9 +42,6 @@ Byte Cartridge_MBC1::getByte(Word address) {
     } else if(page == 0xA || page == 0xB){
         return ram[((uint64_t)ramBank << 13u) | (address & 0x1FFFu)];
     }
-    #ifndef NO_ADDRESS_ERROR
-    throw WrongAddressException("mbc1[read]", address);
-    #endif
 }
 
 void Cartridge_MBC1::setByte(Word address, Byte value) {
@@ -72,8 +64,12 @@ void Cartridge_MBC1::setByte(Word address, Byte value) {
     else if(page == 0x6 || page == 0x7){
         mode = value & 0x1u;
     }
-#ifndef NO_ADDRESS_ERROR
-    throw WrongAddressException("mbc1[read]", address);
-#endif
 }
 
+void Cartridge_MBC1::loadData(const std::string &savePath) {
+    std::ifstream loadFile(savePath, std::ios::binary);
+    char* buffer = new char[ramSize];
+    loadFile.read(buffer, ramSize);
+    std::copy(buffer, buffer + ramSize, ram.begin());
+    delete [] buffer;
+}

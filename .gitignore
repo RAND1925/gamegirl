@@ -10,6 +10,9 @@ CMakeLists*
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 /src/cmake*
+
+/bin/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

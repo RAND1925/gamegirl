@@ -18,11 +18,14 @@ struct Color{
     Byte r, g, b, a;
 };
 extern Color realColorMap[4];
+extern Color coleredMap1[4];
+extern Color coleredMap2[4];
+extern Color coleredMap3[4];
+extern Color coleredMap4[4];
 class SDLManager {
 public:
-    void refreshScreen();
-    void closeScreen();
 
+    void refreshWindow();
     void setLine(Byte lineNum, Uint32 * line);
     Uint32 mapColor(Byte);;
     Byte getJoypad(Byte in);
@@ -46,7 +49,7 @@ private:
     int xPos = SDL_WINDOWPOS_UNDEFINED;
     int yPos = SDL_WINDOWPOS_UNDEFINED;
     int zoomTime = 1;
-    int fps = -1;
+    uint8_t fps = 60;
     Byte joypadC1 = 0x0F;
     Byte joypadC0 = 0x0F;
     bool isQuit = false;

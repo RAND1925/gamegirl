@@ -9,7 +9,7 @@
 
 class Cartridge: public AddressSpace{
 public:
-  virtual ~Cartridge(){};
+  virtual ~Cartridge()= default;
 };
 
 

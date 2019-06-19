@@ -6,11 +6,12 @@
 #define GAMEGIRL_BATTERY_H
 
 #include <string>
-
 class Battery {
-    virtual void saveFile(std::string filePath) = 0;
-    virtual void loadFile(std::string filePath) = 0;
+protected:
+    virtual void loadData(const std::string&) = 0;
+    virtual void saveData(const std::string&) = 0;
 };
+
 
 
 #endif //GAMEGIRL_BATTERY_H

@@ -5,7 +5,6 @@
 #include "GPU.h"
 #include "SDLManager.h"
 #include "InterruptManager.h"
-#include <cassert>
 #include "Exceptions.h"
 
 void GPU::addTime(int clock)
@@ -62,7 +61,7 @@ void GPU::addTime(int clock)
             if (regLineY >= 144) //call for the interrrput
             {
                 setMode(MODE_VBLANK);
-                SDLManager::getSDLManager()->refreshScreen();
+                SDLManager::getSDLManager()->refreshWindow();
             }
             else
             {
@@ -153,7 +152,7 @@ void GPU::draw() {
     bool spriteLarge = getBit(lcdc, 2);
 
     if (!lcdcEnabled) {
-     //   SDLManager::getSDLManager()->closeScreen();
+        //todo: turn off screen
     }
     uint32_t colorLine[160] = {0};
     if (bgWinEnabled) {
@@ -207,11 +206,6 @@ Byte GPU::getByte(Word address) {
                 break;
         }
     }
-#ifndef NO_ADDRESS_ERROR
-    throw WrongAddressException("GPU[read]", address);
-#endif
-    assert(false);
-    return 0xFFu;
 }
 
 bool GPU::accepts(Word address) {
@@ -291,13 +285,9 @@ void GPU::setByte(Word address, Byte value) {
                 regWindowX = value;
                 return;
             default:
-                assert(false);
+                break;
         }
     }
-#ifndef NO_ADDRESS_ERROR
-    throw WrongAddressException("GPU[write]", address);
-#endif
-
 }
 #ifndef NLOG
 void GPU::display() {
@@ -318,7 +308,7 @@ void GPU::doDMA(Byte dma) {
     logger << "DMA" << regDMA;
 #endif
     if ((dma >= 0xA0 && dma <= 0xF1) || dma <= 0x80){
-        AddressSpace* s = MMU::getMMU()->findAddressSpace(dmaAddress);
+        AddressSpace * s = MMU::getMMU()->findAddressSpace(dmaAddress);
         for (Byte i = 0; i < 0xA0; ++i){
             bytesOam[i] = s->getByte(dmaAddress + i);
         }
@@ -433,15 +423,11 @@ void GPU::drawSprite(uint32_t * colorLine, bool spriteLarge) {
         int spriteX = bytesOam[i + 1] - 8;
         if (spriteX >= 160) {
             continue;
-
         }
         Byte chrCode = bytesOam[i + 2];
         Byte infoCode = bytesOam[i + 3];
-      /*  if (getBit(infoCode, 7) == 1){
-            continue;
-        }*/
         bool yFlip = getBit(infoCode, 6);
-        Word pixelAddress = (chrCode << 4u) + (yFlip?  ((spriteHeight - 1 - yPixel) * 2)  : yPixel * 2);
+        Word pixelAddress = (chrCode << 4u) + (yFlip?  (spriteHeight - 1 - yPixel) * 2  : yPixel * 2);
         ready_to_gender.emplace_back(spriteX, pixelAddress, infoCode);
     }
     std::stable_sort(ready_to_gender.begin(), ready_to_gender.end(), [](Sprite a, Sprite b){
@@ -472,7 +458,7 @@ void GPU::drawSprite(uint32_t * colorLine, bool spriteLarge) {
 }
 
 Byte GPU::getGrayCode(Byte colorCode, Byte reg) {
-    return static_cast<Byte>(reg >> (colorCode << 1u) & 0x03u);
+    return static_cast<Byte>(reg >> (colorCode << 1) & 0x03);
 }
 
 void GPU::init(bool useSprite) {

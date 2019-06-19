@@ -13,5 +13,4 @@ Byte Boot::getByte(Word address) {
     return bios[address];
 }
 
-void Boot::setByte(Word address, Byte value) {
-}
+void Boot::setByte(Word address, Byte value) {}

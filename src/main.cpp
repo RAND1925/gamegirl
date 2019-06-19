@@ -48,7 +48,7 @@ bool init(int argc, char **argv) {
         throw FileNotFoundException("argument wrong", "no file path ");
     }
     const std::string FILE_PATH(argv[1]);
-    uint16_t fps = -1;
+    uint16_t fps = 60;
     auto xPos = SDL_WINDOWPOS_UNDEFINED;
     auto yPos = SDL_WINDOWPOS_UNDEFINED;
     uint8_t zoomTime = 1;
