@@ -43,12 +43,12 @@ private:
     FlagGetter getH = [this]() -> Byte { return getBit(registers.f, 5); };
     FlagGetter getC = [this]() -> Byte { return getBit(registers.f, 4); };
     AllFlagSetter setZNHC = [this](Byte z, Byte n, Byte h, Byte c) {
-        registers.f = static_cast<Byte>(z << 7u | (n << 6u) | (h << 5u) | (c << 4u));
+        registers.f = (z << 7u) | (n <<  6u) | (h << 5u) | (c << 4u);
     };
     //tool functions to run opcodes
     inline Byte getImmediateValue8();
-    inline Word getImmediateValue16();;
-    inline SByte getSignedImmediateValue8();;
+    inline Word getImmediateValue16();
+    inline SByte getSignedImmediateValue8();
     inline void ld8(Byte &lhs, Byte rhs);
     inline void ld16(Word &lhs, Word rhs);
     inline Word getR16(Byte high, Byte low);

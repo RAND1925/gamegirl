@@ -2215,7 +2215,7 @@ Byte CPU::step() {
     Byte timing = 4;
     if (InterruptManager::getInterruptManager()->hasInterrupt()) {
         Byte interruptCode = InterruptManager::getInterruptManager()->handleInterrupt();
-        restart(0x40 + (interruptCode << 3));
+        restart(0x40 + (interruptCode << 3u));
         return 32;
     } else {
         if (InterruptManager::getInterruptManager()->handleHalt()) {
@@ -2274,22 +2274,23 @@ Byte CPU::adc(Byte a, Byte b) {
     resetN();
     (halfSum > 0xF) ? setH() : resetH();
     (sum > 0xFF) ? setC() : resetC();
-    return sum & 0xFF;
+    return sum & 0xFFu;
 }
 
 Word CPU::add(Word a, Word b) {
     uint32_t sum = a + b;
-    uint32_t half = (a & 0xFFF) + (b & 0xFFF);
+    uint32_t half = (a & 0xFFFu) + (b & 0xFFFu);
     half > 0xFFF ? setH() : resetH();
     sum > 0xFFFF ? setC() : resetC();
     resetN();
-    return sum & 0xFFFF;
+    return sum & 0xFFFFu;
 }
 
 Word CPU::addSp(Word a, SByte b) {
     Word sum = a + b;
-    (sum & 0xF) < (a & 0xF) ? setH() : resetH();
-    (sum & 0xFF) < (a & 0xFF) ? setC() : resetC();
+
+    (sum & 0xFu) < (a & 0xFu) ? setH() : resetH();
+    (sum & 0xFFu) < (a & 0xFFu) ? setC() : resetC();
     resetZ();
     resetN();
     return sum;
@@ -2298,7 +2299,7 @@ Word CPU::addSp(Word a, SByte b) {
 Byte CPU::sub(Byte a, Byte b) {
     setN();
     (a == b) ? setZ() : resetZ();
-    (((a - b) & 0xF) > (a & 0xF)) ? setH() : resetH();
+    (((a - b) & 0xFu) > (a & 0xFu)) ? setH() : resetH();
     (a < b) ? setC() : resetC();
     return a - b;
 }
@@ -2315,25 +2316,25 @@ Byte CPU::sbc(Byte a, Byte b) {
 
 Byte CPU::andAL(Byte a, Byte b) {
     Byte res = a & b;
-    setZNHC(!res, false, true, false);
+    setZNHC(res ? 0 : 1, 0, 1, 0);
     return res;
 }
 
 Byte CPU::orAL(Byte a, Byte b) {
     Byte res = a | b;
-    setZNHC(!res, false, false , false);
+    setZNHC(res ? 0 : 1, 0, 0, 0);
     return res;
 }
 
 Byte CPU::xorAL(Byte a, Byte b) {
     Byte res = a ^ b;
-    setZNHC(!res, false, false, false);
+    setZNHC(res ? 0 : 1, 0, 0, 0);
     return res;
 }
 
 Byte CPU::inc(Byte a) {
     (a == 255) ? setZ() : resetZ();
-    ((a & 0xF) == 0xF) ? setH() : resetH();
+    ((a & 0xFu) == 0xFu) ? setH() : resetH();
     resetN();
     return a + 1;
 }
@@ -2360,18 +2361,18 @@ Word CPU::getImmediateValue16() {
 }
 
 SByte CPU::getSignedImmediateValue8() {
-  return static_cast<SByte>(getImmediateValue8());
+    return (SByte) MMU::getMMU()->readByte(registers.pc++);
 }
 
 void CPU::ld8(Byte &lhs, Byte rhs) { lhs = rhs; }
 
 void CPU::ld16(Word &lhs, Word rhs) { lhs = rhs; }
 
-Word CPU::getR16(Byte high, Byte low) { return static_cast<Word>(high << 8u) | low; }
+Word CPU::getR16(Byte high, Byte low) { return (high << 8u) | low; }
 
 void CPU::setR16(Byte &high, Byte &low, Word t) {
-    high = (Byte) (t >> 8u);
-    low = (Byte) (t & 0xFFu);
+    high = t >> 8u;
+    low = t & 0xFFu;
 }
 
 Word CPU::getAF() { return getR16(registers.a, registers.f); }
@@ -2383,8 +2384,8 @@ Word CPU::getBC() { return getR16(registers.b, registers.c); }
 Word CPU::getDE() { return getR16(registers.d, registers.e); }
 
 void CPU::setAF(Word t) {
-  registers.a = t >> 8u;
-  registers.f = t & 0xF0u;
+    registers.a = t >> 8u;
+    registers.f = t & 0xF0u;
 }
 
 void CPU::setHL(Word t) { setR16(registers.h, registers.l, t); }
@@ -2405,8 +2406,11 @@ Word CPU::pop16() {
 }
 
 Byte CPU::swap(Byte a) {
-    setZNHC(!a, false, false, false);
-    return static_cast<Byte>(a << 4u) | static_cast<Byte>(a >> 4u);
+    (a == 0) ? setZ() : resetZ();
+    resetN();
+    resetC();
+    resetH();
+    return Byte(a << 4) + Byte(a >> 4);
 }
 
 void CPU::daa() {
@@ -2437,7 +2441,7 @@ void CPU::daa() {
 Byte CPU::cpl(Byte a) {
     setN();
     setH();
-    return (a ^ 0xFF);
+    return (a ^ 0xFFu);
 }
 
 void CPU::ccf() {
@@ -2455,60 +2459,63 @@ void CPU::scf() {
     setC();
 }
 
+
+
+Byte CPU::srl(Byte a) {
+    Byte bit_0 = a & 0x01u;
+    Byte res = a >> 1u;
+    setZNHC(res ? 0 : 1, 0, 0, bit_0);
+    return res;
+}
+
+Byte CPU::rr(Byte a) {
+    Byte bit_0 = a & 0x01u;
+    Byte res = static_cast<Byte>(a >> 1u) | static_cast<Byte>(getC() << 7u);
+    setZNHC(res ? 0 : 1, 0, 0, bit_0);
+    return res;
+}
+
+Byte CPU::rrc(Byte a) {
+    Byte bit_0 = a & 0x01u;
+    Byte res = static_cast<Byte>(a >> 1u) | static_cast<Byte> (bit_0 << 7u);
+    setZNHC(res ? 0 : 1, 0, 0, bit_0);
+    return res;
+}
+
+Byte CPU::sra(Byte a) {
+    Byte bit_0 = a & 0x01u;
+    Byte bit_7 = a >> 7u;
+    Byte res = static_cast<Byte>(a >> 1u) | static_cast<Byte> (bit_7 << 7u);
+    setZNHC(res ? 0 : 1, 0, 0, bit_0);
+    return res;
+}
+
+Byte CPU::sla(Byte a) {
+    Byte bit_7 = a >> 7u;
+    Byte res = a << 1u;
+    setZNHC(res ? 0 : 1, 0, 0, bit_7);
+    return res;
+}
+
 Byte CPU::rlc(Byte a) {
     Byte bit_7 = a >> 7u;
     Byte res = static_cast<Byte>(a << 1u) | bit_7;
-    setZNHC(!res, false, false, bit_7);
+    setZNHC(res ? 0 : 1, 0, 0, bit_7);
     return res;
 }
 
 Byte CPU::rl(Byte a) {
     Byte bit_7 = a >> 7u;
     Byte res = static_cast<Byte>(a << 1u) | getC();
-    setZNHC(!res, false, false, bit_7);
+    setZNHC(res ? 0 : 1, 0, 0, bit_7);
     return res;
 }
 
-Byte CPU::rrc(Byte a) {
-    Byte bit_0 = a << 7u;
-    Byte res = (a >> 1u) + bit_0;
-    setZNHC(!res, false, false, bit_0);
-    return res;
-}
-
-Byte CPU::sla(Byte a) {
-    Byte res = a << 1u;
-    setZNHC(!res, false, false, (a >> 7u));
-    return res;
-    // LSB of n set to 0(LSB is the last bit)
-}
-
-Byte CPU::rr(Byte a) {
-    Byte res = (a >> 1u) + (getC() << 7u);
-    setZNHC(!res, false, false, (a << 7u));
-    return res;
-}
-
-Byte CPU::sra(Byte a) {
-    Byte bit_7 = a & static_cast<Byte >(1u << 7u);
-    Byte res = (a >> 1u) + bit_7;
-    setZNHC(!res, false, false, (a << 7u));
-    return res;
-    // MSB dosen't change
-}
-
-Byte CPU::srl(Byte a) {
-    Byte res = a >> 1u;
-    setZNHC(!res, false, false, (a << 7u));
-    return res;
-    // MSB set to 0   MSB is the first bit
-}
 
 void CPU::bit(Byte b, Byte a) {
     resetN();
     setH();
-    Byte res = a & (Byte) (1 << b);
-    (res == 0) ? setZ() : resetZ();
+    getBit(a, b) ? resetZ(): setZ();
 }
 
 Byte CPU::set(Byte b, Byte a) {
@@ -2523,7 +2530,7 @@ Byte CPU::res(Byte b, Byte a) {
 
 void CPU::jump(Word addr) { registers.pc = addr; }
 
-void CPU::jr(Byte r) { registers.pc += static_cast<SByte>(r); }
+void CPU::jr(Byte r) { registers.pc += (SByte) r; }
 
 void CPU::call(Word addr) {
     push16(registers.pc);
