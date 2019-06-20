@@ -29,6 +29,7 @@ private:
 
     using FlagSetter = std::function<void(void)>;
     using FlagGetter = std::function<Byte(void)>;
+    using AllFlagSetter = std::function<void(Byte, Byte, Byte, Byte)>;
     FlagSetter setZ = [this]() { setBit(registers.f, 7); };
     FlagSetter setN = [this]() { setBit(registers.f, 6); };
     FlagSetter setH = [this]() { setBit(registers.f, 5); };
@@ -41,6 +42,9 @@ private:
     FlagGetter getN = [this]() -> Byte { return getBit(registers.f, 6); };
     FlagGetter getH = [this]() -> Byte { return getBit(registers.f, 5); };
     FlagGetter getC = [this]() -> Byte { return getBit(registers.f, 4); };
+    AllFlagSetter setZNHC = [this](Byte z, Byte n, Byte h, Byte c) {
+        registers.f = static_cast<Byte>(z << 7u | (n << 6u) | (h << 5u) | (c << 4u));
+    };
     //tool functions to run opcodes
     inline Byte getImmediateValue8();
     inline Word getImmediateValue16();;

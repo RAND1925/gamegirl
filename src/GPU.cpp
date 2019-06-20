@@ -250,7 +250,8 @@ void GPU::setByte(Word address, Byte value) {
                 regLcdControl = value;
                 return;
             case 0xFF41:
-                regLcdStatus = value;
+                regLcdStatus &= 0xF8u;
+                regLcdStatus |= (value & 0x07u) ;
                 return;
             case 0xFF42:
                 regScrollY = value;
@@ -267,7 +268,6 @@ void GPU::setByte(Word address, Byte value) {
             case 0xFF46:
                 regDMA = value;
                 doDMA(regDMA);
-
                 return;
             case 0xFF47:
                 regBGP = value;
@@ -443,7 +443,7 @@ void GPU::drawSprite(uint32_t * colorLine, bool spriteLarge) {
         Byte grayPalette = getBit(infoCode, 4) ? regOBP1: regOBP0;
         bool xFlip = getBit(infoCode, 5);
         for (Byte counter = 0; counter < 8; ++ counter) {
-            Byte col = std::get<0>(s) + (xFlip ? counter : 7 - counter);
+            int col = std::get<0>(s) + (xFlip ? counter : 7 - counter);
             if (col < 0 || col >= 160)
                 continue;
             Byte colorCode = getBit(colorLow, counter) | (getBit(colorHigh, counter) << 1);

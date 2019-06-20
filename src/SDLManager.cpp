@@ -4,35 +4,39 @@
 
 #include "SDLManager.h"
 #include "Logger.h"
-Color realColorMap[4]{
-        {0xFF, 0xFF, 0xFF, 0x00},
-        {0xAA, 0xAA, 0xAA, 0x55},
-        {0x55, 0x55, 0x55, 0xAA},
-        {0x00, 0x00, 0x00, 0xFF}
+struct Color{
+    Byte r, g, b, a;
 };
-Color coleredMap1[4] = {
-        {0xFF, 0xFA, 0xCD, 0x00},
-        {0xFF, 0xCA, 0x28, 0x55},
-        {0xFF, 0x00, 0x00, 0xAA},
-        {0x00, 0x00, 0x00, 0xFF}
-};
-Color coleredMap2[4] = {
-        {0xE0, 0xFF, 0xFF, 0x00},
-        {107, 194, 53, 0x55},
-        {6, 128, 67, 0xAA},
-        {0x00, 0x00, 0x00, 0xFF}
-};
-Color coleredMap3[4] = {
-        {0xFF, 0xE1, 0xFF, 0x00},
-        {0xFF, 0xBB, 0xFF, 0x55},
-        {0xBB, 0xFF, 0xFF, 0xAA},
-        {0x00, 0x00, 0x00, 0xFF}
-};
-Color coleredMap4[4] = {
-        {0x00, 0x00, 0x00, 0x00},
-        {0xFF, 0xCA, 0x28, 0x55},
-        {0xEE, 0xEE, 0x00, 0xAA},
-        {0xFF, 0xFF, 0xFF, 0xFF}
+Color realColorMap[5][4]{{
+         {0xFF, 0xFF, 0xFF, 0x00},
+         {0xAA, 0xAA, 0xAA, 0x55},
+         {0x55, 0x55, 0x55, 0xAA},
+         {0x00, 0x00, 0x00, 0xFF}
+     },
+     {
+         {0xFF, 0xFA, 0xCD, 0x00},
+         {0xFF, 0xCA, 0x28, 0x55},
+         {0xFF, 0x00, 0x00, 0xAA},
+         {0x00, 0x00, 0x00, 0xFF}
+     },
+     {
+         {0xE0, 0xFF, 0xFF, 0x00},
+         {0x6B, 0xC2, 0x35, 0x55},
+         {0x06, 0x80, 0x43, 0xAA},
+         {0x00, 0x00, 0x00, 0xFF}
+     },
+     {
+         {0xFF, 0xE1, 0xFF, 0x00},
+         {0xFF, 0xBB, 0xFF, 0x55},
+         {0xBB, 0xFF, 0xFF, 0xAA},
+         {0x00, 0x00, 0x00, 0xFF}
+     },
+     {
+         {0x00, 0x00, 0x00, 0x00},
+         {0xFF, 0xCA, 0x28, 0x55},
+         {0xEE, 0xEE, 0x00, 0xAA},
+         {0xFF, 0xFF, 0xFF, 0xFF}
+     }
 };
 void SDLManager::refreshWindow(){
 #ifndef NLOG
@@ -80,7 +84,7 @@ SDLManager::~SDLManager(){
 }
 
 Uint32 SDLManager::mapColor(Byte grayCode) {
-    Color color = realColorMap[grayCode];
+    Color color = realColorMap[colorMapChoice][grayCode];
     return SDL_MapRGBA(fmt, color.r, color.g, color.b, color.a);
 }
 
@@ -95,78 +99,75 @@ bool SDLManager::handleInput() {
         logger << "input:" << e.type<< std::endl;
 #endif
         if (e.type == SDL_QUIT)
-            isQuit = true;
-        if (e.type == SDL_KEYDOWN) {
-#ifndef NLOG
-            logger << "KEY:" << e.key.keysym.sym << std::endl;
-#endif
+            return true;
+        if (e.type == SDL_KEYUP) {
             switch (e.key.keysym.sym) {
                 case SDLK_ESCAPE:
-                    isQuit = true;
-                    break;
+                    return true;
                     //for column 1
                 case SDLK_RIGHT:
-                    joypadC1 &= 0xE;
+                    setBit(joypadC1, 0);
                     break;
                 case SDLK_LEFT:
-                    joypadC1 &= 0xD;
+                    setBit(joypadC1, 1);
                     break;
                 case SDLK_UP:
-                    joypadC1 &= 0xB;
+                    setBit(joypadC1, 2);
                     break;
                 case SDLK_DOWN:
-                    joypadC1 &= 0x7;
+                    setBit(joypadC1, 3);
                     break;
 
                     //for column 0
                 case SDLK_z:
-                    joypadC0 &= 0xE;
+                    setBit(joypadC0, 0);
                     break;
                 case SDLK_x:
-                    joypadC0 &= 0xD;
+                    setBit(joypadC0, 1);
                     break;
                 case SDLK_SPACE:
-                    joypadC0 &= 0xB;
+                    setBit(joypadC0, 2);
                     break;
                 case SDLK_RETURN:
-                    joypadC0 &= 0x7;
+                    setBit(joypadC0, 3);
                     break;
             }
-        } else if (e.type == SDL_KEYUP) {
+        } else if (e.type == SDL_KEYDOWN) {
             switch (e.key.keysym.sym) {
+                case SDLK_ESCAPE:
+                    return true;
                 //for column 1
                 case SDLK_RIGHT:
-                    joypadC1 |= 0x1;
+                    resetBit(joypadC1, 0);
                     break;
                 case SDLK_LEFT:
-                    joypadC1 |= 0x2;
+                    resetBit(joypadC1, 1);
                     break;
                 case SDLK_UP:
-                    joypadC1 |= 0x4;
+                    resetBit(joypadC1, 2);
                     break;
                 case SDLK_DOWN:
-                    joypadC1 |= 0x8;
+                    resetBit(joypadC1, 3);
                     break;
 
                     //for column 0
                 case SDLK_z:
-                    joypadC0 |= 0x1;
+                    resetBit(joypadC0, 0);
                     break;
                 case SDLK_x:
-                    joypadC0 |= 0x2;
+                    resetBit(joypadC0, 1);
                     break;
                 case SDLK_SPACE:
-                    joypadC0 |= 0x4;
+                    resetBit(joypadC0, 2);
                     break;
                 case SDLK_RETURN:
-                    joypadC0 |= 0x8;
+                    resetBit(joypadC0, 3);
                     break;
                 default:
                     break;
             }
-
         } else {
-            break;
+            continue;
         }
     }
     return isQuit;
@@ -174,52 +175,26 @@ bool SDLManager::handleInput() {
 }
 
 Byte SDLManager::getJoypad(Byte in) {
-    in &= 0xF0;
+    in &= 0xF0u;
     if (!getBit(in, 4)){
-        in |= joypadC1;
+        in |= (joypadC1 & 0x0Fu);
     }
     if (!getBit(in, 5)){
-        in |= joypadC0;
+        in |= (joypadC0 & 0x0Fu);
     }
     return in;
 }
 
-void SDLManager::changeColor(int choice) {
-    switch (choice) {
-        case 1: {
-            for (int i = 0; i < 4; i++) {
-                realColorMap[i] = coleredMap1[i];
-            }
-            break;
-        }
-        case 2:{
-            for (int i = 0; i < 4; i++) {
-                realColorMap[i] = coleredMap2[i];
-            }
-            break;
-        }
-        case 3:{
-            for (int i = 0; i < 4; i++) {
-                realColorMap[i] = coleredMap3[i];
-            }
-            break;
-        }
-        case 4:{
-            for (int i = 0; i < 4; i++) {
-                realColorMap[i] = coleredMap4[i];
-            }
-            break;
-        }
-        default:
-            break;
-    }
+void SDLManager::changeColor(int choice = 0) {
+    colorMapChoice = choice;
 }
 void SDLManager::init(const std::string &title_window, int zoomTime, int xPos, int yPos, int fps) {
 
     this->zoomTime = zoomTime;
     this->xPos = xPos;
     this->yPos = yPos;
-    this->fps = fps;this->zoomTime = zoomTime;
+    this->fps = fps;
+    this->zoomTime = zoomTime;
     int initRes = SDL_Init(SDL_INIT_EVERYTHING);
     if (initRes < 0){
         throw SDLException("init");

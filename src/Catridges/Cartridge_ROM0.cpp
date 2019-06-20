@@ -15,7 +15,6 @@ Byte Cartridge_ROM0::getByte(Word address) {
 
 void Cartridge_ROM0::setByte(Word address, Byte value) {
     rom[address] = value;
-    // throw WrongAddressException("Rom0[write]", address);
 }
 
 Cartridge_ROM0::Cartridge_ROM0(const std::string & filePath):filePath(filePath) {

@@ -25,7 +25,6 @@ protected:
 
 private:
     Byte regJoypad = 0x0F;
-
 };
 
 

@@ -14,24 +14,18 @@ extern "C" {
 
 #include "common.h"
 
-struct Color{
-    Byte r, g, b, a;
-};
-extern Color realColorMap[4];
-extern Color coleredMap1[4];
-extern Color coleredMap2[4];
-extern Color coleredMap3[4];
-extern Color coleredMap4[4];
+
+
 class SDLManager {
 public:
 
     void refreshWindow();
     void setLine(Byte lineNum, Uint32 * line);
-    Uint32 mapColor(Byte);;
+    Uint32 mapColor(Byte);
     Byte getJoypad(Byte in);
     bool handleInput ();
     ~SDLManager();
-    void init(const std::string& title_window, int xPos, int zoomTime, int yPos, int fps);
+    void init(const std::string& title_window, int zoomTime, int xPos, int yPos, int fps);
     void changeColor(int i);
     static SDLManager* getSDLManager();
 protected:
@@ -48,6 +42,7 @@ private:
     const static int BUFFER_WIDTH = 256;
     int xPos = SDL_WINDOWPOS_UNDEFINED;
     int yPos = SDL_WINDOWPOS_UNDEFINED;
+    int colorMapChoice = 0;
     int zoomTime = 1;
     uint8_t fps = 60;
     Byte joypadC1 = 0x0F;
