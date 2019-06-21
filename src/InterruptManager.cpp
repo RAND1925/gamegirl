@@ -44,7 +44,7 @@ Byte InterruptManager::handleInterrupt() {
             return i;
         }
     }
-
+    return 8;
 }
 
 bool InterruptManager::handleHalt() {

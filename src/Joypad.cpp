@@ -1,6 +1,3 @@
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "hicpp-signed-bitwise"
-//
 // Created by dell on 2019/6/14.
 // 4MHz
 
