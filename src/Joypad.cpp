@@ -15,8 +15,7 @@ Byte Joypad::getByte(Word address) {
     return regJoypad;
 }
 void Joypad::setByte(Word address, Byte value) {
-    regJoypad &= 0xCFu;
-    regJoypad |= (value & 0x30u);
+    regJoypad = SDLManager::getSDLManager()->getJoypad(value & 0xF0u);
 }
 
 void Joypad::update() {

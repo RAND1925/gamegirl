@@ -175,12 +175,12 @@ bool SDLManager::handleInput() {
 }
 
 Byte SDLManager::getJoypad(Byte in) {
-    in &= 0xF0u;
+    in |= 0x0Fu;
     if (!getBit(in, 4)){
-        in |= (joypadC1 & 0x0Fu);
+        in &= (joypadC1 | 0xF0u);
     }
     if (!getBit(in, 5)){
-        in |= (joypadC0 & 0x0Fu);
+        in &= (joypadC0 | 0xF0u);
     }
     return in;
 }

@@ -24,7 +24,7 @@ protected:
     Joypad()= default;
 
 private:
-    Byte regJoypad = 0x0F;
+    Byte regJoypad = 0xF0;
 };
 
 
