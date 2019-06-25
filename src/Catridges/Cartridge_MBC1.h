@@ -10,25 +10,24 @@
 #include "Cartridge.h"
 #include "../common.h"
 #include "../Exceptions.h"
-#include "Battery.h"
-class Cartridge_MBC1: public Cartridge, public Battery{
+class Cartridge_MBC1: public Cartridge{
 public:
-    Cartridge_MBC1(const std::string& filePath, size_t romSize, size_t ramSize);
-    bool accepts(Word address) override;
+    Cartridge_MBC1(const std::string & filePath, bool enableRam, bool enableBattery, size_t romSize, size_t ramSize);
     Byte getByte(Word address) override;
     void setByte(Word address, Byte value) override;
 
 private:
-    std::string filePath;
-    size_t romSize = 0;
-    size_t ramSize = 0;
-    std::vector<Byte> rom;
-    std::vector<Byte> ram;
-    void saveData(const std::string &) override{};
-    void loadData(const std::string & savePath) override;;
-    bool ramEnabled = false;
-    Byte romBank = 1;
-    Byte ramBank = 0;// also upprombank
+    size_t romBankNum = 0;
+    std::vector<RomBank> rom{};
+    RomBank::iterator currRomBank;
+    RomBank::iterator romBank0;
+    size_t ramBankNum = 0;
+    std::vector<RamBank> ram{};
+    RamBank::iterator currRamBank;
+
+    bool ramEnabled;
+    Byte romBankCode = 1;
+    Byte ramBankCode = 0;// also upprombank
     Byte mode = 0;
 };
 

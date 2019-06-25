@@ -15,7 +15,7 @@
 
 class CartridgeDriver {
 public:
-    void openFile(const std::string &filePath);
+    void openFile(std::string filePath);
 
    // void reopenFile(const std::string &filePath);
 
@@ -35,15 +35,15 @@ protected:
 
 private:
     Cartridge *cartridgePointer{};
-    Byte cartridgeType{};
+    Byte cartridgeTypeCode{};
     Byte romBankCode{};
     Byte ramBankCode{};
-    size_t romSize{};
-    size_t ramSize{};
+    Byte romBankNum{1};
+    Byte ramBankNum{0};
     std::string title;
     std::string filePath;
-    int ramSizeMap[5] = {0, 2, 8, 32, 128};
-    int romSizeMap[3] = {72, 80, 96};
+    const static int ramSizeMap[5];
+    const static int romSizeMap[3];
     void genCartridge();
 
 #endif //GAMEGIRL_CATRIDGE_H

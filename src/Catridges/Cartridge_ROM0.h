@@ -12,12 +12,14 @@
 class Cartridge_ROM0: public Cartridge{
 private:
     std::array<Byte, 0x8000> rom{};
-    std::string filePath;
+    RamBank ram{};
 public:
-    bool accepts(Word address) override;
     Byte getByte(Word address) override;
     void setByte(Word address, Byte value) override;
-    explicit Cartridge_ROM0(const std::string & filePath);
+    explicit Cartridge_ROM0(const std::string & filePath, bool enableRam, bool enableBattery);
+    ~Cartridge_ROM0() override;
+    void batterySave() override;
+    void batteryLoad() override;
 };
 
 
