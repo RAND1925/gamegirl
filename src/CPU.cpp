@@ -282,27 +282,27 @@ void CPU::initMap() {
     // ld to (hl)
     opMap[0x70] = [this]() {
         MMU::getMMU()->writeByte(getHL(), registers.b);
-        return 4;
+        return 8;
     };
     opMap[0x71] = [this]() {
         MMU::getMMU()->writeByte(getHL(), registers.c);
-        return 4;
+        return 8;
     };
     opMap[0x72] = [this]() {
         MMU::getMMU()->writeByte(getHL(), registers.d);
-        return 4;
+        return 8;
     };
     opMap[0x73] = [this]() {
         MMU::getMMU()->writeByte(getHL(), registers.e);
-        return 4;
+        return 8;
     };
     opMap[0x74] = [this]() {
         MMU::getMMU()->writeByte(getHL(), registers.h);
-        return 4;
+        return 8;
     };
     opMap[0x75] = [this]() {
         MMU::getMMU()->writeByte(getHL(), registers.l);
-        return 4;
+        return 8;
     };
     opMap[0x77] = [this]() {
         MMU::getMMU()->writeByte(getHL(), registers.a);
@@ -982,35 +982,39 @@ void CPU::initMap() {
     // jp
     opMap[0xC3] = [this]() {
         jump(getImmediateValue16());
-        return 12;
+        return 16;
     };
     // jp cc
     opMap[0xC2] = [this]() {
-        if (!getZ())
+        if (!getZ()) {
             jump(getImmediateValue16());
-        else
-            registers.pc += 2;
+            return 16;
+        }
+        registers.pc += 2;
         return 12;
     };
     opMap[0xCA] = [this]() {
-        if (getZ())
+        if (getZ()) {
             jump(getImmediateValue16());
-        else
-            registers.pc += 2;
+            return 16;
+        }
+        registers.pc += 2;
         return 12;
     };
     opMap[0xD2] = [this]() {
-        if (!getC())
+        if (!getC()) {
             jump(getImmediateValue16());
-        else
-            registers.pc += 2;
+            return 16;
+        }
+        registers.pc += 2;
         return 12;
     };
     opMap[0xDA] = [this]() {
-        if (getC())
+        if (getC()) {
             jump(getImmediateValue16());
-        else
-            registers.pc += 2;
+            return 16;
+        }
+        registers.pc += 2;
         return 12;
     };
     // jp hl
@@ -1021,67 +1025,75 @@ void CPU::initMap() {
     // jr
     opMap[0x18] = [this]() {
         jr(getImmediateValue8());
-        return 8;
+        return 12;
     };
     // jr cc
     opMap[0x20] = [this]() {
-        if (!getZ())
+        if (!getZ()) {
             jr(getImmediateValue8());
-        else
-            registers.pc++;
+            return 12;
+        }
+        registers.pc++;
         return 8;
     };
     opMap[0x28] = [this]() {
-        if (getZ())
+        if (getZ()) {
             jr(getImmediateValue8());
-        else
-            registers.pc++;
+            return 12;
+        }
+        registers.pc++;
         return 8;
     };
     opMap[0x30] = [this]() {
-        if (!getC())
+        if (!getC()) {
             jr(getImmediateValue8());
-        else
-            registers.pc++;
+            return 12;
+        }
+        registers.pc++;
         return 8;
     };
     opMap[0x38] = [this]() {
-        if (getC())
+        if (getC()) {
             jr(getImmediateValue8());
-        else
-            registers.pc++;
+            return 12;
+        }
+        registers.pc++;
         return 8;
     };
     // call
     opMap[0xCD] = [this]() {
         call(getImmediateValue16());
-        return 12;
+        return 24;
     };
     // call cc
     opMap[0xC4] = [this]() {
         if (!getZ()) {
             call(getImmediateValue16());
-        } else
-            registers.pc += 2;
+            return 24;
+        }
+        registers.pc += 2;
         return 12;
     };
     opMap[0xCC] = [this]() {
         if (getZ()) {
             call(getImmediateValue16());
-        } else
-            registers.pc += 2;
+            return 24;
+        }
+        registers.pc += 2;
         return 12;
     };
     opMap[0xD4] = [this]() {
         if (!getC()) {
             call(getImmediateValue16());
-        } else
-            registers.pc += 2;
+            return 24;
+        }
+        registers.pc += 2;
         return 12;
     };
     opMap[0xDC] = [this]() {
         if (getC()) {
             call(getImmediateValue16());
+            return 24;
         } else
             registers.pc += 2;
         return 12;
@@ -1090,63 +1102,67 @@ void CPU::initMap() {
     // restart
     opMap[0xC7] = [this]() {
         restart(0x00);
-        return 32;
+        return 16;
     };
     opMap[0xCF] = [this]() {
         restart(0x08);
-        return 32;
+        return 16;
     };
     opMap[0xD7] = [this]() {
         restart(0x10);
-        return 32;
+        return 16;
     };
     opMap[0xDF] = [this]() {
         restart(0x18);
-        return 32;
+        return 16;
     };
     opMap[0xE7] = [this]() {
         restart(0x20);
-        return 32;
+        return 16;
     };
     opMap[0xEF] = [this]() {
         restart(0x28);
-        return 32;
+        return 16;
     };
     opMap[0xF7] = [this]() {
         restart(0x30);
-        return 32;
+        return 16;
     };
     opMap[0xFF] = [this]() {
         restart(0x38);
-        return 32;
+        return 16;
     };
     // ret
     opMap[0xC9] = [this]() {
         ret();
-        return 8;
+        return 16;
     };
     // ret cc
     opMap[0xC0] = [this]() {
         if (!getZ()) {
             ret();
+            return 20;
         }
         return 8;
     };
     opMap[0xC8] = [this]() {
         if (getZ()) {
             ret();
+            return 20;
         }
         return 8;
     };
     opMap[0xD0] = [this]() {
         if (!getC()) {
             ret();
+            return 20;
         }
         return 8;
     };
     opMap[0xD8] = [this]() {
         if (getC()) {
             ret();
+            return 20;
         }
         return 8;
     };
@@ -1154,7 +1170,7 @@ void CPU::initMap() {
     opMap[0xD9] = [this]() {
         ret();
         InterruptManager::getInterruptManager()->setIME(true);
-        return 8;
+        return 16;
     };
 
     // stop
@@ -1445,7 +1461,7 @@ void CPU::initMap() {
     };
     opCBMap[0x46] = [this]() {
         bit(0, MMU::getMMU()->readByte(getHL()));
-        return 16;
+        return 12;
     };
 
     opCBMap[0x4F] = [this]() {
@@ -1478,7 +1494,7 @@ void CPU::initMap() {
     };
     opCBMap[0x4E] = [this]() {
         bit(1, MMU::getMMU()->readByte(getHL()));
-        return 16;
+        return 12;
     };
 
     opCBMap[0x57] = [this]() {
@@ -1511,7 +1527,7 @@ void CPU::initMap() {
     };
     opCBMap[0x56] = [this]() {
         bit(2, MMU::getMMU()->readByte(getHL()));
-        return 16;
+        return 12;
     };
 
     opCBMap[0x5F] = [this]() {
@@ -1544,7 +1560,7 @@ void CPU::initMap() {
     };
     opCBMap[0x5E] = [this]() {
         bit(3, MMU::getMMU()->readByte(getHL()));
-        return 16;
+        return 12;
     };
 
     opCBMap[0x67] = [this]() {
@@ -1577,7 +1593,7 @@ void CPU::initMap() {
     };
     opCBMap[0x66] = [this]() {
         bit(4, MMU::getMMU()->readByte(getHL()));
-        return 16;
+        return 12;
     };
 
     opCBMap[0x6F] = [this]() {
@@ -1610,7 +1626,7 @@ void CPU::initMap() {
     };
     opCBMap[0x6E] = [this]() {
         bit(5, MMU::getMMU()->readByte(getHL()));
-        return 16;
+        return 12;
     };
 
     opCBMap[0x77] = [this]() {
@@ -1643,7 +1659,7 @@ void CPU::initMap() {
     };
     opCBMap[0x76] = [this]() {
         bit(6, MMU::getMMU()->readByte(getHL()));
-        return 16;
+        return 12;
     };
 
     opCBMap[0x7F] = [this]() {
@@ -1676,7 +1692,7 @@ void CPU::initMap() {
     };
     opCBMap[0x7E] = [this]() {
         bit(7, MMU::getMMU()->readByte(getHL()));
-        return 16;
+        return 12;
     };
     // set
     opCBMap[0xC7] = [this]() {
@@ -2216,18 +2232,12 @@ Byte CPU::step() {
     if (InterruptManager::getInterruptManager()->hasInterrupt()) {
         Byte interruptCode = InterruptManager::getInterruptManager()->handleInterrupt();
         restart(0x40 + (interruptCode << 3u));
-        return 32;
+        return 16;
     } else {
         if (InterruptManager::getInterruptManager()->handleHalt()) {
             Byte opNum = MMU::getMMU()->readByte(registers.pc);
-            if (opNum == 0xCB) {
-                Byte cbNum = MMU::getMMU()->readByte(registers.pc + 1);
-                timing = CBTable[cbNum] * 4;
-            } else {
-                timing = normalTable[opNum] * 4;
-            }
             registers.pc++;
-            opMap[opNum]();
+            timing = opMap[opNum]();
         }
     }
     return timing;

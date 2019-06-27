@@ -206,6 +206,7 @@ Byte GPU::getByte(Word address) {
                 break;
         }
     }
+    return 0xFF;
 }
 
 bool GPU::accepts(Word address) {

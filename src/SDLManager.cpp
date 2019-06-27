@@ -63,17 +63,17 @@ void SDLManager::refreshWindow(){
     }
     SDL_UnlockSurface(surface);
     SDL_UpdateWindowSurface(win);
-    /*
-    if (SDL_GetTicks() - fpsTimer < 1000 / fps)
+
+    if (SDL_GetTicks() - fpsTimer < 1000 / 10)
     {
 #ifndef NLOG
         logger << "frameTime:" << SDL_GetTicks() - fpsTimer << std::endl;
 #endif
-    //    SDL_Delay(1000 / fps - SDL_GetTicks() + fpsTimer);
+        SDL_Delay(1000 / fps - SDL_GetTicks() + fpsTimer);
 
     }
     fpsTimer = SDL_GetTicks();
-     */
+
 }
 
 SDLManager::~SDLManager(){

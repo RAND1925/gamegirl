@@ -53,7 +53,9 @@ Byte Timer::getByte(Word address) {
 
 void Timer::setByte(Word address, Byte value) {
     switch (address) {
-        case 0xFF04: regDiv=0;break;
+        case 0xFF04: {regDiv=0;divider = 0;
+        break;
+        }
         case 0xFF05: regTima=value;break;
         case 0xFF06: regTma=value;break;
         case 0xFF07: regTac=(value & 7);break;
