@@ -2451,7 +2451,7 @@ void CPU::daa() {
 Byte CPU::cpl(Byte a) {
     setN();
     setH();
-    return (a ^ 0xFFu);
+    return ~a;
 }
 
 void CPU::ccf() {

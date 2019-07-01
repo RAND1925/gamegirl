@@ -64,7 +64,7 @@ void SDLManager::refreshWindow(){
     SDL_UnlockSurface(surface);
     SDL_UpdateWindowSurface(win);
 
-    if (SDL_GetTicks() - fpsTimer < 1000 / 10)
+    if (SDL_GetTicks() - fpsTimer < 1000 / fps)
     {
 #ifndef NLOG
         logger << "frameTime:" << SDL_GetTicks() - fpsTimer << std::endl;
@@ -105,30 +105,30 @@ bool SDLManager::handleInput() {
                 case SDLK_ESCAPE:
                     return true;
                     //for column 1
-                case SDLK_RIGHT:
+                case kR:
                     setBit(joypadC1, 0);
                     break;
-                case SDLK_LEFT:
+                case kL:
                     setBit(joypadC1, 1);
                     break;
-                case SDLK_UP:
+                case kU:
                     setBit(joypadC1, 2);
                     break;
-                case SDLK_DOWN:
+                case kD:
                     setBit(joypadC1, 3);
                     break;
 
                     //for column 0
-                case SDLK_z:
+                case kA:
                     setBit(joypadC0, 0);
                     break;
-                case SDLK_x:
+                case kB:
                     setBit(joypadC0, 1);
                     break;
-                case SDLK_SPACE:
+                case kSel:
                     setBit(joypadC0, 2);
                     break;
-                case SDLK_RETURN:
+                case kSta:
                     setBit(joypadC0, 3);
                     break;
             }
@@ -137,30 +137,30 @@ bool SDLManager::handleInput() {
                 case SDLK_ESCAPE:
                     return true;
                 //for column 1
-                case SDLK_RIGHT:
+                case kR:
                     resetBit(joypadC1, 0);
                     break;
-                case SDLK_LEFT:
+                case kL:
                     resetBit(joypadC1, 1);
                     break;
-                case SDLK_UP:
+                case kU:
                     resetBit(joypadC1, 2);
                     break;
-                case SDLK_DOWN:
+                case kD:
                     resetBit(joypadC1, 3);
                     break;
 
                     //for column 0
-                case SDLK_z:
+                case kA:
                     resetBit(joypadC0, 0);
                     break;
-                case SDLK_x:
+                case kB:
                     resetBit(joypadC0, 1);
                     break;
-                case SDLK_SPACE:
+                case kSel:
                     resetBit(joypadC0, 2);
                     break;
-                case SDLK_RETURN:
+                case kSta:
                     resetBit(joypadC0, 3);
                     break;
                 default:

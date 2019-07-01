@@ -42,6 +42,16 @@ private:
     const static int BUFFER_WIDTH = 256;
     int xPos = SDL_WINDOWPOS_UNDEFINED;
     int yPos = SDL_WINDOWPOS_UNDEFINED;
+    using Key = SDL_Keymod;
+#define kA SDLK_j
+#define kB SDLK_k
+#define kSta SDLK_l
+#define kSel SDLK_SEMICOLON
+#define kU SDLK_w
+#define kR SDLK_d
+#define kD SDLK_s
+#define kL SDLK_a
+
     int colorMapChoice = 0;
     int zoomTime = 1;
     uint8_t fps = 60;
